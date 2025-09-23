@@ -39,6 +39,13 @@ PlasmoidItem {
         }
     }
 
+    // Auto-focus textarea when plasmoid becomes visible
+    onVisibleChanged: {
+        if (visible && hasLocalModel && !isLoading && messageField) {
+            messageField.forceActiveFocus();
+        }
+    }
+
     function getServerUrl(endpoint) {
         const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
         return baseUrl + '/api/' + endpoint;
@@ -386,6 +393,20 @@ PlasmoidItem {
                 hoverEnabled: hasLocalModel && !isLoading
                 placeholderText: i18n("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
+
+                Component.onCompleted: {
+                    // Auto-focus when component is ready and models are loaded
+                    if (hasLocalModel && !isLoading) {
+                        forceActiveFocus();
+                    }
+                }
+
+                // Auto-focus when models become available
+                onEnabledChanged: {
+                    if (enabled) {
+                        forceActiveFocus();
+                    }
+                }
 
                 Keys.onReturnPressed: function(event) {
                     if (event.modifiers & Qt.ControlModifier) {
