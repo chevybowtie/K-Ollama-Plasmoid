@@ -183,7 +183,15 @@ PlasmoidItem {
                     if (models.length) {
                         hasLocalModel = true;
 
-                        modelsComboboxCurrentValue = models[0];
+                        // Try to restore the previously selected model, otherwise use first model
+                        const savedModel = Plasmoid.configuration.selectedModel;
+                        if (savedModel && models.includes(savedModel)) {
+                            modelsComboboxCurrentValue = savedModel;
+                        } else {
+                            modelsComboboxCurrentValue = models[0];
+                            // Save the default selection
+                            Plasmoid.configuration.selectedModel = models[0];
+                        }
 
                         modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
                         console.log("Successfully loaded", models.length, "models");
@@ -276,13 +284,31 @@ PlasmoidItem {
 
                     onActivated: {
                         modelsComboboxCurrentValue = modelsArray.find(model => model.text === modelsCombobox.currentText).value;
+                        // Save selected model to configuration
+                        Plasmoid.configuration.selectedModel = modelsComboboxCurrentValue;
                         listModelController.clear();
                     }
 
                     // Update the current selection when models array changes
                     onModelChanged: {
-                        if (modelsArray.length > 0 && !modelsComboboxCurrentValue) {
-                            modelsComboboxCurrentValue = modelsArray[0].value;
+                        if (modelsArray.length > 0) {
+                            if (modelsComboboxCurrentValue) {
+                                // Find and set the index of the saved/current model
+                                const modelIndex = modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
+                                if (modelIndex >= 0) {
+                                    currentIndex = modelIndex;
+                                } else {
+                                    // Fallback to first model if saved model not found
+                                    currentIndex = 0;
+                                    modelsComboboxCurrentValue = modelsArray[0].value;
+                                    Plasmoid.configuration.selectedModel = modelsArray[0].value;
+                                }
+                            } else {
+                                // No current model, use first one
+                                currentIndex = 0;
+                                modelsComboboxCurrentValue = modelsArray[0].value;
+                                Plasmoid.configuration.selectedModel = modelsArray[0].value;
+                            }
                         }
                     }
 

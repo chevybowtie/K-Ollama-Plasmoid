@@ -42,5 +42,9 @@
       <label>Widget icon</label>
       <default></default>
     </entry>
+    <entry name="selectedModel" type="String">
+      <label>Selected Ollama model</label>
+      <default></default>
+    </entry>
   </group>
 </kcfg>

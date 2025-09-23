@@ -17,6 +17,7 @@ KCM.SimpleKCM {
     property bool cfg_useOutlinedDarkIcon: false
     property string cfg_icon: ""
     property bool cfg_pin: false
+    property string cfg_selectedModel: ""
 
     Kirigami.FormLayout {
         QQC2.TextField {

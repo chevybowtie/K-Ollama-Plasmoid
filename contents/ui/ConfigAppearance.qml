@@ -21,6 +21,7 @@ KCM.SimpleKCM {
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
     property bool cfg_pin: false
+    property string cfg_selectedModel: ""
 
     Kirigami.FormLayout {
 
