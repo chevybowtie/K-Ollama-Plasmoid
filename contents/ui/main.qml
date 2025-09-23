@@ -435,10 +435,34 @@ PlasmoidItem {
                 }
 
                 Keys.onReturnPressed: function(event) {
-                    if (event.modifiers & Qt.ControlModifier) {
-                        request(messageField, listModel, scrollView, messageField.text);
+                    if (Plasmoid.configuration.enterToSend) {
+                        // New behavior: Enter sends, Ctrl+Enter adds new line
+                        if (event.modifiers & Qt.ControlModifier) {
+                            // Ctrl+Enter: add new line
+                            event.accepted = false;
+                        } else {
+                            // Enter: send message
+                            if (messageField.text.trim().length > 0) {
+                                request(messageField, listModel, scrollView, messageField.text);
+                                event.accepted = true;
+                            } else {
+                                event.accepted = false;
+                            }
+                        }
                     } else {
-                        event.accepted = false;
+                        // Original behavior: Ctrl+Enter sends, Enter adds new line
+                        if (event.modifiers & Qt.ControlModifier) {
+                            // Ctrl+Enter: send message
+                            if (messageField.text.trim().length > 0) {
+                                request(messageField, listModel, scrollView, messageField.text);
+                                event.accepted = true;
+                            } else {
+                                event.accepted = false;
+                            }
+                        } else {
+                            // Enter: add new line
+                            event.accepted = false;
+                        }
                     }
                 }
 

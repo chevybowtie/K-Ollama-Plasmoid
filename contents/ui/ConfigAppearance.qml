@@ -17,11 +17,25 @@ KCM.SimpleKCM {
     property alias cfg_useFilledDarkIcon: useFilledDarkIcon.checked
     property alias cfg_useOutlinedLightIcon: useOutlinedLightIcon.checked
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
+    property alias cfg_enterToSend: enterToSendCheckbox.checked
     
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
     property bool cfg_pin: false
     property string cfg_selectedModel: ""
+    
+    // Ignore "Default" variants that the configuration system tries to assign
+    property bool cfg_useFilledIconDefault: false
+    property bool cfg_useOutlinedIconDefault: false
+    property bool cfg_useFilledLightIconDefault: false
+    property bool cfg_useFilledDarkIconDefault: false
+    property bool cfg_useOutlinedLightIconDefault: false
+    property bool cfg_useOutlinedDarkIconDefault: false
+    property string cfg_ollamaServerUrlDefault: ""
+    property bool cfg_enterToSendDefault: false
+    property string cfg_iconDefault: ""
+    property bool cfg_pinDefault: false
+    property string cfg_selectedModelDefault: ""
 
     Kirigami.FormLayout {
 
@@ -76,6 +90,17 @@ KCM.SimpleKCM {
             text: i18nc("@option:radio", "Outlined light icon")
 
             QQC2.ButtonGroup.group: iconGroup
+        }
+        
+        QQC2.CheckBox {
+            id: enterToSendCheckbox
+            
+            Kirigami.FormData.label: i18nc("@label:checkbox", "Input behavior:")
+            text: i18nc("@option:check", "Use Enter to send message")
+            
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "When enabled: Enter sends message, Ctrl+Enter adds new line.\nWhen disabled: Enter adds new line, Ctrl+Enter sends message.")
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: 1000
         }
     }
 }

@@ -18,6 +18,20 @@ KCM.SimpleKCM {
     property string cfg_icon: ""
     property bool cfg_pin: false
     property string cfg_selectedModel: ""
+    property bool cfg_enterToSend: false
+    
+    // Ignore "Default" variants that the configuration system tries to assign
+    property bool cfg_useFilledIconDefault: false
+    property bool cfg_useOutlinedIconDefault: false
+    property bool cfg_useFilledLightIconDefault: false
+    property bool cfg_useFilledDarkIconDefault: false
+    property bool cfg_useOutlinedLightIconDefault: false
+    property bool cfg_useOutlinedDarkIconDefault: false
+    property string cfg_ollamaServerUrlDefault: ""
+    property bool cfg_enterToSendDefault: false
+    property string cfg_iconDefault: ""
+    property bool cfg_pinDefault: false
+    property string cfg_selectedModelDefault: ""
 
     Kirigami.FormLayout {
         QQC2.TextField {
