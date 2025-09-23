@@ -1,0 +1,31 @@
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls as QQC2
+
+import org.kde.kirigami 2.20 as Kirigami
+import org.kde.kcmutils as KCM
+
+KCM.SimpleKCM {
+    property alias cfg_ollamaServerUrl: serverUrlField.text
+
+    Kirigami.FormLayout {
+        QQC2.TextField {
+            id: serverUrlField
+            
+            Kirigami.FormData.label: i18nc("@label:textbox", "Ollama Server URL:")
+            placeholderText: i18nc("@info:placeholder", "http://127.0.0.1:11434")
+            
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN IP for remote server")
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: 1000
+        }
+        
+        QQC2.Label {
+            text: i18nc("@info", "Examples:\n• Local server: http://127.0.0.1:11434\n• Remote server: http://192.168.1.100:11434")
+            font.pointSize: Kirigami.Theme.smallFont.pointSize
+            opacity: 0.7
+            Layout.maximumWidth: serverUrlField.width
+            wrapMode: Text.WordWrap
+        }
+    }
+}

@@ -13,4 +13,9 @@ ConfigModel {
          icon: "preferences-desktop-color"
          source: "ConfigAppearance.qml"
     }
+    ConfigCategory {
+         name: i18nc("@title", "Server")
+         icon: "network-server"
+         source: "ConfigServer.qml"
+    }
 }
