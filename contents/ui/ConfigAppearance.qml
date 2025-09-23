@@ -10,13 +10,17 @@ import org.kde.kcmutils as KCM
 import org.kde.plasma.core as PlasmaCore
 
 KCM.SimpleKCM {
-    property string cfg_icon: plasmoid.configuration.icon
+    property string cfg_icon: plasmoid.configuration.icon || ""
     property alias cfg_useFilledIcon: useFilledIcon.checked
     property alias cfg_useOutlinedIcon: useOutlinedIcon.checked
     property alias cfg_useFilledLightIcon: useFilledLightIcon.checked
     property alias cfg_useFilledDarkIcon: useFilledDarkIcon.checked
     property alias cfg_useOutlinedLightIcon: useOutlinedLightIcon.checked
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
+    
+    // Ignore server-related properties that get assigned to all config pages
+    property string cfg_ollamaServerUrl: ""
+    property bool cfg_pin: false
 
     Kirigami.FormLayout {
 

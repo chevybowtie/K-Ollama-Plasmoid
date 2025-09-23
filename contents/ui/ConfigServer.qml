@@ -7,6 +7,16 @@ import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
     property alias cfg_ollamaServerUrl: serverUrlField.text
+    
+    // Ignore appearance-related properties that get assigned to all config pages
+    property bool cfg_useFilledIcon: false
+    property bool cfg_useOutlinedIcon: false
+    property bool cfg_useFilledLightIcon: false
+    property bool cfg_useFilledDarkIcon: false
+    property bool cfg_useOutlinedLightIcon: false
+    property bool cfg_useOutlinedDarkIcon: false
+    property string cfg_icon: ""
+    property bool cfg_pin: false
 
     Kirigami.FormLayout {
         QQC2.TextField {

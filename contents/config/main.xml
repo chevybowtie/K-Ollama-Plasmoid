@@ -34,5 +34,13 @@
       <label>Ollama Server URL</label>
       <default>http://127.0.0.1:11434</default>
     </entry>
+    <entry name="pin" type="Bool">
+      <label>Keep window pinned</label>
+      <default>false</default>
+    </entry>
+    <entry name="icon" type="String">
+      <label>Widget icon</label>
+      <default></default>
+    </entry>
   </group>
 </kcfg>
