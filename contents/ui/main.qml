@@ -366,23 +366,34 @@ PlasmoidItem {
                 delegate: Kirigami.AbstractCard {
                     Layout.fillWidth: true
 
-                    contentItem: TextEdit {
-                        id: textMessage
+                    contentItem: Item {
+                        implicitHeight: textMessage.implicitHeight + 16
+                        
+                        TextEdit {
+                            id: textMessage
+                            
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: 8
 
-                        topPadding: 8
-                        readOnly: true
-                        wrapMode: Text.WordWrap
-                        text: number
-                        color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                        selectByMouse: true
+                            readOnly: true
+                            wrapMode: Text.WordWrap
+                            text: number
+                            color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                            selectByMouse: true
+                        }
 
                         PlasmaComponents.Button {
+                            anchors.bottom: parent.bottom
                             anchors.right: parent.right
+                            anchors.margins: 4
+                            z: 10 // Ensure button stays on top
 
                             icon.name: "edit-copy-symbolic"
                             text: i18n("Copy")
                             display: PlasmaComponents.AbstractButton.IconOnly
-                            visible: hoverHandler.hovered
+                            visible: cardHoverHandler.hovered
                             
                             onClicked: {
                                 textMessage.selectAll();
@@ -396,7 +407,7 @@ PlasmoidItem {
                         }
 
                         HoverHandler {
-                            id: hoverHandler
+                            id: cardHoverHandler
                         }
                     }
                 }
