@@ -24,6 +24,11 @@ PlasmoidItem {
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
 
+    function getServerUrl(endpoint) {
+        const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
+        return baseUrl + '/api/' + endpoint;
+    }
+
     function parseTextToComboBox(text) {
         return text
             .replace(/-/g, ' ')
@@ -55,7 +60,7 @@ PlasmoidItem {
         }
 
         const oldLength = listModel.count;
-        const url = 'http://127.0.0.1:11434/api/chat';
+        const url = getServerUrl('chat');
         const data = JSON.stringify({
             "model": modelsComboboxCurrentValue,
             "keep_alive": "5m",
@@ -108,7 +113,7 @@ PlasmoidItem {
     }
 
     function getModels() {
-        const url = 'http://127.0.0.1:11434/api/tags';
+        const url = getServerUrl('tags');
 
         let xhr = new XMLHttpRequest();
 

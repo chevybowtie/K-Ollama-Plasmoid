@@ -30,5 +30,9 @@
       <label>Use the widget's outlined dark icon</label>
       <default>false</default>
     </entry>
+    <entry name="ollamaServerUrl" type="String">
+      <label>Ollama Server URL</label>
+      <default>http://127.0.0.1:11434</default>
+    </entry>
   </group>
 </kcfg>
