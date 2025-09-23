@@ -1,39 +1,29 @@
 # ChatQT
-ChatQT is an Ollama client where you can quickly chat with all your local models downloaded with Ollama.
+ChatQT is an enhanced Ollama client for KDE Plasma where you can quickly chat with all your local models downloaded with Ollama. Features a modern interface with persistent settings, configurable input behavior, and robust error handling.
 
-![Screenshot_20240801_204909](https://github.com/user-attachments/assets/ad1d04b2-480e-46d4-b27e-25fc8fca594b)
 
-![ChatQT](https://github.com/user-attachments/assets/5c1d6b57-da20-4f1e-b325-ef52363f2366)
+
+## Features
+
+- **Multi-Model Support**: Seamlessly switch between all your Ollama models
+- **Persistent Settings**: Remembers your preferred model and configuration across sessions
+- **Configurable Input**: Choose between Enter-to-send or Ctrl+Enter-to-send behaviors
+- **Pin Widget**: Keep the chat interface open while working
+- **Multiple Icon Themes**: Adaptive, filled, outlined icons in light/dark variants
+- **Remote Server Support**: Connect to Ollama running on remote servers
+- **Copy Messages**: Easy one-click copying of AI responses
+- **Auto-Focus**: Input field automatically focused when widget opens
+- **Optimized Streaming**: Smooth real-time response streaming without UI blocking
 
 ## Prerequisites
 
 Before installing ChatQT, ensure you have the following:
 
 - **KDE Plasma 6** or later
-- **Ollama** installed and running (download from [ollama.ai](https://ollama.ai))
+- **Ollama** installed and running (locally: , or on your own server) - download from [ollama.ai](https://ollama.ai)
 - **Git** for cloning the repository
 - **kpackagetool6** (usually included with KDE Plasma development packages)
 
-### Installing Ollama
-
-If you don't have Ollama installed:
-
-```bash
-# Linux/macOS
-curl -fsSL https://ollama.ai/install.sh | sh
-
-# Or download from https://ollama.ai/download
-```
-
-After installation, start Ollama and download a model:
-
-```bash
-# Start Ollama service
-ollama serve
-
-# In another terminal, download a model (e.g., llama2)
-ollama pull llama2
-```
 
 ## Installation from Source
 
@@ -77,36 +67,37 @@ ollama pull llama2
 
 ## Configuration
 
-After installation:
+After installation, right-click the ChatQT widget and select "Configure..." to access these options:
 
-1. **Right-click the ChatQT widget** and select "Configure..."
+### Appearance & Behavior Tab
+- **Icon Themes**: Choose between filled or outlined icons with light/dark/adaptive variants
+- **Input Behavior**: Configure how Enter key works:
+  - **Modern Mode**: Enter sends message, Ctrl+Enter adds new line 
+  - **Classic Mode**: Enter adds new line, Ctrl+Enter sends message (default)
 
-2. **Appearance Tab:**
-   - Choose between filled or outlined icons
-   - Select light or dark variants
-   - Pick adaptive icons that change based on your theme
+### Server Tab
+- **Ollama Server URL**: Set your server location (default: `http://127.0.0.1:11434`)
+- **Remote Server Support**: Connect to Ollama on other machines (e.g., `http://192.168.1.100:11434`)
 
-3. **Server Tab:**
-   - Set your Ollama server URL (default: `http://127.0.0.1:11434`)
-   - For remote servers, use the appropriate IP address (e.g., `http://192.168.1.100:11434`)
+### Automatic Settings
+- **Model Persistence**: Your selected model is automatically remembered
+- **Pin State**: Widget remembers if you prefer it pinned open
 
 ## Usage
 
-1. **Ensure Ollama is running:**
-   ```bash
-   ollama serve
-   ```
+1. **Click the ChatQT widget** in your panel to open the chat interface
 
-2. **Verify you have models downloaded:**
-   ```bash
-   ollama list
-   ```
+2. **Select a model** from the dropdown menu (your choice will be remembered for next time)
 
-3. **Click the ChatQT widget** in your panel to open the chat interface
+3. **Configure input behavior** (optional):
+   - Default: Enter adds new line, Ctrl+Enter sends message  
+   - Modern: Enter sends message, Ctrl+Enter adds new line
 
-4. **Select a model** from the dropdown menu
+4. **Pin the widget** (optional) using the pin button to keep it open while working
 
-5. **Start chatting** with your local AI models!
+5. **Start chatting** with your AI models! The input field is automatically focused and ready for typing
+
+6. **Copy responses** using the copy button that appears when hovering over messages
 
 ## Troubleshooting
 
@@ -116,17 +107,28 @@ After installation:
 
 ### Can't connect to Ollama
 - Ensure Ollama is running: `ollama serve`
-- Check if Ollama is accessible: `curl http://127.0.0.1:11434/api/tags`
+- Check if Ollama is accessible: 
+  - locally: `curl http://127.0.0.1:11434/api/tags` 
+  - remotely: `curl http://{your-servers-ip}:11434/api/tags` 
 - Verify the server URL in widget configuration
 
 ### No models available
-- Download models: `ollama pull llama2` (or your preferred model)
+- Make sure Ollama is running and accessible
+- Check your server URL configuration  
+- Verify models are installed: `ollama list`
 - Restart the widget after downloading new models
 
-### Widget shows "No local model found"
-- Make sure Ollama is running and accessible
-- Check your server URL configuration
-- Verify models are installed: `ollama list`
+### Input behavior not working as expected
+- Check your configuration in "Appearance & Behavior" → "Input behavior"
+- Remember: Default mode uses Ctrl+Enter to send, Modern mode uses Enter to send
+
+### Pin button not working
+- Ensure you're using the latest version with the pin functionality fixes
+- Try toggling the pin state a few times to refresh the behavior
+
+### Performance issues during AI responses
+- The latest version includes optimized streaming to prevent UI blocking
+- If issues persist, check your network connection to the Ollama server
 
 ## Development
 
