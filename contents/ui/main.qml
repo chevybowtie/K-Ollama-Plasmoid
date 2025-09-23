@@ -15,6 +15,9 @@ import org.kde.plasma.extras as PlasmaExtras
 PlasmoidItem {
     id: root
 
+    // Control popup behavior based on pin state
+    hideOnWindowDeactivate: !Plasmoid.configuration.pin
+
     property string parentMessageId: ''
     property string modelsComboboxCurrentValue: '';    
     property var listModelController;
@@ -23,6 +26,18 @@ PlasmoidItem {
     property bool isLoading: false
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
+
+    // Watch for server URL configuration changes
+    Connections {
+        target: Plasmoid.configuration
+        function onOllamaServerUrlChanged() {
+            console.log("Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
+            hasLocalModel = false;
+            modelsArray = [];
+            modelsComboboxCurrentValue = '';
+            getModels();
+        }
+    }
 
     function getServerUrl(endpoint) {
         const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
@@ -72,18 +87,49 @@ PlasmoidItem {
 
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
+        
+        let lastProcessedLength = 0; // Track how much we've already processed
+        
         xhr.onreadystatechange = function() {
-            const objects = xhr.responseText.split('\n');
+            // Only process during loading states to avoid unnecessary calls
+            if (xhr.readyState !== XMLHttpRequest.LOADING && xhr.readyState !== XMLHttpRequest.DONE) {
+                return;
+            }
+            
+            const responseText = xhr.responseText;
+            if (responseText.length <= lastProcessedLength) {
+                return; // No new data to process
+            }
+            
+            // Only process the new part of the response
+            const newText = responseText.substring(lastProcessedLength);
+            const newObjects = newText.split('\n');
+            
+            // Update our tracking
+            lastProcessedLength = responseText.length;
+            
             let text = '';
+            
+            // Get existing text if we already have a response
+            if (listModel.count > oldLength) {
+                const lastValue = listModel.get(oldLength);
+                text = lastValue.number;
+            }
 
-            objects.forEach((object, index) => {
-                const parsedObject = JSON.parse(object);
-                text = text + parsedObject?.message?.content;
-
-                if (index === 0 ) {
-                    text = text.trim();
+            newObjects.forEach((object, index) => {
+                if (object.trim() === '') return; // Skip empty lines
+                
+                try {
+                    const parsedObject = JSON.parse(object);
+                    text = text + parsedObject?.message?.content;
+                } catch (e) {
+                    console.warn('Failed to parse JSON object:', object, 'Error:', e.message);
+                    return; // Skip malformed JSON
                 }
+            });
 
+            // Batch UI updates to reduce frequency
+            if (text.length > 0) {
                 if (!disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
@@ -95,10 +141,9 @@ PlasmoidItem {
                     });
                 } else {
                     const lastValue = listModel.get(oldLength);
-
                     lastValue.number = text;
                 }
-            });
+            }
         };
 
         xhr.onload = function() {
@@ -114,6 +159,7 @@ PlasmoidItem {
 
     function getModels() {
         const url = getServerUrl('tags');
+        console.log("Fetching models from:", url);
 
         let xhr = new XMLHttpRequest();
 
@@ -133,11 +179,21 @@ PlasmoidItem {
                         modelsComboboxCurrentValue = models[0];
 
                         modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
+                        console.log("Successfully loaded", models.length, "models");
+                    } else {
+                        hasLocalModel = false;
+                        console.log("No models found on server");
                     }
                 } else {
-                    console.error('Erro na requisição:', xhr.status, xhr.statusText);
+                    hasLocalModel = false;
+                    console.error('Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
+        };
+
+        xhr.onerror = function() {
+            hasLocalModel = false;
+            console.error('Network error when fetching models from:', url);
         };
 
         xhr.send();
@@ -169,6 +225,10 @@ PlasmoidItem {
     ]
 
     compactRepresentation: CompactRepresentation {}
+
+    Component.onCompleted: {
+        getModels();
+    }
 
     fullRepresentation: ColumnLayout {
         Layout.preferredHeight: 400
@@ -212,6 +272,13 @@ PlasmoidItem {
                         listModelController.clear();
                     }
 
+                    // Update the current selection when models array changes
+                    onModelChanged: {
+                        if (modelsArray.length > 0 && !modelsComboboxCurrentValue) {
+                            modelsComboboxCurrentValue = modelsArray[0].value;
+                        }
+                    }
+
                     Component.onCompleted: getModels()
                 }
 
@@ -252,7 +319,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: hasLocalModel ? i18n("I am waiting for your questions...") : i18n("No local model found.\nPlease install some first.\n\nIf you need help, check Ollama documentation.")
+                    text: hasLocalModel ? i18n("I am waiting for your questions...") : i18n("No local models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -265,7 +332,6 @@ PlasmoidItem {
 
                 delegate: Kirigami.AbstractCard {
                     Layout.fillWidth: true
-                    implicitHeight: 24 + textMessage.implicitHeight
 
                     contentItem: TextEdit {
                         id: textMessage
@@ -321,7 +387,7 @@ PlasmoidItem {
                 placeholderText: i18n("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 
-                Keys.onReturnPressed: {
+                Keys.onReturnPressed: function(event) {
                     if (event.modifiers & Qt.ControlModifier) {
                         request(messageField, listModel, scrollView, messageField.text);
                     } else {
