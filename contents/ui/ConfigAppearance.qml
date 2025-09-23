@@ -98,7 +98,7 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: i18nc("@label:checkbox", "Input behavior:")
             text: i18nc("@option:check", "Use Enter to send message")
             
-            QQC2.ToolTip.text: i18nc("@info:tooltip", "When enabled: Enter sends message, Ctrl+Enter adds new line.\nWhen disabled: Enter adds new line, Ctrl+Enter sends message.")
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "When enabled: Enter sends message, Ctrl+Enter adds new line.\nWhen disabled: Enter adds new line, use `send` button to submit.")
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
         }

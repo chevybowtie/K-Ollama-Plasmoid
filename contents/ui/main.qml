@@ -352,7 +352,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: hasLocalModel ? i18n("I am waiting for your questions...") : i18n("No local models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
+                    text: hasLocalModel ? i18n("I am ready...") : i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -450,7 +450,9 @@ PlasmoidItem {
                         // New behavior: Enter sends, Ctrl+Enter adds new line
                         if (event.modifiers & Qt.ControlModifier) {
                             // Ctrl+Enter: add new line
-                            event.accepted = false;
+                            var cursorPosition = messageField.cursorPosition;
+                            messageField.insert(cursorPosition, "\n");
+                            event.accepted = true;
                         } else {
                             // Enter: send message
                             if (messageField.text.trim().length > 0) {
