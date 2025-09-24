@@ -18,6 +18,7 @@ KCM.SimpleKCM {
     property alias cfg_useOutlinedLightIcon: useOutlinedLightIcon.checked
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
     property alias cfg_enterToSend: enterToSendCheckbox.checked
+    property alias cfg_completionSound: completionSoundCheckbox.checked
     
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
@@ -33,6 +34,7 @@ KCM.SimpleKCM {
     property bool cfg_useOutlinedDarkIconDefault: false
     property string cfg_ollamaServerUrlDefault: ""
     property bool cfg_enterToSendDefault: false
+    property bool cfg_completionSoundDefault: false
     property string cfg_iconDefault: ""
     property bool cfg_pinDefault: false
     property string cfg_selectedModelDefault: ""
@@ -99,6 +101,17 @@ KCM.SimpleKCM {
             text: i18nc("@option:check", "Use Enter to send message")
             
             QQC2.ToolTip.text: i18nc("@info:tooltip", "When enabled: Enter sends message, Ctrl+Enter adds new line.\nWhen disabled: Enter adds new line, use `send` button to submit.")
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: 1000
+        }
+        
+        QQC2.CheckBox {
+            id: completionSoundCheckbox
+            
+            Kirigami.FormData.label: i18nc("@label:checkbox", "Sound effects:")
+            text: i18nc("@option:check", "Play sound when AI response is complete")
+            
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "Play a slight beep sound effect after the response is completed.")
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
         }

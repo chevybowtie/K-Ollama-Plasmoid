@@ -19,6 +19,7 @@ KCM.SimpleKCM {
     property bool cfg_pin: false
     property string cfg_selectedModel: ""
     property bool cfg_enterToSend: false
+    property bool cfg_completionSound: false
     
     // Ignore "Default" variants that the configuration system tries to assign
     property bool cfg_useFilledIconDefault: false
@@ -29,6 +30,7 @@ KCM.SimpleKCM {
     property bool cfg_useOutlinedDarkIconDefault: false
     property string cfg_ollamaServerUrlDefault: ""
     property bool cfg_enterToSendDefault: false
+    property bool cfg_completionSoundDefault: false
     property string cfg_iconDefault: ""
     property bool cfg_pinDefault: false
     property string cfg_selectedModelDefault: ""

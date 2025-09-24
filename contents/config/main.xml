@@ -50,5 +50,9 @@
       <label>Use Enter to send message (Ctrl+Enter for new line)</label>
       <default>false</default>
     </entry>
+    <entry name="completionSound" type="Bool">
+      <label>Play typing sounds during AI responses</label>
+      <default>false</default>
+    </entry>
   </group>
 </kcfg>

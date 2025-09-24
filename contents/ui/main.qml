@@ -6,6 +6,7 @@
 import QtQuick 2.15
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtMultimedia
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
@@ -26,6 +27,14 @@ PlasmoidItem {
     property bool isLoading: false
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
+
+    // Typing sound effect for AI responses
+    SoundEffect {
+        id: typingSound
+        source: "assets/beep.wav"
+        volume: 0.1
+        loops: 1
+    }
 
     // Watch for server URL configuration changes
     Connections {
@@ -137,6 +146,11 @@ PlasmoidItem {
 
             // Batch UI updates to reduce frequency
             if (text.length > 0) {
+                // Play typing sound if enabled and we have new content
+                if (Plasmoid.configuration.completionSound && newObjects.some(obj => obj.trim() !== '')) {
+                    typingSound.play();
+                }
+                
                 if (!disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
