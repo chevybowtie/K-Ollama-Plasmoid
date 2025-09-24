@@ -198,6 +198,16 @@ PlasmoidItem {
         xhr.send(data);
     }
 
+    function deleteMessage(index) {
+        // Remove from visual list model
+        listModelController.remove(index);
+        
+        // Remove from prompt array (conversation history)
+        if (index < promptArray.length) {
+            promptArray.splice(index, 1);
+        }
+    }
+
     function getModels() {
         const url = getServerUrl('tags');
         console.log("Fetching models from:", url);
@@ -365,6 +375,7 @@ PlasmoidItem {
 
                     onClicked: {
                         listModelController.clear();
+                        promptArray = [];
                     }
 
                     PlasmaComponents.ToolTip.text: text
@@ -447,7 +458,7 @@ PlasmoidItem {
                     Layout.fillWidth: true
 
                     contentItem: Item {
-                        implicitHeight: textMessage.implicitHeight + 16
+                        implicitHeight: textMessage.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
                         TextEdit {
                             id: textMessage
@@ -464,26 +475,43 @@ PlasmoidItem {
                             selectByMouse: true
                         }
 
-                        PlasmaComponents.Button {
-                            anchors.bottom: parent.bottom
+                        RowLayout {
+                            id: cardButtonsLayout
                             anchors.right: parent.right
-                            anchors.margins: 4
-                            z: 10 // Ensure button stays on top
-
-                            icon.name: "edit-copy-symbolic"
-                            text: i18n("Copy")
-                            display: PlasmaComponents.AbstractButton.IconOnly
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 4
+                            spacing: 2
                             visible: cardHoverHandler.hovered
-                            
-                            onClicked: {
-                                textMessage.selectAll();
-                                textMessage.copy();
-                                textMessage.deselect();
+
+                            PlasmaComponents.Button {
+                                icon.name: "edit-copy-symbolic"
+                                text: i18n("Copy")
+                                display: PlasmaComponents.AbstractButton.IconOnly
+                                
+                                onClicked: {
+                                    textMessage.selectAll();
+                                    textMessage.copy();
+                                    textMessage.deselect();
+                                }
+
+                                PlasmaComponents.ToolTip.text: text
+                                PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                PlasmaComponents.ToolTip.visible: hovered
                             }
 
-                            PlasmaComponents.ToolTip.text: text
-                            PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                            PlasmaComponents.ToolTip.visible: hovered
+                            PlasmaComponents.Button {
+                                icon.name: "edit-delete-symbolic"
+                                text: i18n("Delete")
+                                display: PlasmaComponents.AbstractButton.IconOnly
+                                
+                                onClicked: {
+                                    deleteMessage(index);
+                                }
+
+                                PlasmaComponents.ToolTip.text: text
+                                PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                PlasmaComponents.ToolTip.visible: hovered
+                            }
                         }
 
                         HoverHandler {
@@ -525,36 +553,40 @@ PlasmoidItem {
                     }
                 }
 
-                Keys.onReturnPressed: function(event) {
-                    if (Plasmoid.configuration.enterToSend) {
-                        // New behavior: Enter sends, Ctrl+Enter adds new line
-                        if (event.modifiers & Qt.ControlModifier) {
-                            // Ctrl+Enter: add new line
-                            var cursorPosition = messageField.cursorPosition;
-                            messageField.insert(cursorPosition, "\n");
-                            event.accepted = true;
-                        } else {
-                            // Enter: send message
-                            if (messageField.text.trim().length > 0) {
-                                request(messageField, listModel, scrollView, messageField.text);
+                Keys.onPressed: function(event) {
+                    // Handle both main Enter (Return) and numpad Enter
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        var ctrl = (event.modifiers & Qt.ControlModifier);
+                        if (Plasmoid.configuration.enterToSend) {
+                            // New behavior: Enter sends, Ctrl+Enter adds new line
+                            if (ctrl) {
+                                // Ctrl+Enter: add new line
+                                var cursorPosition = messageField.cursorPosition;
+                                messageField.insert(cursorPosition, "\n");
                                 event.accepted = true;
                             } else {
-                                event.accepted = false;
-                            }
-                        }
-                    } else {
-                        // Original behavior: Ctrl+Enter sends, Enter adds new line
-                        if (event.modifiers & Qt.ControlModifier) {
-                            // Ctrl+Enter: send message
-                            if (messageField.text.trim().length > 0) {
-                                request(messageField, listModel, scrollView, messageField.text);
-                                event.accepted = true;
-                            } else {
-                                event.accepted = false;
+                                // Enter: send message
+                                if (messageField.text.trim().length > 0) {
+                                    request(messageField, listModel, scrollView, messageField.text);
+                                    event.accepted = true;
+                                } else {
+                                    event.accepted = false;
+                                }
                             }
                         } else {
-                            // Enter: add new line
-                            event.accepted = false;
+                            // Original behavior: Ctrl+Enter sends, Enter adds new line
+                            if (ctrl) {
+                                // Ctrl+Enter: send message
+                                if (messageField.text.trim().length > 0) {
+                                    request(messageField, listModel, scrollView, messageField.text);
+                                    event.accepted = true;
+                                } else {
+                                    event.accepted = false;
+                                }
+                            } else {
+                                // Enter: add new line (let default behavior)
+                                event.accepted = false;
+                            }
                         }
                     }
                 }

@@ -46,6 +46,11 @@ Before installing K-Ollama, ensure you have the following:
    - Search for "K-Ollama"
    - Drag it to your panel or desktop
 
+
+
+
+
+
 ### Method 2: Manual Installation
 
 1. **Clone and copy to the plasmoids directory:**
@@ -64,6 +69,10 @@ Before installing K-Ollama, ensure you have the following:
    ```
 
 3. **Add the widget as described in Method 1, step 3**
+
+
+
+
 
 ## Configuration
 
@@ -148,7 +157,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - [ ] token limit setting
 - [x] temperature setting
 - [ ] up-arrow populates last user message so it may be edited
-- [ ] delete message from conversation
+- [x] delete message from conversation
 
 
 
