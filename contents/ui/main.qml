@@ -14,6 +14,7 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
 import Qt.labs.settings 1.0
+Qt.include("../js/utils.js")
 
 PlasmoidItem {
     id: root
@@ -26,6 +27,8 @@ PlasmoidItem {
     property var listModelController;
     property var promptArray: [];
     property var modelsArray: [];
+    // Store the last user-entered prompt for quick recall with Up-Arrow
+    property string lastUserMessage: '';
     property bool isLoading: false
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
@@ -93,6 +96,11 @@ PlasmoidItem {
     }
 
     function request(messageField, listModel, scrollView, prompt) {
+        // Save last user message (trimmed) so Up-Arrow can recall it later
+        if (prompt && prompt.toString().trim().length > 0) {
+            lastUserMessage = prompt.toString();
+        }
+
         messageField.text = '';
 
         listModel.append({
@@ -554,6 +562,25 @@ PlasmoidItem {
                 }
 
                 Keys.onPressed: function(event) {
+                    // If Up arrow pressed, and caret is on the first line, recall lastUserMessage
+                    if (event.key === Qt.Key_Up) {
+                        // TextArea provides positionToRectangle to determine current cursor row via y coordinate,
+                        // but that's heavyweight; instead, inspect the text before the cursor for newlines.
+                        var caretPos = messageField.cursorPosition;
+                        var isAtFirstLine = caretIsOnFirstLine(messageField.text, caretPos);
+
+                        if (isAtFirstLine && lastUserMessage && lastUserMessage.length > 0) {
+                            // Repopulate the field and place caret at end
+                            messageField.text = lastUserMessage;
+                            messageField.cursorPosition = messageField.text.length;
+                            event.accepted = true;
+                            return;
+                        } else {
+                            // Let default behavior (move caret up) occur
+                            event.accepted = false;
+                            return;
+                        }
+                    }
                     // Handle both main Enter (Return) and numpad Enter
                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                         var ctrl = (event.modifiers & Qt.ControlModifier);

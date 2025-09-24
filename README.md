@@ -135,17 +135,66 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 ## Development
 
 ### Testing the plasmoid during development
+Running tests (Qt Quick Test)
 
-1. **Use plasmoidviewer for testing:**
+If you want to run the QML unit tests locally we use Qt Quick Test (QtTest). On Debian 13 (trixie) you can install the Qt6 test modules with:
+
+```bash
+sudo apt update
+sudo apt install -y qml6-module-qttest libqt6quicktest6
+```
+
+Notes:
+- The package `qml6-module-qttest` provides the QML import `import QtTest 1.x` for Qt6.
+- If your system defaults to Qt5 you can install the Qt5 equivalents instead:
+
+```bash
+sudo apt install -y qml-module-qttest libqt5quicktest5
+```
+
+Running the tests
+- Run all tests in the `tests/` directory (Qt6):
+
+```bash
+/usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml -input tests
+```
+
+- Run a single test file:
+
+```bash
+/usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml tests/tst_utils.qml
+```
+
+If `qmltestrunner` on your PATH is pointing to Qt5 (qtchooser), run the Qt6 binary directly as shown above. If you prefer a convenience wrapper, create `run-qml-tests.sh` at the repo root:
+
+```bash
+#!/bin/sh
+/usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml -input tests "$@"
+```
+
+Make it executable:
+
+```bash
+chmod +x run-qml-tests.sh
+```
+
+Development and live reload
+1. **Use plasmoidviewer for manual testing:**
    ```bash
    plasmoidviewer -a .
    ```
+
+   Tests reuse runtime JS helpers
+    - The QML tests import the shared JavaScript helpers directly from the source tree, so test logic is single-sourced with the plasmoid runtime.
+    - Example (inside a test QML file):
+       import "../contents/js/utils.js" as Utils
+       // call: Utils.caretIsOnFirstLine(text, cursorPosition)
 
 2. **For live development with auto-reload:**
    ```bash
    # Install in development mode
    kpackagetool6 -i . --dev
-   
+
    # Make changes and reload
    kpackagetool6 -u .
    ```
@@ -157,6 +206,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - [ ] token limit setting
 - [x] temperature setting
 - [ ] up-arrow populates last user message so it may be edited
+- [x] up-arrow populates last user message so it may be edited
 - [x] delete message from conversation
 
 
