@@ -213,6 +213,12 @@ Development and live reload
 - [x] up-arrow populates last user message so it may be edited
 - [x] delete message from conversation
 - [x] add UI setting to turn on debugging logs (console.log type statements)
+- [ ] add a request timeout
+- [ ] add retry/backoff for transient failures
+- [ ] UI tests
+- [ ] add a single cleanup helper finishRequest(reason) that clears root.currentXhr, sets isLoading=false, and logs the reason. Use it in onload, onerror, onabort.
+- [ ] Esc-to-abort keyboard shortcut for stop
+
 
 
 

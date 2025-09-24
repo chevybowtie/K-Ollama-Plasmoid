@@ -204,6 +204,9 @@ PlasmoidItem {
             }
 
             isLoading = false;
+            if (!assistantText || assistantText.length === 0) {
+                Utils.debugLog('debug', 'xhr.onload: assistantText missing for request at oldLength=', oldLength, 'listModel.count=', listModel.count);
+            }
             promptArray.push({ "role": "assistant", "content": assistantText, "images": [] });
             // Clear currentXhr when complete
             try { root.currentXhr = null; } catch(e) {}

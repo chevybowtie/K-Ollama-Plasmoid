@@ -24,10 +24,11 @@ KCM.SimpleKCM {
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
     property alias cfg_enterToSend: enterToSendCheckbox.checked
     property alias cfg_completionSound: completionSoundCheckbox.checked
-    property alias cfg_debugLogs: debugLogsCheckbox.checked
+    property bool cfg_debugLogs: false
     
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
+    property real cfg_ollamaTemperature: 0.7
     property bool cfg_pin: false
     property string cfg_selectedModel: ""
     
@@ -39,6 +40,7 @@ KCM.SimpleKCM {
     property bool cfg_useOutlinedLightIconDefault: false
     property bool cfg_useOutlinedDarkIconDefault: false
     property string cfg_ollamaServerUrlDefault: ""
+    property real cfg_ollamaTemperatureDefault: 0.0
     property bool cfg_enterToSendDefault: false
     property bool cfg_completionSoundDefault: false
     property string cfg_iconDefault: ""
@@ -60,6 +62,7 @@ KCM.SimpleKCM {
             try { if (typeof cfg_enterToSend !== 'boolean') cfg_enterToSend = !!plasmoid.configuration.enterToSend; } catch (e) {}
             try { if (typeof cfg_completionSound !== 'boolean') cfg_completionSound = !!plasmoid.configuration.completionSound; } catch (e) {}
             try { if (typeof cfg_debugLogs !== 'boolean') cfg_debugLogs = !!plasmoid.configuration.debugLogs; } catch (e) {}
+            try { if (typeof cfg_ollamaTemperature !== 'number') cfg_ollamaTemperature = Number(plasmoid.configuration.ollamaTemperature || 0.7); } catch (e) {}
             try { if (typeof cfg_pin !== 'boolean') cfg_pin = !!plasmoid.configuration.pin; } catch (e) {}
             try { if (!cfg_selectedModel && plasmoid.configuration.selectedModel) cfg_selectedModel = plasmoid.configuration.selectedModel; } catch (e) {}
         }
