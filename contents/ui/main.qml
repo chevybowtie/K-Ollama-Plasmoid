@@ -107,6 +107,16 @@ PlasmoidItem {
         xhr.send(data);
     }
 
+    function deleteMessage(index) {
+        // Remove from visual list model
+        listModelController.remove(index);
+        
+        // Remove from prompt array (conversation history)
+        if (index < promptArray.length) {
+            promptArray.splice(index, 1);
+        }
+    }
+
     function getModels() {
         const url = 'http://127.0.0.1:11434/api/tags';
 
@@ -219,6 +229,7 @@ PlasmoidItem {
 
                     onClicked: {
                         listModelController.clear();
+                        promptArray = [];
                     }
 
                     PlasmaComponents.ToolTip.text: text
@@ -272,23 +283,42 @@ PlasmoidItem {
                         color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
                         selectByMouse: true
 
-                        PlasmaComponents.Button {
+                        RowLayout {
                             anchors.right: parent.right
-
-                            icon.name: "edit-copy-symbolic"
-                            text: i18n("Copy")
-                            display: PlasmaComponents.AbstractButton.IconOnly
+                            anchors.top: parent.top
+                            anchors.topMargin: 4
+                            spacing: 2
                             visible: hoverHandler.hovered
-                            
-                            onClicked: {
-                                textMessage.selectAll();
-                                textMessage.copy();
-                                textMessage.deselect();
+
+                            PlasmaComponents.Button {
+                                icon.name: "edit-copy-symbolic"
+                                text: i18n("Copy")
+                                display: PlasmaComponents.AbstractButton.IconOnly
+                                
+                                onClicked: {
+                                    textMessage.selectAll();
+                                    textMessage.copy();
+                                    textMessage.deselect();
+                                }
+
+                                PlasmaComponents.ToolTip.text: text
+                                PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                PlasmaComponents.ToolTip.visible: hovered
                             }
 
-                            PlasmaComponents.ToolTip.text: text
-                            PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                            PlasmaComponents.ToolTip.visible: hovered
+                            PlasmaComponents.Button {
+                                icon.name: "edit-delete-symbolic"
+                                text: i18n("Delete")
+                                display: PlasmaComponents.AbstractButton.IconOnly
+                                
+                                onClicked: {
+                                    deleteMessage(index);
+                                }
+
+                                PlasmaComponents.ToolTip.text: text
+                                PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                PlasmaComponents.ToolTip.visible: hovered
+                            }
                         }
 
                         HoverHandler {
