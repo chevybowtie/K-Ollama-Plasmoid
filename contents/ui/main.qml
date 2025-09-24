@@ -1,11 +1,13 @@
 /*
     SPDX-FileCopyrightText: 2023 Denys Madureira <denysmb@zoho.com>
+    SPDX-FileCopyrightText: 2025 Paul <paul.sturm@cotton-software.com>
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
-import QtQuick 2.15
+import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtMultimedia
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
@@ -15,6 +17,9 @@ import org.kde.plasma.extras as PlasmaExtras
 PlasmoidItem {
     id: root
 
+    // Control popup behavior based on pin state
+    hideOnWindowDeactivate: !Plasmoid.configuration.pin
+
     property string parentMessageId: ''
     property string modelsComboboxCurrentValue: '';    
     property var listModelController;
@@ -23,6 +28,38 @@ PlasmoidItem {
     property bool isLoading: false
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
+
+    // Typing sound effect for AI responses
+    SoundEffect {
+        id: typingSound
+        source: "assets/beep.wav"
+        volume: 0.1
+        loops: 1
+    }
+
+    // Watch for server URL configuration changes
+    Connections {
+        target: Plasmoid.configuration
+        function onOllamaServerUrlChanged() {
+            console.log("Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
+            hasLocalModel = false;
+            modelsArray = [];
+            modelsComboboxCurrentValue = '';
+            getModels();
+        }
+    }
+
+    // Auto-focus textarea when plasmoid becomes visible
+    onVisibleChanged: {
+        if (visible && hasLocalModel && !isLoading && messageField) {
+            messageField.forceActiveFocus();
+        }
+    }
+
+    function getServerUrl(endpoint) {
+        const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
+        return baseUrl + '/api/' + endpoint;
+    }
 
     function parseTextToComboBox(text) {
         return text
@@ -55,7 +92,7 @@ PlasmoidItem {
         }
 
         const oldLength = listModel.count;
-        const url = 'http://127.0.0.1:11434/api/chat';
+        const url = getServerUrl('chat');
         const data = JSON.stringify({
             "model": modelsComboboxCurrentValue,
             "keep_alive": "5m",
@@ -67,18 +104,54 @@ PlasmoidItem {
 
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
+        
+        let lastProcessedLength = 0; // Track how much we've already processed
+        
         xhr.onreadystatechange = function() {
-            const objects = xhr.responseText.split('\n');
+            // Only process during loading states to avoid unnecessary calls
+            if (xhr.readyState !== XMLHttpRequest.LOADING && xhr.readyState !== XMLHttpRequest.DONE) {
+                return;
+            }
+            
+            const responseText = xhr.responseText;
+            if (responseText.length <= lastProcessedLength) {
+                return; // No new data to process
+            }
+            
+            // Only process the new part of the response
+            const newText = responseText.substring(lastProcessedLength);
+            const newObjects = newText.split('\n');
+            
+            // Update our tracking
+            lastProcessedLength = responseText.length;
+            
             let text = '';
+            
+            // Get existing text if we already have a response
+            if (listModel.count > oldLength) {
+                const lastValue = listModel.get(oldLength);
+                text = lastValue.number;
+            }
 
-            objects.forEach((object, index) => {
-                const parsedObject = JSON.parse(object);
-                text = text + parsedObject?.message?.content;
-
-                if (index === 0 ) {
-                    text = text.trim();
+            newObjects.forEach((object, index) => {
+                if (object.trim() === '') return; // Skip empty lines
+                
+                try {
+                    const parsedObject = JSON.parse(object);
+                    text = text + parsedObject?.message?.content;
+                } catch (e) {
+                    console.warn('Failed to parse JSON object:', object, 'Error:', e.message);
+                    return; // Skip malformed JSON
                 }
+            });
 
+            // Batch UI updates to reduce frequency
+            if (text.length > 0) {
+                // Play typing sound if enabled and we have new content
+                if (Plasmoid.configuration.completionSound && newObjects.some(obj => obj.trim() !== '')) {
+                    typingSound.play();
+                }
+                
                 if (!disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
@@ -90,10 +163,9 @@ PlasmoidItem {
                     });
                 } else {
                     const lastValue = listModel.get(oldLength);
-
                     lastValue.number = text;
                 }
-            });
+            }
         };
 
         xhr.onload = function() {
@@ -108,7 +180,8 @@ PlasmoidItem {
     }
 
     function getModels() {
-        const url = 'http://127.0.0.1:11434/api/tags';
+        const url = getServerUrl('tags');
+        console.log("Fetching models from:", url);
 
         let xhr = new XMLHttpRequest();
 
@@ -125,14 +198,32 @@ PlasmoidItem {
                     if (models.length) {
                         hasLocalModel = true;
 
-                        modelsComboboxCurrentValue = models[0];
+                        // Try to restore the previously selected model, otherwise use first model
+                        const savedModel = Plasmoid.configuration.selectedModel;
+                        if (savedModel && models.includes(savedModel)) {
+                            modelsComboboxCurrentValue = savedModel;
+                        } else {
+                            modelsComboboxCurrentValue = models[0];
+                            // Save the default selection
+                            Plasmoid.configuration.selectedModel = models[0];
+                        }
 
                         modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
+                        console.log("Successfully loaded", models.length, "models");
+                    } else {
+                        hasLocalModel = false;
+                        console.log("No models found on server");
                     }
                 } else {
-                    console.error('Erro na requisição:', xhr.status, xhr.statusText);
+                    hasLocalModel = false;
+                    console.error('Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
+        };
+
+        xhr.onerror = function() {
+            hasLocalModel = false;
+            console.error('Network error when fetching models from:', url);
         };
 
         xhr.send();
@@ -164,6 +255,10 @@ PlasmoidItem {
     ]
 
     compactRepresentation: CompactRepresentation {}
+
+    Component.onCompleted: {
+        getModels();
+    }
 
     fullRepresentation: ColumnLayout {
         Layout.preferredHeight: 400
@@ -204,7 +299,32 @@ PlasmoidItem {
 
                     onActivated: {
                         modelsComboboxCurrentValue = modelsArray.find(model => model.text === modelsCombobox.currentText).value;
+                        // Save selected model to configuration
+                        Plasmoid.configuration.selectedModel = modelsComboboxCurrentValue;
                         listModelController.clear();
+                    }
+
+                    // Update the current selection when models array changes
+                    onModelChanged: {
+                        if (modelsArray.length > 0) {
+                            if (modelsComboboxCurrentValue) {
+                                // Find and set the index of the saved/current model
+                                const modelIndex = modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
+                                if (modelIndex >= 0) {
+                                    currentIndex = modelIndex;
+                                } else {
+                                    // Fallback to first model if saved model not found
+                                    currentIndex = 0;
+                                    modelsComboboxCurrentValue = modelsArray[0].value;
+                                    Plasmoid.configuration.selectedModel = modelsArray[0].value;
+                                }
+                            } else {
+                                // No current model, use first one
+                                currentIndex = 0;
+                                modelsComboboxCurrentValue = modelsArray[0].value;
+                                Plasmoid.configuration.selectedModel = modelsArray[0].value;
+                            }
+                        }
                     }
 
                     Component.onCompleted: getModels()
@@ -247,7 +367,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: hasLocalModel ? i18n("I am waiting for your questions...") : i18n("No local model found.\nPlease install some first.\n\nIf you need help, check Ollama documentation.")
+                    text: hasLocalModel ? i18n("I am ready...") : i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -260,25 +380,35 @@ PlasmoidItem {
 
                 delegate: Kirigami.AbstractCard {
                     Layout.fillWidth: true
-                    implicitHeight: 24 + textMessage.implicitHeight
 
-                    contentItem: TextEdit {
-                        id: textMessage
+                    contentItem: Item {
+                        implicitHeight: textMessage.implicitHeight + 16
+                        
+                        TextEdit {
+                            id: textMessage
+                            
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: 8
 
-                        topPadding: 8
-                        readOnly: true
-                        wrapMode: Text.WordWrap
-                        text: number
-                        color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                        selectByMouse: true
+                            readOnly: true
+                            wrapMode: Text.WordWrap
+                            text: number
+                            color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                            selectByMouse: true
+                        }
 
                         PlasmaComponents.Button {
+                            anchors.bottom: parent.bottom
                             anchors.right: parent.right
+                            anchors.margins: 4
+                            z: 10 // Ensure button stays on top
 
                             icon.name: "edit-copy-symbolic"
                             text: i18n("Copy")
                             display: PlasmaComponents.AbstractButton.IconOnly
-                            visible: hoverHandler.hovered
+                            visible: cardHoverHandler.hovered
                             
                             onClicked: {
                                 textMessage.selectAll();
@@ -292,7 +422,7 @@ PlasmoidItem {
                         }
 
                         HoverHandler {
-                            id: hoverHandler
+                            id: cardHoverHandler
                         }
                     }
                 }
@@ -316,11 +446,51 @@ PlasmoidItem {
                 placeholderText: i18n("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 
-                Keys.onReturnPressed: {
-                    if (event.modifiers & Qt.ControlModifier) {
-                        request(messageField, listModel, scrollView, messageField.text);
+                Component.onCompleted: {
+                    // Auto-focus when component is ready and models are loaded
+                    if (hasLocalModel && !isLoading) {
+                        forceActiveFocus();
+                    }
+                }
+
+                // Auto-focus when models become available
+                onEnabledChanged: {
+                    if (enabled) {
+                        forceActiveFocus();
+                    }
+                }
+
+                Keys.onReturnPressed: function(event) {
+                    if (Plasmoid.configuration.enterToSend) {
+                        // New behavior: Enter sends, Ctrl+Enter adds new line
+                        if (event.modifiers & Qt.ControlModifier) {
+                            // Ctrl+Enter: add new line
+                            var cursorPosition = messageField.cursorPosition;
+                            messageField.insert(cursorPosition, "\n");
+                            event.accepted = true;
+                        } else {
+                            // Enter: send message
+                            if (messageField.text.trim().length > 0) {
+                                request(messageField, listModel, scrollView, messageField.text);
+                                event.accepted = true;
+                            } else {
+                                event.accepted = false;
+                            }
+                        }
                     } else {
-                        event.accepted = false;
+                        // Original behavior: Ctrl+Enter sends, Enter adds new line
+                        if (event.modifiers & Qt.ControlModifier) {
+                            // Ctrl+Enter: send message
+                            if (messageField.text.trim().length > 0) {
+                                request(messageField, listModel, scrollView, messageField.text);
+                                event.accepted = true;
+                            } else {
+                                event.accepted = false;
+                            }
+                        } else {
+                            // Enter: add new line
+                            event.accepted = false;
+                        }
                     }
                 }
 

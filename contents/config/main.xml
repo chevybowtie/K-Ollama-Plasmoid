@@ -30,5 +30,29 @@
       <label>Use the widget's outlined dark icon</label>
       <default>false</default>
     </entry>
+    <entry name="ollamaServerUrl" type="String">
+      <label>Ollama Server URL</label>
+      <default>http://127.0.0.1:11434</default>
+    </entry>
+    <entry name="pin" type="Bool">
+      <label>Keep window pinned</label>
+      <default>false</default>
+    </entry>
+    <entry name="icon" type="String">
+      <label>Widget icon</label>
+      <default></default>
+    </entry>
+    <entry name="selectedModel" type="String">
+      <label>Selected Ollama model</label>
+      <default></default>
+    </entry>
+    <entry name="enterToSend" type="Bool">
+      <label>Use Enter to send message (Ctrl+Enter for new line)</label>
+      <default>false</default>
+    </entry>
+    <entry name="completionSound" type="Bool">
+      <label>Play typing sounds during AI responses</label>
+      <default>false</default>
+    </entry>
   </group>
 </kcfg>

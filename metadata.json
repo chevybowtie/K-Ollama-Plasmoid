@@ -5,16 +5,20 @@
             {
                 "Email": "denysmb@zoho.com",
                 "Name": "Denys Madureira"
+            },
+            {
+                "Email": "paul.sturm@cotton-software.com",
+                "Name": "Paul Sturm"
             }
         ],
         "Category": "Utilities",
-        "Description": "Quickly ask questions to your local LLVM with Ollama",
+        "Description": "Enhanced Ollama client with persistent settings, configurable input, and modern Plasma 6 compatibility",
         "Icon": "org.kde.neochat.tray",
-        "Id": "ChatQT-Plasmoid",
+        "Id": "K-Ollama-Plasmoid",
         "License": "LGPL-2.1+",
-        "Name": "ChatQT",
-        "Version": "1.0",
-        "Website": "https://github.com/DenysMb/ChatQT-Plasmoid"
+        "Name": "K-Ollama",
+        "Version": "2.0",
+        "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
