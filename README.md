@@ -165,17 +165,23 @@ Running the tests
 /usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml tests/tst_utils.qml
 ```
 
-If `qmltestrunner` on your PATH is pointing to Qt5 (qtchooser), run the Qt6 binary directly as shown above. If you prefer a convenience wrapper, create `run-qml-tests.sh` at the repo root:
+If `qmltestrunner` on your PATH is pointing to Qt5 (qtchooser), run the Qt6 binary directly as shown above. There is also a small convenience wrapper included in this repo to avoid remembering the -import flags:
+
+Using the provided wrapper
+
+This repository includes `scripts/run-tests`, a small wrapper that detects `qmltestrunner` (or you can set `QMLTEST_RUNNER`) and runs the tests with the correct `-import` and `-input` flags so the tests can import the runtime JS helpers.
+
+Examples:
 
 ```bash
-#!/bin/sh
-/usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml -input tests "$@"
-```
+# Run all tests using the detected runner
+scripts/run-tests
 
-Make it executable:
+# Force a specific qmltestrunner (e.g. custom Qt6 install)
+QMLTEST_RUNNER=/opt/qt/6.8.2/bin/qmltestrunner scripts/run-tests
 
-```bash
-chmod +x run-qml-tests.sh
+# Pass additional qmltestrunner args (verbose, output file, etc.)
+scripts/run-tests -v2 -o tests/results.txt,txt
 ```
 
 Development and live reload
@@ -205,9 +211,9 @@ Development and live reload
 - [ ] single system prompt
 - [ ] token limit setting
 - [x] temperature setting
-- [ ] up-arrow populates last user message so it may be edited
 - [x] up-arrow populates last user message so it may be edited
 - [x] delete message from conversation
+- [ ] add UI setting to turn on debugging logs (console.log type statements)
 
 
 

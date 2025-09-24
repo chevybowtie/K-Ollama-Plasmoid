@@ -14,7 +14,7 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
 import Qt.labs.settings 1.0
-Qt.include("../js/utils.js")
+import "../js/utils.js" as Utils
 
 PlasmoidItem {
     id: root
@@ -76,23 +76,13 @@ PlasmoidItem {
         }
     }
 
+    // Use Utils.getServerUrl(baseUrl, endpoint) to avoid coupling to Plasmoid internals
     function getServerUrl(endpoint) {
-        const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
-        return baseUrl + '/api/' + endpoint;
+        return Utils.getServerUrl(Plasmoid.configuration.ollamaServerUrl, endpoint);
     }
 
     function parseTextToComboBox(text) {
-        return text
-            .replace(/-/g, ' ')
-            .replace(/:(.+)/, ' ($1)')
-            .split(' ')
-            .map(word => {
-                if (word.startsWith('(')) {
-                    return word.charAt(0) + word.charAt(1).toUpperCase() + word.slice(2);
-                }
-                return word.charAt(0).toUpperCase() + word.slice(1);
-            })
-            .join(' ');
+        return Utils.parseTextToComboBox(text);
     }
 
     function request(messageField, listModel, scrollView, prompt) {
@@ -234,6 +224,8 @@ PlasmoidItem {
 
                     if (models.length) {
                         hasLocalModel = true;
+                        // mark connection manager as connected when we successfully retrieved models
+                        try { connMgr.status = "connected"; } catch (e) { }
 
                         // Try to restore the previously selected model, otherwise use first model
                         const savedModel = Plasmoid.configuration.selectedModel;
@@ -249,10 +241,12 @@ PlasmoidItem {
                         console.log("Successfully loaded", models.length, "models");
                     } else {
                         hasLocalModel = false;
+                        try { connMgr.status = "disconnected"; } catch (e) { }
                         console.log("No models found on server");
                     }
                 } else {
                     hasLocalModel = false;
+                    try { connMgr.status = "disconnected"; } catch (e) { }
                     console.error('Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
@@ -260,6 +254,7 @@ PlasmoidItem {
 
         xhr.onerror = function() {
             hasLocalModel = false;
+            try { connMgr.status = "disconnected"; } catch (e) { }
             console.error('Network error when fetching models from:', url);
         };
 
@@ -427,7 +422,8 @@ PlasmoidItem {
 
                     PlasmaComponents.ToolTip.text: connMgr.connected ? i18n("Connected to Ollama") : (connMgr.status === "connecting" ? i18n("Connecting...") : i18n("Disconnected. Click to retry."))
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                    PlasmaComponents.ToolTip.visible: (hoverArea && hoverArea.hovered) ? true : false
+                    // Use containsMouse for a more robust hover check
+                    PlasmaComponents.ToolTip.visible: hoverArea && hoverArea.containsMouse
                 }
             }
         }

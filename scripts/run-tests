@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# scripts/run-tests
+# Wrapper to run Qt QML tests for this project.
+# Usage: scripts/run-tests [additional qmltestrunner args]
+# Environment variables:
+#   QMLTEST_RUNNER - path to qmltestrunner binary to use (optional)
+
+ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+CONTENTS_DIR="$ROOT_DIR/contents"
+TESTS_DIR="$ROOT_DIR/tests"
+
+# Locate qmltestrunner
+if [[ -n "${QMLTEST_RUNNER:-}" ]]; then
+  RUNNER="$QMLTEST_RUNNER"
+elif [[ -x "/usr/lib/qt6/bin/qmltestrunner" ]]; then
+  RUNNER="/usr/lib/qt6/bin/qmltestrunner"
+elif command -v qmltestrunner >/dev/null 2>&1; then
+  RUNNER=$(command -v qmltestrunner)
+else
+  echo "Error: qmltestrunner not found. Set QMLTEST_RUNNER or install Qt (qt6-qmltest / qt5-qmltest)." >&2
+  exit 2
+fi
+
+# Default args: import project contents so tests can import JS helpers, and run tests from tests/ dir
+DEFAULT_ARGS=("-import" "$CONTENTS_DIR" "-input" "$TESTS_DIR")
+
+# Allow user to pass additional args which will be appended
+exec "$RUNNER" "${DEFAULT_ARGS[@]}" "$@"

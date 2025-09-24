@@ -4,6 +4,7 @@
   `connected`, `status`, and `error` properties for UI binding.
 */
 import QtQuick 2.15
+import "../js/utils.js" as Utils
 
 Item {
     id: root
@@ -70,17 +71,17 @@ Item {
     }
 
     function getUrl() {
-        var base = getServerBase();
-        // avoid double slashes
-        if (base.endsWith('/')) base = base.slice(0, -1);
-        return base + root.endpoint;
+        // Utils.buildServerUrl returns base + endpoint (endpoint may include leading slash)
+        return Utils.buildServerUrl(getServerBase(), root.endpoint);
     }
 
     function check() {
+        console.log("ConnectionManager: check() starting. endpoint=", root.endpoint, "serverBase=", root.serverBase);
         status = "connecting";
         error = "";
 
         var url = getUrl();
+        console.log("ConnectionManager: checking URL ->", url);
         var xhr = new XMLHttpRequest();
 
         // start the request timeout timer and keep reference to xhr so it can be aborted
@@ -96,6 +97,7 @@ Item {
                 requestTimer.stop();
                 root._currentXhr = null;
                 lastChecked = new Date().toISOString();
+                    console.log("ConnectionManager: check DONE, status=", xhr.status);
                 if (xhr.status === 200) {
                     status = "connected";
                     error = "";
@@ -109,6 +111,7 @@ Item {
         xhr.onerror = function() {
             requestTimer.stop();
             root._currentXhr = null;
+            console.log("ConnectionManager: network error when checking URL");
             status = "disconnected";
             error = 'network error';
             lastChecked = new Date().toISOString();
@@ -127,6 +130,7 @@ Item {
 
     Component.onCompleted: {
         // start polling immediately
+        console.log("ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
         if (root.running) pollTimer.start();
     }
 }
