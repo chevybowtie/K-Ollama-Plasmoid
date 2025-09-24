@@ -345,6 +345,45 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     PlasmaComponents.ToolTip.visible: hovered
                 }
+
+                // Connection status indicator
+                ConnectionManager {
+                    id: connMgr
+                    interval: 5000
+                    timeoutMs: 2500
+                    serverBase: Plasmoid.configuration.ollamaServerUrl || ''
+                }
+
+                // Connection indicator: colored dot only
+                Item {
+                    id: connStatusItem
+                    width: 18
+                    height: 18
+
+                    MouseArea {
+                        id: hoverArea
+                        anchors.fill: parent
+                        onClicked: connMgr.check()
+                        hoverEnabled: true
+                    }
+
+                    // small colored dot for consistent at-a-glance state
+                    Rectangle {
+                        id: stateDot
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        radius: 6
+                        color: connMgr.connected ? "#4CAF50" : (connMgr.status === "connecting" ? "#FFC107" : "#9E9E9E")
+                        border.width: 1
+                        border.color: Qt.lighter(stateDot.color, 1.2)
+                        opacity: connMgr.connected ? 1.0 : (connMgr.status === "connecting" ? 0.95 : 0.8)
+                    }
+
+                    PlasmaComponents.ToolTip.text: connMgr.connected ? i18n("Connected to Ollama") : (connMgr.status === "connecting" ? i18n("Connecting...") : i18n("Disconnected. Click to retry."))
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: (hoverArea && hoverArea.hovered) ? true : false
+                }
             }
         }
 

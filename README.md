@@ -143,7 +143,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 ### TODO
 - [ ] `stop generating` button
-- [ ] connection status icon
+- [x] connection status icon
 - [ ] single system prompt
 - [ ] token limit setting
 - [ ] temperature setting
