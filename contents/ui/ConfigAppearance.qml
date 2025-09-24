@@ -46,6 +46,23 @@ KCM.SimpleKCM {
     property string cfg_selectedModelDefault: ""
 
     Kirigami.FormLayout {
+        Component.onCompleted: {
+            // Initialize cfg_* properties from Plasmoid.configuration if KCM hasn't provided values
+            try {
+                if ((cfg_icon === undefined || cfg_icon === '') && plasmoid.configuration.icon) cfg_icon = plasmoid.configuration.icon;
+            } catch (e) {}
+            try { if (typeof cfg_useFilledIcon !== 'boolean') cfg_useFilledIcon = !!plasmoid.configuration.useFilledIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedIcon !== 'boolean') cfg_useOutlinedIcon = !!plasmoid.configuration.useOutlinedIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledLightIcon !== 'boolean') cfg_useFilledLightIcon = !!plasmoid.configuration.useFilledLightIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledDarkIcon !== 'boolean') cfg_useFilledDarkIcon = !!plasmoid.configuration.useFilledDarkIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedLightIcon !== 'boolean') cfg_useOutlinedLightIcon = !!plasmoid.configuration.useOutlinedLightIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedDarkIcon !== 'boolean') cfg_useOutlinedDarkIcon = !!plasmoid.configuration.useOutlinedDarkIcon; } catch (e) {}
+            try { if (typeof cfg_enterToSend !== 'boolean') cfg_enterToSend = !!plasmoid.configuration.enterToSend; } catch (e) {}
+            try { if (typeof cfg_completionSound !== 'boolean') cfg_completionSound = !!plasmoid.configuration.completionSound; } catch (e) {}
+            try { if (typeof cfg_debugLogs !== 'boolean') cfg_debugLogs = !!plasmoid.configuration.debugLogs; } catch (e) {}
+            try { if (typeof cfg_pin !== 'boolean') cfg_pin = !!plasmoid.configuration.pin; } catch (e) {}
+            try { if (!cfg_selectedModel && plasmoid.configuration.selectedModel) cfg_selectedModel = plasmoid.configuration.selectedModel; } catch (e) {}
+        }
 
         QQC2.ButtonGroup {
             id: iconGroup

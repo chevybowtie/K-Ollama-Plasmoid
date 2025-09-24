@@ -13,7 +13,7 @@ import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
-import Qt.labs.settings 1.0
+import QtCore
 import "../js/utils.js" as Utils
 
 PlasmoidItem {
@@ -563,7 +563,7 @@ PlasmoidItem {
                         // TextArea provides positionToRectangle to determine current cursor row via y coordinate,
                         // but that's heavyweight; instead, inspect the text before the cursor for newlines.
                         var caretPos = messageField.cursorPosition;
-                        var isAtFirstLine = caretIsOnFirstLine(messageField.text, caretPos);
+                        var isAtFirstLine = Utils.caretIsOnFirstLine(messageField.text, caretPos);
 
                         if (isAtFirstLine && lastUserMessage && lastUserMessage.length > 0) {
                             // Repopulate the field and place caret at end
