@@ -146,7 +146,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - [x] connection status icon
 - [ ] single system prompt
 - [ ] token limit setting
-- [ ] temperature setting
+- [x] temperature setting
 - [ ] up-arrow populates last user message so it may be edited
 - [ ] delete message from conversation
 

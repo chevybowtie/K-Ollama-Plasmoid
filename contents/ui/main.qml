@@ -13,6 +13,7 @@ import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
+import Qt.labs.settings 1.0
 
 PlasmoidItem {
     id: root
@@ -37,6 +38,12 @@ PlasmoidItem {
         loops: 1
     }
 
+    // Local persistent settings (fallback persistence for temperature)
+    Settings {
+        id: appSettings
+        property real ollamaTemperature: 0.7
+    }
+
     // Watch for server URL configuration changes
     Connections {
         target: Plasmoid.configuration
@@ -46,6 +53,16 @@ PlasmoidItem {
             modelsArray = [];
             modelsComboboxCurrentValue = '';
             getModels();
+        }
+    }
+
+    // Persist temperature changes from the settings UI into local Settings
+    Connections {
+        target: Plasmoid.configuration
+        function onOllamaTemperatureChanged() {
+            if (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null) {
+                appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
+            }
         }
     }
 
@@ -96,7 +113,9 @@ PlasmoidItem {
         const data = JSON.stringify({
             "model": modelsComboboxCurrentValue,
             "keep_alive": "5m",
-            "options": {},
+            "options": {
+                "temperature": Number(Plasmoid.configuration.ollamaTemperature || 0.7)
+            },
             "messages": promptArray
         });
         
@@ -257,6 +276,13 @@ PlasmoidItem {
     compactRepresentation: CompactRepresentation {}
 
     Component.onCompleted: {
+        // Ensure temperature is initialized from persisted settings if the plasmoid config doesn't provide it
+        if (Plasmoid.configuration.ollamaTemperature === undefined || Plasmoid.configuration.ollamaTemperature === null) {
+            Plasmoid.configuration.ollamaTemperature = appSettings.ollamaTemperature;
+        } else {
+            appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
+        }
+
         getModels();
     }
 

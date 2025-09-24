@@ -39,6 +39,9 @@ KCM.SimpleKCM {
     property string cfg_iconDefault: ""
     property bool cfg_pinDefault: false
     property string cfg_selectedModelDefault: ""
+        // Ollama generation temperature (0.0 - 2.0)
+        property real cfg_ollamaTemperature: 0.7
+        property real cfg_ollamaTemperatureDefault: 0.7
 
     Kirigami.FormLayout {
         QQC2.TextField {
@@ -47,6 +50,10 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: i18nc("@label:textbox", "Ollama Server URL:")
             placeholderText: i18nc("@info:placeholder", "http://127.0.0.1:11434")
             
+            // Initialize from plasmoid configuration and persist on changes
+            text: plasmoid.configuration.ollamaServerUrl || ""
+            onTextChanged: plasmoid.configuration.ollamaServerUrl = text
+
             QQC2.ToolTip.text: i18nc("@info:tooltip", "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN IP for remote server")
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
@@ -59,5 +66,38 @@ KCM.SimpleKCM {
             Layout.maximumWidth: serverUrlField.width
             wrapMode: Text.WordWrap
         }
+        
+            // Temperature control
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+
+                QQC2.Label {
+                    text: i18nc("@label", "Temperature")
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                QQC2.Slider {
+                    id: tempSlider
+                    from: 0.0
+                    to: 2.0
+                    stepSize: 0.01
+                    // initialize from plasmoid configuration if present, otherwise use default property
+                    value: (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null) ? plasmoid.configuration.ollamaTemperature : cfg_ollamaTemperature
+                    onValueChanged: {
+                        cfg_ollamaTemperature = value
+                        plasmoid.configuration.ollamaTemperature = value
+                    }
+                    Layout.fillWidth: true
+                }
+
+                QQC2.Label {
+                    text: (typeof tempSlider.value === 'number') ? tempSlider.value.toFixed(2) : tempSlider.value
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                QQC2.ToolTip.text: i18nc("@info", "Lower = more deterministic, higher = more creative (0.0–2.0)")
+                QQC2.ToolTip.visible: tempSlider.hovered
+            }
     }
 }
