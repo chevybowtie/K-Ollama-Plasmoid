@@ -32,6 +32,8 @@ PlasmoidItem {
     property bool isLoading: false
     property bool hasLocalModel: false;
     property bool disableAutoScroll: false;
+    // Track the in-flight XMLHttpRequest so we can abort long-running responses
+    property var currentXhr: null;
 
     // Typing sound effect for AI responses
     SoundEffect {
@@ -117,7 +119,9 @@ PlasmoidItem {
             "messages": promptArray
         });
         
-        let xhr = new XMLHttpRequest();
+    let xhr = new XMLHttpRequest();
+    // Record current XHR so UI can abort it via "Stop generating"
+    root.currentXhr = xhr;
 
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -186,11 +190,34 @@ PlasmoidItem {
         };
 
         xhr.onload = function() {
-            const lastValue = listModel.get(oldLength);
+            // Safely read the assistant's final text if it was appended during streaming.
+            var assistantText = "";
+            try {
+                if (listModel.count > oldLength) {
+                    var lastValue = listModel.get(oldLength);
+                    if (lastValue && typeof lastValue.number !== 'undefined' && lastValue.number !== null) {
+                        assistantText = lastValue.number;
+                    }
+                }
+            } catch (e) {
+                // defensive: leave assistantText empty
+            }
 
             isLoading = false;
+            promptArray.push({ "role": "assistant", "content": assistantText, "images": [] });
+            // Clear currentXhr when complete
+            try { root.currentXhr = null; } catch(e) {}
+        };
 
-            promptArray.push({ "role": "assistant", "content": lastValue.number, "images": [] });
+        xhr.onabort = function() {
+            // Aborted by user
+            isLoading = false;
+            try { root.currentXhr = null; } catch(e) {}
+        };
+
+        xhr.onerror = function() {
+            isLoading = false;
+            try { root.currentXhr = null; } catch(e) {}
         };
 
         xhr.send(data);
@@ -623,21 +650,50 @@ PlasmoidItem {
 
         }
 
-        Button {
-            Layout.alignment: Qt.AlignHCenter
+        RowLayout {
             Layout.fillWidth: true
-            
-            text: i18n("Send")
-            hoverEnabled: hasLocalModel && !isLoading
-            enabled: hasLocalModel && !isLoading
-            visible: hasLocalModel
+            Layout.alignment: Qt.AlignHCenter
 
-            ToolTip.delay: 1000
-            ToolTip.visible: hovered
-            ToolTip.text: "CTRL+Enter"
-            
-            onClicked: {
-                request(messageField, listModel, scrollView, messageField.text);
+            // Wide Send button
+            Button {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+
+                text: i18n("Send")
+                hoverEnabled: hasLocalModel && !isLoading
+                enabled: hasLocalModel && !isLoading
+                visible: hasLocalModel
+
+                ToolTip.delay: 1000
+                ToolTip.visible: hovered
+                ToolTip.text: "CTRL+Enter"
+
+                onClicked: {
+                    request(messageField, listModel, scrollView, messageField.text);
+                }
+            }
+
+            // Narrow stop icon button to the right of Send
+            ToolButton {
+                Layout.alignment: Qt.AlignVCenter
+                // Keep the stop button narrow — doesn't expand like the Send button
+                Layout.preferredWidth: implicitWidth
+
+                icon.name: "media-playback-stop"
+                visible: hasLocalModel
+                enabled: hasLocalModel && isLoading && root.currentXhr !== null
+
+                ToolTip.delay: 1000
+                ToolTip.visible: hovered
+                ToolTip.text: i18n("Stop")
+
+                onClicked: {
+                    if (root.currentXhr) {
+                        try { root.currentXhr.abort(); } catch (e) {}
+                        root.currentXhr = null;
+                    }
+                    isLoading = false;
+                }
             }
         }
 

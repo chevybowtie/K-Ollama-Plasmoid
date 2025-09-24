@@ -206,10 +206,9 @@ Development and live reload
    ```
 
 ### TODO
-- [ ] `stop generating` button
+- [x] `stop generating` button
 - [x] connection status icon
-- [ ] single system prompt
-- [ ] token limit setting
+- [ ] allow a system prompt
 - [x] temperature setting
 - [x] up-arrow populates last user message so it may be edited
 - [x] delete message from conversation
