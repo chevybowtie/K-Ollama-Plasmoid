@@ -108,3 +108,55 @@ function buildServerUrl(baseUrl, endpoint) {
     endpoint = (endpoint || '').replace(/^\/+/, '');
     return base + (endpoint ? '/' + endpoint : '');
 }
+
+
+/**
+ * Centralized debug logging helper.
+ *
+ * Levels supported: 'debug', 'info', 'warn', 'error'.
+ * - 'debug' and 'info' messages are emitted only when plasmoid.configuration.debugLogs is truthy.
+ * - 'warn' and 'error' are always emitted.
+ *
+ * Usage from QML: Utils.debugLog('debug', 'Some message', var1, var2)
+ */
+function debugLog(level) {
+    try {
+        var args = Array.prototype.slice.call(arguments, 1);
+        var lvl = (level || 'debug').toString().toLowerCase();
+
+        // Determine whether to emit
+        var emit = true;
+        if (lvl === 'debug' || lvl === 'info') {
+            // Allow tests to inject a stubbed plasmoid configuration via debugLog._testConfig
+            if (typeof debugLog._testConfig !== 'undefined' && debugLog._testConfig && debugLog._testConfig.configuration) {
+                emit = !!debugLog._testConfig.configuration.debugLogs;
+            } else {
+                emit = (typeof plasmoid !== 'undefined' && plasmoid.configuration && plasmoid.configuration.debugLogs);
+            }
+        }
+
+        if (!emit) return;
+
+        // For tests: record the last emitted call (level and args)
+        try { debugLog._lastCall = { level: lvl, args: args }; } catch(e) {}
+
+        if (lvl === 'warn') {
+            console.warn.apply(console, args);
+        } else if (lvl === 'error') {
+            console.error.apply(console, args);
+        } else {
+            // debug/info -> console.log
+            console.log.apply(console, args);
+        }
+    } catch (e) {
+        // If something goes wrong in the logger, don't throw.
+    }
+}
+
+/**
+ * Test helper: set a test configuration object used by debugLog for unit tests.
+ * Example: Utils.debugLogSetTestConfig({ configuration: { debugLogs: true } })
+ */
+function debugLogSetTestConfig(obj) {
+    try { debugLog._testConfig = obj; } catch (e) {}
+}

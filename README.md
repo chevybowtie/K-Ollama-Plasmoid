@@ -213,7 +213,7 @@ Development and live reload
 - [x] temperature setting
 - [x] up-arrow populates last user message so it may be edited
 - [x] delete message from conversation
-- [ ] add UI setting to turn on debugging logs (console.log type statements)
+- [x] add UI setting to turn on debugging logs (console.log type statements)
 
 
 

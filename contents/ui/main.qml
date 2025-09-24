@@ -51,7 +51,7 @@ PlasmoidItem {
     Connections {
         target: Plasmoid.configuration
         function onOllamaServerUrlChanged() {
-            console.log("Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
+            Utils.debugLog('info', "Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
             hasLocalModel = false;
             modelsArray = [];
             modelsComboboxCurrentValue = '';
@@ -157,7 +157,7 @@ PlasmoidItem {
                     const parsedObject = JSON.parse(object);
                     text = text + parsedObject?.message?.content;
                 } catch (e) {
-                    console.warn('Failed to parse JSON object:', object, 'Error:', e.message);
+                    Utils.debugLog('warn', 'Failed to parse JSON object:', object, 'Error:', e.message);
                     return; // Skip malformed JSON
                 }
             });
@@ -208,7 +208,7 @@ PlasmoidItem {
 
     function getModels() {
         const url = getServerUrl('tags');
-        console.log("Fetching models from:", url);
+    Utils.debugLog('debug', "Fetching models from:", url);
 
         let xhr = new XMLHttpRequest();
 
@@ -238,16 +238,16 @@ PlasmoidItem {
                         }
 
                         modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
-                        console.log("Successfully loaded", models.length, "models");
+                        Utils.debugLog('info', "Successfully loaded", models.length, "models");
                     } else {
                         hasLocalModel = false;
                         try { connMgr.status = "disconnected"; } catch (e) { }
-                        console.log("No models found on server");
+                        Utils.debugLog('info', "No models found on server");
                     }
                 } else {
                     hasLocalModel = false;
                     try { connMgr.status = "disconnected"; } catch (e) { }
-                    console.error('Error fetching models:', xhr.status, xhr.statusText, 'from', url);
+                    Utils.debugLog('error', 'Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
         };
@@ -255,7 +255,7 @@ PlasmoidItem {
         xhr.onerror = function() {
             hasLocalModel = false;
             try { connMgr.status = "disconnected"; } catch (e) { }
-            console.error('Network error when fetching models from:', url);
+            Utils.debugLog('error', 'Network error when fetching models from:', url);
         };
 
         xhr.send();

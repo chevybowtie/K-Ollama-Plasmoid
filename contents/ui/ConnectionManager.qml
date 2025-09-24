@@ -76,12 +76,12 @@ Item {
     }
 
     function check() {
-        console.log("ConnectionManager: check() starting. endpoint=", root.endpoint, "serverBase=", root.serverBase);
+    Utils.debugLog('debug', "ConnectionManager: check() starting. endpoint=", root.endpoint, "serverBase=", root.serverBase);
         status = "connecting";
         error = "";
 
         var url = getUrl();
-        console.log("ConnectionManager: checking URL ->", url);
+    Utils.debugLog('debug', "ConnectionManager: checking URL ->", url);
         var xhr = new XMLHttpRequest();
 
         // start the request timeout timer and keep reference to xhr so it can be aborted
@@ -97,7 +97,7 @@ Item {
                 requestTimer.stop();
                 root._currentXhr = null;
                 lastChecked = new Date().toISOString();
-                    console.log("ConnectionManager: check DONE, status=", xhr.status);
+                    Utils.debugLog('info', "ConnectionManager: check DONE, status=", xhr.status);
                 if (xhr.status === 200) {
                     status = "connected";
                     error = "";
@@ -111,7 +111,7 @@ Item {
         xhr.onerror = function() {
             requestTimer.stop();
             root._currentXhr = null;
-            console.log("ConnectionManager: network error when checking URL");
+            Utils.debugLog('warn', "ConnectionManager: network error when checking URL");
             status = "disconnected";
             error = 'network error';
             lastChecked = new Date().toISOString();
@@ -130,7 +130,7 @@ Item {
 
     Component.onCompleted: {
         // start polling immediately
-        console.log("ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
+    Utils.debugLog('debug', "ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
         if (root.running) pollTimer.start();
     }
 }

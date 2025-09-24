@@ -24,6 +24,7 @@ KCM.SimpleKCM {
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
     property alias cfg_enterToSend: enterToSendCheckbox.checked
     property alias cfg_completionSound: completionSoundCheckbox.checked
+    property alias cfg_debugLogs: debugLogsCheckbox.checked
     
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
@@ -119,6 +120,24 @@ KCM.SimpleKCM {
             QQC2.ToolTip.text: i18nc("@info:tooltip", "Play a slight beep sound effect after the response is completed.")
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
+        }
+
+        QQC2.CheckBox {
+            id: debugLogsCheckbox
+
+            Kirigami.FormData.label: i18nc("@label:checkbox", "Debug logging:")
+            text: i18nc("@option:check", "Enable debug console logs")
+
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "Show debug console.log messages for troubleshooting. This setting is persisted.")
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: 1000
+
+            // Use the KCM pattern: bind to cfg_debugLogs so the Apply button is enabled
+            checked: cfg_debugLogs
+
+            // When applied by the KCM framework, the top-level plasmoid configuration system will set
+            // `cfg_debugLogs` on this component. We still need to persist the value into plasmoid.configuration
+            // when the user applies the KCM changes; SimpleKCM will do that by reading the cfg_* properties.
         }
     }
 }
