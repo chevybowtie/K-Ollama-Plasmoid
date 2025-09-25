@@ -161,7 +161,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 ### Widget doesn't appear in the add widgets menu
 - Try restarting Plasma: `plasmashell --replace &`
-- Check if the installation was successful: `kpackagetool6 -l | grep K-Ollama`
+- Check if the installation was successful: `kpackagetool6 -t Plasma/Applet -l  | grep K-Ollama`
 
 ### Can't connect to Ollama
 - Ensure Ollama is running: `ollama serve`
@@ -245,13 +245,12 @@ Development and live reload
        import "../contents/js/utils.js" as Utils
        // call: Utils.caretIsOnFirstLine(text, cursorPosition)
 
-2. **For live development with auto-reload:**
-   ```bash
-   # Install in development mode
-   kpackagetool6 -i . --dev
+2. **For quick local development/deploy:**
+   The simplest, reliable way to test changes locally is to copy the workspace into your user plasmoids folder and restart Plasma:
 
-   # Make changes and reload
-   kpackagetool6 -u .
+   ```bash
+   # Copy current tree to the user plasmoids directory and restart Plasma
+   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
    ```
 
 ### TODO
@@ -267,7 +266,7 @@ Development and live reload
 - [ ] UI tests
 - [ ] add a single cleanup helper finishRequest(reason) that clears root.currentXhr, sets isLoading=false, and logs the reason. Use it in onload, onerror, onabort.
 - [ ] Esc-to-abort keyboard shortcut for stop
-
+- [ ] allow configuration as a desktop widget instead of only a panel widget
 
 
 
