@@ -11,6 +11,7 @@ import org.kde.iconthemes as KIconThemes
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
 import org.kde.kcmutils as KCM
+import "../js/utils.js" as Utils
 
 import org.kde.plasma.core as PlasmaCore
 
@@ -25,6 +26,10 @@ KCM.SimpleKCM {
     property alias cfg_enterToSend: enterToSendCheckbox.checked
     property alias cfg_completionSound: completionSoundCheckbox.checked
     property bool cfg_debugLogs: false
+    property bool cfg_debugLogsDefault: false
+    onCfg_debugLogsChanged: {
+        try { Utils.debugLog('info', 'ConfigAppearance: cfg_debugLogs changed ->', cfg_debugLogs); } catch (e) {}
+    }
     
     // Ignore server-related properties that get assigned to all config pages
     property string cfg_ollamaServerUrl: ""
@@ -49,6 +54,11 @@ KCM.SimpleKCM {
 
     Kirigami.FormLayout {
         Component.onCompleted: {
+            try {
+                try { Utils.debugLog('info', 'ConfigAppearance: plasmoid.configuration snapshot ->', JSON.stringify(plasmoid.configuration)); } catch (e) {}
+            } catch (e) {
+                try { Utils.debugLog('warn', 'ConfigAppearance: failed to stringify plasmoid.configuration', e); } catch (ee) {}
+            }
             // Initialize cfg_* properties from Plasmoid.configuration if KCM hasn't provided values
             try {
                 if ((cfg_icon === undefined || cfg_icon === '') && plasmoid.configuration.icon) cfg_icon = plasmoid.configuration.icon;
@@ -61,7 +71,17 @@ KCM.SimpleKCM {
             try { if (typeof cfg_useOutlinedDarkIcon !== 'boolean') cfg_useOutlinedDarkIcon = !!plasmoid.configuration.useOutlinedDarkIcon; } catch (e) {}
             try { if (typeof cfg_enterToSend !== 'boolean') cfg_enterToSend = !!plasmoid.configuration.enterToSend; } catch (e) {}
             try { if (typeof cfg_completionSound !== 'boolean') cfg_completionSound = !!plasmoid.configuration.completionSound; } catch (e) {}
-            try { if (typeof cfg_debugLogs !== 'boolean') cfg_debugLogs = !!plasmoid.configuration.debugLogs; } catch (e) {}
+            // Initialize cfg_debugLogs from the stored plasmoid configuration if present.
+            // Note: cfg_debugLogs is declared as a bool property so typeof checks are unreliable
+            // for determining whether the host already provided a value. Check the stored
+            // configuration explicitly instead.
+            try {
+                if (plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs !== undefined) {
+                    cfg_debugLogs = !!plasmoid.configuration.debugLogs;
+                }
+            } catch (e) {
+                try { Utils.debugLog('warn', "ConfigAppearance: failed to read plasmoid.configuration.debugLogs:", e); } catch (ee) {}
+            }
             try { if (typeof cfg_ollamaTemperature !== 'number') cfg_ollamaTemperature = Number(plasmoid.configuration.ollamaTemperature || 0.7); } catch (e) {}
             try { if (typeof cfg_pin !== 'boolean') cfg_pin = !!plasmoid.configuration.pin; } catch (e) {}
             try { if (!cfg_selectedModel && plasmoid.configuration.selectedModel) cfg_selectedModel = plasmoid.configuration.selectedModel; } catch (e) {}
@@ -152,12 +172,53 @@ KCM.SimpleKCM {
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
 
-            // Use the KCM pattern: bind to cfg_debugLogs so the Apply button is enabled
-            checked: cfg_debugLogs
+            // Write user changes back into cfg_debugLogs so KCM detects the change
+            onCheckedChanged: {
+                cfg_debugLogs = checked;
+            }
+
+            Component.onCompleted: {
+                try {
+                        if (typeof cfg_debugLogs === 'boolean') {
+                            // Explicitly reference the checkbox id to avoid accidental global property writes
+                            try {
+                                if (typeof debugLogsCheckbox !== 'undefined' && debugLogsCheckbox !== null) {
+                                    debugLogsCheckbox.checked = !!cfg_debugLogs;
+                                }
+                            } catch (e) {}
+                            try { Utils.debugLog('info', 'ConfigAppearance: debugLogsCheckbox initialized checked ->', debugLogsCheckbox && debugLogsCheckbox.checked); } catch (e) {}
+                            try { Utils.debugLog('debug', 'ConfigAppearance: plasmoid.configuration.debugLogs ->', plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs); } catch (e) {}
+                        } else {
+                            try { Utils.debugLog('debug', 'ConfigAppearance: debugLogsCheckbox initialized but cfg_debugLogs not boolean ->', cfg_debugLogs); } catch (e) {}
+                        }
+                } catch (e) {
+                    try { Utils.debugLog('warn', 'ConfigAppearance: failed to initialize debugLogsCheckbox.checked in Component.onCompleted', e); } catch (ee) {}
+                }
+            }
+
+            // Defensive re-sync after a short delay to avoid a visual flicker caused by
+            // the configuration host populating properties after child controls are created.
+            Timer {
+                interval: 100
+                repeat: false
+                running: true
+                onTriggered: {
+                    try {
+                        if (typeof cfg_debugLogs === 'boolean') {
+                            try {
+                                if (typeof debugLogsCheckbox !== 'undefined' && debugLogsCheckbox !== null) {
+                                    debugLogsCheckbox.checked = !!cfg_debugLogs;
+                                }
+                            } catch (e) {}
+                        }
+                    } catch (e) {
+                        try { Utils.debugLog('warn', 'ConfigAppearance: Timer re-sync failed', e); } catch (ee) {}
+                    }
+                }
+            }
 
             // When applied by the KCM framework, the top-level plasmoid configuration system will set
-            // `cfg_debugLogs` on this component. We still need to persist the value into plasmoid.configuration
-            // when the user applies the KCM changes; SimpleKCM will do that by reading the cfg_* properties.
+            // `cfg_debugLogs` on this component. SimpleKCM will read cfg_* properties when Apply is clicked.
         }
     }
 }

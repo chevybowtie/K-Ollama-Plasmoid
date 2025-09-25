@@ -40,6 +40,55 @@ Before installing K-Ollama, ensure you have the following:
    kpackagetool6 -i .
    ```
 
+#### Install / Upgrade notes
+
+- If you get an error like:
+
+  Error: Installation of /path/to/repo failed: .../.local/share/kpackage/generic/K-Ollama-Plasmoid already exists
+
+  It means the package is already installed on your system. You have three safe options:
+
+  1. Upgrade the installed package in-place (recommended for development):
+
+     ```bash
+     # update the installed package from the current working tree
+     kpackagetool6 -u .
+     ```
+
+     This replaces files in the installed package with the files from the current directory and is non-destructive.
+
+  2. Remove then reinstall (clean install):
+
+     ```bash
+     # remove the installed package by name (use the pluginId from metadata.json)
+     kpackagetool6 -r K-Ollama-Plasmoid
+     kpackagetool6 -i .
+     ```
+
+  3. Manually remove the installed folder and install (last resort):
+
+     ```bash
+     rm -rf ~/.local/share/kpackage/generic/K-Ollama-Plasmoid
+     kpackagetool6 -i .
+     ```
+
+- After installing or upgrading, reload Plasma so the running shell sees the new files:
+
+  ```bash
+  # graceful reload
+  kquitapp5 plasmashell && kstart5 plasmashell
+
+  # or in a terminal session (may briefly flicker the UI)
+  plasmashell --replace &
+  ```
+
+- For quick development testing without switching your entire session, use `plasmoidviewer`:
+
+  ```bash
+  plasmoidviewer -a .
+  ```
+
+
 3. **Add the widget to your panel:**
    - Right-click on your KDE panel
    - Select "Add Widgets..."

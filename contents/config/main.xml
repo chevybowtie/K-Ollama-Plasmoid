@@ -54,5 +54,9 @@
       <label>Play typing sounds during AI responses</label>
       <default>false</default>
     </entry>
+    <entry name="debugLogs" type="Bool">
+      <label>Enable debug console logs</label>
+      <default>false</default>
+    </entry>
   </group>
 </kcfg>
