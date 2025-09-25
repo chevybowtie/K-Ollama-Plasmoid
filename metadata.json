@@ -17,7 +17,7 @@
         "Id": "K-Ollama-Plasmoid",
         "License": "LGPL-2.1+",
         "Name": "K-Ollama",
-        "Version": "2.0",
+        "Version": "1.0.0",
         "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
