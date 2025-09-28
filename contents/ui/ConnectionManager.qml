@@ -22,7 +22,7 @@ Item {
     property int connectedPollInterval: 30000
     property int disconnectedPollInterval: 5000
     property int timeoutMs: 3000         // ms before aborting a single request
-    property string endpoint: "/api/tags"
+    property string endpoint: "tags"
     property bool running: true
     // Optional server base URL (e.g. "http://127.0.0.1:11434"). If empty, falls back to default.
     property string serverBase: ""
@@ -71,8 +71,8 @@ Item {
     }
 
     function getUrl() {
-        // Utils.buildServerUrl returns base + endpoint (endpoint may include leading slash)
-        return Utils.buildServerUrl(getServerBase(), root.endpoint);
+        // Use Utils.getServerUrl for consistent API endpoint building
+        return Utils.getServerUrl(getServerBase(), root.endpoint);
     }
 
     function check() {

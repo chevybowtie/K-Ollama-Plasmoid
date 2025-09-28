@@ -19,21 +19,22 @@ import "../js/utils.js" as Utils
 PlasmoidItem {
     id: root
 
-    // Control popup behavior based on pin state
+    // 1. Layout properties
     hideOnWindowDeactivate: !Plasmoid.configuration.pin
 
+    // 2. Public API properties (for component reuse)
+    property string modelsComboboxCurrentValue: ''
+    property var modelsArray: []
+    property bool hasLocalModel: false
+
+    // 3. Internal state properties
     property string parentMessageId: ''
-    property string modelsComboboxCurrentValue: '';    
-    property var listModelController;
-    property var promptArray: [];
-    property var modelsArray: [];
-    // Store the last user-entered prompt for quick recall with Up-Arrow
-    property string lastUserMessage: '';
+    property var listModelController
+    property var promptArray: []
+    property string lastUserMessage: '' // Store the last user-entered prompt for quick recall with Up-Arrow
     property bool isLoading: false
-    property bool hasLocalModel: false;
-    property bool disableAutoScroll: false;
-    // Track the in-flight XMLHttpRequest so we can abort long-running responses
-    property var currentXhr: null;
+    property bool disableAutoScroll: false
+    property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
 
     // Completion sound effect for AI responses
     SoundEffect {
@@ -220,9 +221,17 @@ PlasmoidItem {
 
         xhr.onerror = function() {
             isLoading = false;
+            Utils.debugLog('error', 'Network error during chat request');
             try { root.currentXhr = null; } catch(e) {}
         };
 
+        xhr.ontimeout = function() {
+            isLoading = false;
+            Utils.debugLog('warn', 'Chat request timeout');
+            try { root.currentXhr = null; } catch(e) {}
+        };
+
+        xhr.timeout = 30000; // 30 seconds timeout
         xhr.send(data);
     }
 
@@ -288,6 +297,13 @@ PlasmoidItem {
             Utils.debugLog('error', 'Network error when fetching models from:', url);
         };
 
+        xhr.ontimeout = function() {
+            hasLocalModel = false;
+            try { connMgr.status = "disconnected"; } catch (e) { }
+            Utils.debugLog('warn', 'Timeout when fetching models from:', url);
+        };
+
+        xhr.timeout = 10000; // 10 seconds timeout for model fetching
         xhr.send();
     }
 
