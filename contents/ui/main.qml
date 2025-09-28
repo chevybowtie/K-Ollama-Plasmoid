@@ -147,6 +147,23 @@ PlasmoidItem {
         Utils.debugLog('debug', 'Request finished:', reason);
     }
 
+    // Global Escape shortcut: abort in-flight request and run the standard cleanup
+    Shortcut {
+        id: escAbortShortcut
+        sequences: [ StandardKey.Cancel ]    // Escape key
+        context: Qt.ApplicationShortcut      // works regardless of focus
+        onActivated: {
+            if (root.currentXhr) {
+                try {
+                    root.currentXhr.abort(); // will trigger xhr.onabort -> finishRequest(...)
+                } catch (e) {
+                    // If abort fails, still run cleanup
+                    finishRequest('aborted-by-esc-abort-failed');
+                }
+            }
+        }
+    }
+
     /**
      * Temperature configuration validation and conversion helper
      * Handles the null/undefined check pattern used throughout the component
@@ -974,7 +991,8 @@ PlasmoidItem {
 
                 ToolTip.delay: 1000
                 ToolTip.visible: hovered
-                ToolTip.text: root.translate("Stop")
+                // Show the Esc key alongside the translated label so users discover the shortcut
+                ToolTip.text: root.translate("Stop") + " (Esc)"
 
                 onClicked: {
                     if (root.currentXhr) {

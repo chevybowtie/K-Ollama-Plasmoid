@@ -229,7 +229,7 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests
 - [x] Temperature settings & message management  
 - [x] Debug logging & comprehensive UI tests
 - [x] Centralized request cleanup with finishRequest() helper
-- [ ] Esc-to-abort in flight conversation
+- [x] Esc-to-abort in flight conversation
 - [ ] allow a system prompt
     {
       "role": "system",
