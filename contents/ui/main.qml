@@ -35,7 +35,7 @@ PlasmoidItem {
     // Track the in-flight XMLHttpRequest so we can abort long-running responses
     property var currentXhr: null;
 
-    // Typing sound effect for AI responses
+    // Completion sound effect for AI responses
     SoundEffect {
         id: typingSound
         source: "assets/beep.wav"
@@ -168,11 +168,6 @@ PlasmoidItem {
 
             // Batch UI updates to reduce frequency
             if (text.length > 0) {
-                // Play typing sound if enabled and we have new content
-                if (Plasmoid.configuration.completionSound && newObjects.some(obj => obj.trim() !== '')) {
-                    typingSound.play();
-                }
-                
                 if (!disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
@@ -206,6 +201,11 @@ PlasmoidItem {
             isLoading = false;
             if (!assistantText || assistantText.length === 0) {
                 Utils.debugLog('debug', 'xhr.onload: assistantText missing for request at oldLength=', oldLength, 'listModel.count=', listModel.count);
+            } else {
+                // Play completion sound when AI response is fully complete
+                if (Plasmoid.configuration.completionSound) {
+                    typingSound.play();
+                }
             }
             promptArray.push({ "role": "assistant", "content": assistantText, "images": [] });
             // Clear currentXhr when complete
