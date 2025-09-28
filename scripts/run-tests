@@ -11,6 +11,41 @@ ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 CONTENTS_DIR="$ROOT_DIR/contents"
 TESTS_DIR="$ROOT_DIR/tests"
 
+# Validate all QML files in contents/ unless explicitly skipped
+if [[ "${SKIP_QML_LINT:-}" != "1" ]]; then
+  if [[ -n "${QMLLINT_BIN:-}" ]]; then
+    QML_LINTER="$QMLLINT_BIN"
+  elif [[ -x "/usr/lib/qt6/bin/qmllint" ]]; then
+    QML_LINTER="/usr/lib/qt6/bin/qmllint"
+  elif command -v qmllint >/dev/null 2>&1; then
+    QML_LINTER="$(command -v qmllint)"
+  else
+    echo "Error: qmllint not found. Set QMLLINT_BIN or install Qt6 (qt6-declarative)." >&2
+    echo "Set SKIP_QML_LINT=1 to bypass QML validation." >&2
+    exit 2
+  fi
+
+  # Collect QML files using null-delimited output to handle spaces safely
+  mapfile -d '' -t QML_FILES < <(find "$CONTENTS_DIR" -type f -name '*.qml' -print0)
+
+  if (( ${#QML_FILES[@]} > 0 )); then
+    echo "Running qmllint on ${#QML_FILES[@]} QML files..."
+    QML_LINT_ARGS=()
+  QML_LINTER_HELP="$("$QML_LINTER" --help 2>&1 || true)"
+    if [[ "$QML_LINTER_HELP" == *"--strict"* ]]; then
+      QML_LINT_ARGS+=("--strict")
+    else
+      echo "qmllint: --strict flag not supported; running without it."
+    fi
+
+    "$QML_LINTER" "${QML_LINT_ARGS[@]}" "${QML_FILES[@]}"
+  else
+    echo "No QML files found under $CONTENTS_DIR; skipping validation."
+  fi
+else
+  echo "Skipping QML validation (SKIP_QML_LINT=1)."
+fi
+
 # Locate qmltestrunner
 if [[ -n "${QMLTEST_RUNNER:-}" ]]; then
   RUNNER="$QMLTEST_RUNNER"
