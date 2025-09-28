@@ -223,14 +223,13 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests
 - [x] Temperature settings & message management  
 - [x] Debug logging & comprehensive UI tests
 - [ ] System prompts & request timeouts
-- [ ] Retry/backoff for failures
-- [ ] Esc-to-abort & desktop widget support
+- [ ] Esc-to-abort in flight conversation
 - [ ] allow a system prompt
 - [ ] add a request timeout
 - [ ] add retry/backoff for transient failures
 - [x] UI tests
 - [ ] add a single cleanup helper finishRequest(reason) that clears root.currentXhr, sets isLoading=false, and logs the reason. Use it in onload, onerror, onabort.
-- [ ] add support for rendering markdown or provide a system prompt so LLS doesn't present markdown in its reply
+- [ ] add support for rendering markdown or provide a system prompt so LLM doesn't present markdown in its reply
 
 ## Contributors
 

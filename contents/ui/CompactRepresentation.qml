@@ -9,14 +9,15 @@ Loader {
     property var models;
 
     TapHandler {
+        id: tapHandler
         property bool wasExpanded: false
 
         acceptedButtons: Qt.LeftButton
 
         onPressedChanged: if (pressed) {
-            wasExpanded = root.expanded;
+            tapHandler.wasExpanded = root.expanded;
         }
-        onTapped: root.expanded = !wasExpanded
+        onTapped: root.expanded = !tapHandler.wasExpanded
     }
 
     Kirigami.Icon {

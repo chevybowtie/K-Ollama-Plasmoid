@@ -16,6 +16,7 @@ import "../js/utils.js" as Utils
 import org.kde.plasma.core as PlasmaCore
 
 KCM.SimpleKCM {
+    id: root
     property string cfg_icon: plasmoid.configuration.icon || ""
     property alias cfg_useFilledIcon: useFilledIcon.checked
     property alias cfg_useOutlinedIcon: useOutlinedIcon.checked
@@ -28,7 +29,7 @@ KCM.SimpleKCM {
     property bool cfg_debugLogs: false
     property bool cfg_debugLogsDefault: false
     onCfg_debugLogsChanged: {
-        try { Utils.debugLog('info', 'ConfigAppearance: cfg_debugLogs changed ->', cfg_debugLogs); } catch (e) {}
+        try { Utils.debugLog('info', 'ConfigAppearance: cfg_debugLogs changed ->', root.cfg_debugLogs); } catch (e) {}
     }
     
     // Ignore server-related properties that get assigned to all config pages
@@ -77,7 +78,7 @@ KCM.SimpleKCM {
             // configuration explicitly instead.
             try {
                 if (plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs !== undefined) {
-                    cfg_debugLogs = !!plasmoid.configuration.debugLogs;
+                    root.cfg_debugLogs = !!plasmoid.configuration.debugLogs;
                 }
             } catch (e) {
                 try { Utils.debugLog('warn', "ConfigAppearance: failed to read plasmoid.configuration.debugLogs:", e); } catch (ee) {}
@@ -174,22 +175,22 @@ KCM.SimpleKCM {
 
             // Write user changes back into cfg_debugLogs so KCM detects the change
             onCheckedChanged: {
-                cfg_debugLogs = checked;
+                root.cfg_debugLogs = checked;
             }
 
             Component.onCompleted: {
                 try {
-                        if (typeof cfg_debugLogs === 'boolean') {
+                        if (typeof root.cfg_debugLogs === 'boolean') {
                             // Explicitly reference the checkbox id to avoid accidental global property writes
                             try {
                                 if (typeof debugLogsCheckbox !== 'undefined' && debugLogsCheckbox !== null) {
-                                    debugLogsCheckbox.checked = !!cfg_debugLogs;
+                                    debugLogsCheckbox.checked = !!root.cfg_debugLogs;
                                 }
                             } catch (e) {}
                             try { Utils.debugLog('info', 'ConfigAppearance: debugLogsCheckbox initialized checked ->', debugLogsCheckbox && debugLogsCheckbox.checked); } catch (e) {}
                             try { Utils.debugLog('debug', 'ConfigAppearance: plasmoid.configuration.debugLogs ->', plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs); } catch (e) {}
                         } else {
-                            try { Utils.debugLog('debug', 'ConfigAppearance: debugLogsCheckbox initialized but cfg_debugLogs not boolean ->', cfg_debugLogs); } catch (e) {}
+                            try { Utils.debugLog('debug', 'ConfigAppearance: debugLogsCheckbox initialized but cfg_debugLogs not boolean ->', root.cfg_debugLogs); } catch (e) {}
                         }
                 } catch (e) {
                     try { Utils.debugLog('warn', 'ConfigAppearance: failed to initialize debugLogsCheckbox.checked in Component.onCompleted', e); } catch (ee) {}
@@ -204,10 +205,10 @@ KCM.SimpleKCM {
                 running: true
                 onTriggered: {
                     try {
-                        if (typeof cfg_debugLogs === 'boolean') {
+                        if (typeof root.cfg_debugLogs === 'boolean') {
                             try {
                                 if (typeof debugLogsCheckbox !== 'undefined' && debugLogsCheckbox !== null) {
-                                    debugLogsCheckbox.checked = !!cfg_debugLogs;
+                                    debugLogsCheckbox.checked = !!root.cfg_debugLogs;
                                 }
                             } catch (e) {}
                         }

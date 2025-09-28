@@ -55,7 +55,7 @@ PlasmoidItem {
         target: Plasmoid.configuration
         function onOllamaServerUrlChanged() {
             Utils.debugLog('info', "Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
-            hasLocalModel = false;
+            root.hasLocalModel = false;
             modelsArray = [];
             modelsComboboxCurrentValue = '';
             getModels();
@@ -74,7 +74,7 @@ PlasmoidItem {
 
     // Auto-focus textarea when plasmoid becomes visible
     onVisibleChanged: {
-        if (visible && hasLocalModel && !isLoading && messageField) {
+        if (visible && root.hasLocalModel && !root.isLoading && messageField) {
             messageField.forceActiveFocus();
         }
     }
@@ -91,7 +91,7 @@ PlasmoidItem {
     function request(messageField, listModel, scrollView, prompt) {
         // Save last user message (trimmed) so Up-Arrow can recall it later
         if (prompt && prompt.toString().trim().length > 0) {
-            lastUserMessage = prompt.toString();
+            root.lastUserMessage = prompt.toString();
         }
 
         messageField.text = '';
@@ -103,9 +103,9 @@ PlasmoidItem {
 
         promptArray.push({ "role": "user", "content": prompt, "images": [] });
 
-        isLoading = true;
+        root.isLoading = true;
 
-        if (!disableAutoScroll && scrollView.ScrollBar) {
+        if (!root.disableAutoScroll && scrollView.ScrollBar) {
             scrollView.ScrollBar.vertical.position = 1;
         }
 
@@ -160,7 +160,7 @@ PlasmoidItem {
                 
                 try {
                     const parsedObject = JSON.parse(object);
-                    text = text + parsedObject?.message?.content;
+                    text = text + (parsedObject && parsedObject.message && parsedObject.message.content ? parsedObject.message.content : '');
                 } catch (e) {
                     Utils.debugLog('warn', 'Failed to parse JSON object:', object, 'Error:', e.message);
                     return; // Skip malformed JSON
@@ -169,7 +169,7 @@ PlasmoidItem {
 
             // Batch UI updates to reduce frequency
             if (text.length > 0) {
-                if (!disableAutoScroll && scrollView.ScrollBar) {
+                if (!root.disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
 
@@ -199,7 +199,7 @@ PlasmoidItem {
                 // defensive: leave assistantText empty
             }
 
-            isLoading = false;
+            root.isLoading = false;
             if (!assistantText || assistantText.length === 0) {
                 Utils.debugLog('debug', 'xhr.onload: assistantText missing for request at oldLength=', oldLength, 'listModel.count=', listModel.count);
             } else {
@@ -215,18 +215,18 @@ PlasmoidItem {
 
         xhr.onabort = function() {
             // Aborted by user
-            isLoading = false;
+            root.isLoading = false;
             try { root.currentXhr = null; } catch(e) {}
         };
 
         xhr.onerror = function() {
-            isLoading = false;
+            root.isLoading = false;
             Utils.debugLog('error', 'Network error during chat request');
             try { root.currentXhr = null; } catch(e) {}
         };
 
         xhr.ontimeout = function() {
-            isLoading = false;
+            root.isLoading = false;
             Utils.debugLog('warn', 'Chat request timeout');
             try { root.currentXhr = null; } catch(e) {}
         };
@@ -237,7 +237,7 @@ PlasmoidItem {
 
     function deleteMessage(index) {
         // Remove from visual list model
-        listModelController.remove(index);
+        root.listModelController.remove(index);
         
         // Remove from prompt array (conversation history)
         if (index < promptArray.length) {
@@ -262,7 +262,7 @@ PlasmoidItem {
                     const models = objects.map(object => object.model);
 
                     if (models.length) {
-                        hasLocalModel = true;
+                        root.hasLocalModel = true;
                         // mark connection manager as connected when we successfully retrieved models
                         try { connMgr.status = "connected"; } catch (e) { }
 
@@ -276,15 +276,15 @@ PlasmoidItem {
                             Plasmoid.configuration.selectedModel = models[0];
                         }
 
-                        modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
+                        root.modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
                         Utils.debugLog('info', "Successfully loaded", models.length, "models");
                     } else {
-                        hasLocalModel = false;
+                        root.hasLocalModel = false;
                         try { connMgr.status = "disconnected"; } catch (e) { }
                         Utils.debugLog('info', "No models found on server");
                     }
                 } else {
-                    hasLocalModel = false;
+                    root.hasLocalModel = false;
                     try { connMgr.status = "disconnected"; } catch (e) { }
                     Utils.debugLog('error', 'Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
@@ -292,13 +292,13 @@ PlasmoidItem {
         };
 
         xhr.onerror = function() {
-            hasLocalModel = false;
+            root.hasLocalModel = false;
             try { connMgr.status = "disconnected"; } catch (e) { }
             Utils.debugLog('error', 'Network error when fetching models from:', url);
         };
 
         xhr.ontimeout = function() {
-            hasLocalModel = false;
+            root.hasLocalModel = false;
             try { connMgr.status = "disconnected"; } catch (e) { }
             Utils.debugLog('warn', 'Timeout when fetching models from:', url);
         };
@@ -309,14 +309,14 @@ PlasmoidItem {
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: i18n("Keep Open")
+            text: root.i18n("Keep Open")
             icon.name: "window-pin"
             checkable: true
             checked: Plasmoid.configuration.pin
             onTriggered: Plasmoid.configuration.pin = checked
         },
         PlasmaCore.Action {
-            text: i18n("Clear chat")
+            text: root.i18n("Clear chat")
             icon.name: "edit-clear"
             onTriggered: {
                 listModelController.clear();
@@ -324,7 +324,7 @@ PlasmoidItem {
             }
         },
         PlasmaCore.Action {
-            text: i18n("Disable auto scroll")
+            text: root.i18n("Disable auto scroll")
             icon.name: "transform-move-vertical"
             checkable: true
             checked: disableAutoScroll
@@ -355,7 +355,7 @@ PlasmoidItem {
             width: parent.width
 
             contentItem: RowLayout {
-                visible: hasLocalModel
+                visible: root.hasLocalModel
                 Layout.fillWidth: true
 
                 PlasmaComponents.Button {
@@ -366,7 +366,7 @@ PlasmoidItem {
                     icon.name: "window-pin"
 
                     display: PlasmaComponents.AbstractButton.IconOnly
-                    text: i18n("Keep Open")
+                    text: root.i18n("Keep Open")
 
                     PlasmaComponents.ToolTip.text: text
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
@@ -375,26 +375,26 @@ PlasmoidItem {
 
                 PlasmaComponents.ComboBox {
                     id: modelsCombobox
-                    enabled: hasLocalModel && !isLoading
-                    hoverEnabled: hasLocalModel && !isLoading
+                    enabled: root.hasLocalModel && !root.isLoading
+                    hoverEnabled: root.hasLocalModel && !root.isLoading
 
                     Layout.fillWidth: true
 
-                    model: modelsArray.map(model => model.text)
+                    model: root.modelsArray.map(model => model.text)
 
                     onActivated: {
-                        modelsComboboxCurrentValue = modelsArray.find(model => model.text === modelsCombobox.currentText).value;
+                        modelsComboboxCurrentValue = root.modelsArray.find(model => model.text === modelsCombobox.currentText).value;
                         // Save selected model to configuration
                         Plasmoid.configuration.selectedModel = modelsComboboxCurrentValue;
-                        listModelController.clear();
+                        root.listModelController.clear();
                     }
 
                     // Update the current selection when models array changes
                     onModelChanged: {
-                        if (modelsArray.length > 0) {
+                        if (root.modelsArray.length > 0) {
                             if (modelsComboboxCurrentValue) {
                                 // Find and set the index of the saved/current model
-                                const modelIndex = modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
+                                const modelIndex = root.modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
                                 if (modelIndex >= 0) {
                                     currentIndex = modelIndex;
                                 } else {
@@ -412,12 +412,12 @@ PlasmoidItem {
                         }
                     }
 
-                    Component.onCompleted: getModels()
+                    Component.onCompleted: root.getModels()
                 }
 
                 PlasmaComponents.Button {
                     icon.name: "edit-clear-symbolic"
-                    text: i18n("Clear chat")
+                    text: root.i18n("Clear chat")
                     display: PlasmaComponents.AbstractButton.IconOnly
                     enabled: hasLocalModel && !isLoading
                     hoverEnabled: hasLocalModel && !isLoading
@@ -434,7 +434,7 @@ PlasmoidItem {
 
                 PlasmaComponents.Button {
                     icon.name: "configure"
-                    text: i18n("Configure")
+                    text: root.i18n("Configure")
                     display: PlasmaComponents.AbstractButton.IconOnly
                     enabled: true
                     hoverEnabled: true
@@ -482,7 +482,7 @@ PlasmoidItem {
                         opacity: connMgr.connected ? 1.0 : (connMgr.status === "connecting" ? 0.95 : 0.8)
                     }
 
-                    PlasmaComponents.ToolTip.text: connMgr.connected ? i18n("Connected to Ollama") : (connMgr.status === "connecting" ? i18n("Connecting...") : i18n("Disconnected. Click to retry."))
+                    PlasmaComponents.ToolTip.text: connMgr.connected ? root.i18n("Connected to Ollama") : (connMgr.status === "connecting" ? root.i18n("Connecting...") : root.i18n("Disconnected. Click to retry."))
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     // Use containsMouse for a more robust hover check
                     PlasmaComponents.ToolTip.visible: hoverArea && hoverArea.containsMouse
@@ -509,7 +509,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: hasLocalModel ? i18n("I am ready...") : i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
+                    text: root.hasLocalModel ? root.i18n("I am ready...") : root.i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -551,7 +551,7 @@ PlasmoidItem {
 
                             PlasmaComponents.Button {
                                 icon.name: "edit-copy-symbolic"
-                                text: i18n("Copy")
+                                text: root.i18n("Copy")
                                 display: PlasmaComponents.AbstractButton.IconOnly
                                 
                                 onClicked: {
@@ -567,7 +567,7 @@ PlasmoidItem {
 
                             PlasmaComponents.Button {
                                 icon.name: "edit-delete-symbolic"
-                                text: i18n("Delete")
+                                text: root.i18n("Delete")
                                 display: PlasmaComponents.AbstractButton.IconOnly
                                 
                                 onClicked: {
@@ -602,7 +602,7 @@ PlasmoidItem {
 
                 enabled: hasLocalModel && !isLoading
                 hoverEnabled: hasLocalModel && !isLoading
-                placeholderText: i18n("Type here what you want to ask...")
+                placeholderText: root.i18n("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 
                 Component.onCompleted: {
@@ -627,9 +627,9 @@ PlasmoidItem {
                         var caretPos = messageField.cursorPosition;
                         var isAtFirstLine = Utils.caretIsOnFirstLine(messageField.text, caretPos);
 
-                        if (isAtFirstLine && lastUserMessage && lastUserMessage.length > 0) {
+                        if (isAtFirstLine && root.lastUserMessage && root.lastUserMessage.length > 0) {
                             // Repopulate the field and place caret at end
-                            messageField.text = lastUserMessage;
+                            messageField.text = root.lastUserMessage;
                             messageField.cursorPosition = messageField.text.length;
                             event.accepted = true;
                             return;
@@ -652,7 +652,7 @@ PlasmoidItem {
                             } else {
                                 // Enter: send message
                                 if (messageField.text.trim().length > 0) {
-                                    request(messageField, listModel, scrollView, messageField.text);
+                                    root.request(messageField, listModel, scrollView, messageField.text);
                                     event.accepted = true;
                                 } else {
                                     event.accepted = false;
@@ -679,7 +679,7 @@ PlasmoidItem {
                 BusyIndicator {
                     id: indicator
                     anchors.centerIn: parent
-                    running: isLoading
+                    running: root.isLoading
                 }
             }
 
@@ -694,7 +694,7 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
 
-                text: i18n("Send")
+                text: root.i18n("Send")
                 hoverEnabled: hasLocalModel && !isLoading
                 enabled: hasLocalModel && !isLoading
                 visible: hasLocalModel
@@ -720,7 +720,7 @@ PlasmoidItem {
 
                 ToolTip.delay: 1000
                 ToolTip.visible: hovered
-                ToolTip.text: i18n("Stop")
+                ToolTip.text: root.i18n("Stop")
 
                 onClicked: {
                     if (root.currentXhr) {
@@ -736,10 +736,10 @@ PlasmoidItem {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             
-            text: i18n("Refresh models list")
-            visible: !hasLocalModel
+            text: root.i18n("Refresh models list")
+            visible: !root.hasLocalModel
             
-            onClicked: getModels()
+            onClicked: root.getModels()
         }
     }
 }

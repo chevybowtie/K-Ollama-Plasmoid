@@ -57,9 +57,9 @@ Item {
                 try { root._currentXhr.abort(); } catch(e) {}
                 root._currentXhr = null;
             }
-            status = "disconnected";
-            error = "timeout";
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = "timeout";
+            root.lastChecked = new Date().toISOString();
         }
     }
 
@@ -77,8 +77,8 @@ Item {
 
     function check() {
     Utils.debugLog('debug', "ConnectionManager: check() starting. endpoint=", root.endpoint, "serverBase=", root.serverBase);
-        status = "connecting";
-        error = "";
+        root.status = "connecting";
+        root.error = "";
 
         var url = getUrl();
     Utils.debugLog('debug', "ConnectionManager: checking URL ->", url);
@@ -96,14 +96,14 @@ Item {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 requestTimer.stop();
                 root._currentXhr = null;
-                lastChecked = new Date().toISOString();
+                root.lastChecked = new Date().toISOString();
                     Utils.debugLog('info', "ConnectionManager: check DONE, status=", xhr.status);
                 if (xhr.status === 200) {
-                    status = "connected";
-                    error = "";
+                    root.status = "connected";
+                    root.error = "";
                 } else {
-                    status = "disconnected";
-                    error = "HTTP " + xhr.status;
+                    root.status = "disconnected";
+                    root.error = "HTTP " + xhr.status;
                 }
             }
         };
@@ -112,9 +112,9 @@ Item {
             requestTimer.stop();
             root._currentXhr = null;
             Utils.debugLog('warn', "ConnectionManager: network error when checking URL");
-            status = "disconnected";
-            error = 'network error';
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = 'network error';
+            root.lastChecked = new Date().toISOString();
         };
 
         try {
@@ -122,9 +122,9 @@ Item {
         } catch (e) {
             requestTimer.stop();
             root._currentXhr = null;
-            status = "disconnected";
-            error = e.toString();
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = e.toString();
+            root.lastChecked = new Date().toISOString();
         }
     }
 

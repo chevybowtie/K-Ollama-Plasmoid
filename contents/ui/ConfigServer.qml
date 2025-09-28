@@ -11,6 +11,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
+    id: root
     property alias cfg_ollamaServerUrl: serverUrlField.text
     
     // Ignore appearance-related properties that get assigned to all config pages
@@ -46,16 +47,16 @@ KCM.SimpleKCM {
     Kirigami.FormLayout {
         Component.onCompleted: {
             // If the KCM host didn't populate cfg_ollamaServerUrl, initialize it from the current plasmoid configuration
-            if (!cfg_ollamaServerUrl || cfg_ollamaServerUrl.length === 0) {
+            if (!root.cfg_ollamaServerUrl || root.cfg_ollamaServerUrl.length === 0) {
                 try {
-                    cfg_ollamaServerUrl = plasmoid.configuration.ollamaServerUrl || '';
+                    root.cfg_ollamaServerUrl = plasmoid.configuration.ollamaServerUrl || '';
                 } catch (e) {}
             }
 
             // Also initialize cfg_ollamaTemperature if not set
-            if (typeof cfg_ollamaTemperature !== 'number' || isNaN(cfg_ollamaTemperature)) {
+            if (typeof root.cfg_ollamaTemperature !== 'number' || isNaN(root.cfg_ollamaTemperature)) {
                 try {
-                    cfg_ollamaTemperature = (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null) ? plasmoid.configuration.ollamaTemperature : cfg_ollamaTemperature;
+                    root.cfg_ollamaTemperature = (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null) ? plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature;
                 } catch (e) {}
             }
         }
@@ -66,8 +67,8 @@ KCM.SimpleKCM {
             placeholderText: i18nc("@info:placeholder", "http://127.0.0.1:11434")
             
             // Bind to cfg_ollamaServerUrl (KCM pattern). Initialize from existing configuration on completed.
-            text: cfg_ollamaServerUrl
-            onTextChanged: cfg_ollamaServerUrl = text
+            text: root.cfg_ollamaServerUrl
+            onTextChanged: root.cfg_ollamaServerUrl = text
 
             QQC2.ToolTip.text: i18nc("@info:tooltip", "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN IP for remote server")
             QQC2.ToolTip.visible: hovered
@@ -98,9 +99,9 @@ KCM.SimpleKCM {
                     to: 2.0
                     stepSize: 0.01
                     // initialize from cfg_ollamaTemperature (which the KCM host may populate). If absent, fall back to existing plasmoid configuration.
-                    value: (typeof cfg_ollamaTemperature === 'number') ? cfg_ollamaTemperature : (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null ? plasmoid.configuration.ollamaTemperature : cfg_ollamaTemperature)
+                    value: (typeof root.cfg_ollamaTemperature === 'number') ? root.cfg_ollamaTemperature : (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null ? plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature)
                     onValueChanged: {
-                        cfg_ollamaTemperature = value
+                        root.cfg_ollamaTemperature = value
                     }
                     Layout.fillWidth: true
                 }
