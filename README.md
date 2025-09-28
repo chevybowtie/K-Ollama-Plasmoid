@@ -10,7 +10,7 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 - **Persistent Settings** - Remembers your configuration across sessions  
 - **Configurable Input** - Enter-to-send or Ctrl+Enter-to-send modes
 - **Markdown Rendering** - Optional markdown formatting in AI responses (disabled by default)
-- **Pin Widget** - Keep chat open while working
+- **Pin Widget** - Keep chat open while working (panel mode only)
 - **Multiple Themes** - Adaptive, filled, outlined icons (light/dark)
 - **Remote Servers** - Connect to Ollama on other machines
 - **Copy Messages** - One-click copying of AI responses
@@ -111,7 +111,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 ### Automatic Settings
 - **Model Persistence**: Your selected model is automatically remembered
-- **Pin State**: Widget remembers if you prefer it pinned open
+- **Pin State**: Widget remembers if you prefer it pinned open (panel mode only)
 
 ## Usage
 
@@ -123,7 +123,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
    - Default: Enter adds new line, Ctrl+Enter sends message  
    - Modern: Enter sends message, Ctrl+Enter adds new line
 
-4. **Pin the widget** (optional) using the pin button to keep it open while working
+4. **Pin the widget** (optional, panel mode only) using the pin button to keep it open while working
 
 5. **Enable markdown rendering** (optional) in Appearance & Behavior settings to see formatted AI responses with bold text, code blocks, lists, etc.
 
@@ -240,6 +240,7 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests
 - [x] UI tests
 - [x] add support for rendering markdown
 - [x] add option to disable scroll in desktop mode
+- [ ] explore mic input
 
 ## Contributors
 

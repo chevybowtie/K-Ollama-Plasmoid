@@ -23,7 +23,11 @@ PlasmoidItem {
     id: root
 
     // 1. Layout properties
-    hideOnWindowDeactivate: !Plasmoid.configuration.pin
+    // Desktop widgets stay visible by default; panel applets use pin setting
+    hideOnWindowDeactivate: (Plasmoid.location === PlasmaCore.Types.LeftEdge || 
+                             Plasmoid.location === PlasmaCore.Types.RightEdge || 
+                             Plasmoid.location === PlasmaCore.Types.TopEdge || 
+                             Plasmoid.location === PlasmaCore.Types.BottomEdge) && !Plasmoid.configuration.pin
 
     // 2. Public API properties (for component reuse)
     property string modelsComboboxCurrentValue: ''
@@ -553,6 +557,13 @@ PlasmoidItem {
                     checked: Plasmoid.configuration.pin
                     onToggled: Plasmoid.configuration.pin = checked
                     icon.name: "window-pin"
+                    
+                    // Only show pin button in panel mode where it's functional
+                    // Desktop widgets stay visible by default and don't need pinning
+                    visible: Plasmoid.location === PlasmaCore.Types.LeftEdge || 
+                             Plasmoid.location === PlasmaCore.Types.RightEdge || 
+                             Plasmoid.location === PlasmaCore.Types.TopEdge || 
+                             Plasmoid.location === PlasmaCore.Types.BottomEdge
 
                     display: PlasmaComponents.AbstractButton.IconOnly
                     text: root.translate("Keep Open")
@@ -622,22 +633,6 @@ PlasmoidItem {
                 }
 
                 PlasmaComponents.Button {
-                    icon.name: "configure"
-                    text: root.translate("Configure")
-                    display: PlasmaComponents.AbstractButton.IconOnly
-                    enabled: true
-                    hoverEnabled: true
-
-                    onClicked: {
-                        Plasmoid.internalAction("configure").trigger();
-                    }
-
-                    PlasmaComponents.ToolTip.text: text
-                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                    PlasmaComponents.ToolTip.visible: hovered
-                }
-
-                PlasmaComponents.Button {
                     icon.name: "transform-move-vertical"
                     display: PlasmaComponents.AbstractButton.IconOnly
                     checkable: true
@@ -652,6 +647,22 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.text: root.disableAutoScroll ? 
                         root.translate("Enable auto scroll") : 
                         root.translate("Disable auto scroll")
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
+                PlasmaComponents.Button {
+                    icon.name: "configure"
+                    text: root.translate("Configure")
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    enabled: true
+                    hoverEnabled: true
+
+                    onClicked: {
+                        Plasmoid.internalAction("configure").trigger();
+                    }
+
+                    PlasmaComponents.ToolTip.text: text
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     PlasmaComponents.ToolTip.visible: hovered
                 }
