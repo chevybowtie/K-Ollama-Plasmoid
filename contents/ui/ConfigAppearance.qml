@@ -3,20 +3,25 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
+// KDE modules
 import org.kde.iconthemes as KIconThemes
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
-import org.kde.kcmutils as KCM
-import "../js/utils.js" as Utils
-
 import org.kde.plasma.core as PlasmaCore
 
-KCM.SimpleKCM {
+// Local imports
+import "../js/utils.js" as Utils
+
+ConfigDefaults {
     id: root
+    
+    // === ACTIVE CONFIGURATION PROPERTIES ===
+    // Icon configuration aliases - bound to radio button states
     property string cfg_icon: plasmoid.configuration.icon || ""
     property alias cfg_useFilledIcon: useFilledIcon.checked
     property alias cfg_useOutlinedIcon: useOutlinedIcon.checked
@@ -24,34 +29,22 @@ KCM.SimpleKCM {
     property alias cfg_useFilledDarkIcon: useFilledDarkIcon.checked
     property alias cfg_useOutlinedLightIcon: useOutlinedLightIcon.checked
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
+    
+    // Behavior configuration aliases - bound to checkbox states  
     property alias cfg_enterToSend: enterToSendCheckbox.checked
     property alias cfg_completionSound: completionSoundCheckbox.checked
+    
+    // Advanced feature configurations - managed manually for complex sync
     property bool cfg_debugLogs: false
-    property bool cfg_debugLogsDefault: false
+    property bool cfg_enableMarkdown: false
+    
+    // Configuration change handlers - log changes for debugging
     onCfg_debugLogsChanged: {
         try { Utils.debugLog('info', 'ConfigAppearance: cfg_debugLogs changed ->', root.cfg_debugLogs); } catch (e) {}
     }
-    
-    // Ignore server-related properties that get assigned to all config pages
-    property string cfg_ollamaServerUrl: ""
-    property real cfg_ollamaTemperature: 0.7
-    property bool cfg_pin: false
-    property string cfg_selectedModel: ""
-    
-    // Ignore "Default" variants that the configuration system tries to assign
-    property bool cfg_useFilledIconDefault: false
-    property bool cfg_useOutlinedIconDefault: false
-    property bool cfg_useFilledLightIconDefault: false
-    property bool cfg_useFilledDarkIconDefault: false
-    property bool cfg_useOutlinedLightIconDefault: false
-    property bool cfg_useOutlinedDarkIconDefault: false
-    property string cfg_ollamaServerUrlDefault: ""
-    property real cfg_ollamaTemperatureDefault: 0.0
-    property bool cfg_enterToSendDefault: false
-    property bool cfg_completionSoundDefault: false
-    property string cfg_iconDefault: ""
-    property bool cfg_pinDefault: false
-    property string cfg_selectedModelDefault: ""
+    onCfg_enableMarkdownChanged: {
+        try { Utils.debugLog('info', 'ConfigAppearance: cfg_enableMarkdown changed ->', root.cfg_enableMarkdown); } catch (e) {}
+    }
 
     Kirigami.FormLayout {
         Component.onCompleted: {
@@ -161,6 +154,65 @@ KCM.SimpleKCM {
             QQC2.ToolTip.text: i18nc("@info:tooltip", "Play a slight beep sound effect after the response is completed.")
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: 1000
+        }
+
+        QQC2.CheckBox {
+            id: enableMarkdownCheckbox
+            
+            Kirigami.FormData.label: i18nc("@label:checkbox", "Text rendering:")
+            text: i18nc("@option:check", "Enable markdown rendering in AI responses")
+            
+            QQC2.ToolTip.text: i18nc("@info:tooltip", "Render markdown formatting (bold, italics, code blocks, etc.) in AI responses. When disabled, responses are shown as plain text.")
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: 1000
+            
+            // Write user changes back into cfg_enableMarkdown so KCM detects the change
+            onCheckedChanged: {
+                root.cfg_enableMarkdown = checked;
+            }
+
+            Component.onCompleted: {
+                try {
+                        if (typeof root.cfg_enableMarkdown === 'boolean') {
+                            // Explicitly reference the checkbox id to avoid accidental global property writes
+                            try {
+                                if (typeof enableMarkdownCheckbox !== 'undefined' && enableMarkdownCheckbox !== null) {
+                                    enableMarkdownCheckbox.checked = !!root.cfg_enableMarkdown;
+                                }
+                            } catch (e) {}
+                            try { Utils.debugLog('info', 'ConfigAppearance: enableMarkdownCheckbox initialized checked ->', enableMarkdownCheckbox && enableMarkdownCheckbox.checked); } catch (e) {}
+                            try { Utils.debugLog('debug', 'ConfigAppearance: plasmoid.configuration.enableMarkdown ->', plasmoid && plasmoid.configuration && plasmoid.configuration.enableMarkdown); } catch (e) {}
+                        } else {
+                            try { Utils.debugLog('debug', 'ConfigAppearance: enableMarkdownCheckbox initialized but cfg_enableMarkdown not boolean ->', root.cfg_enableMarkdown); } catch (e) {}
+                        }
+                } catch (e) {
+                    try { Utils.debugLog('warn', 'ConfigAppearance: failed to initialize enableMarkdownCheckbox.checked in Component.onCompleted', e); } catch (ee) {}
+                }
+            }
+
+            // Defensive re-sync after a short delay to avoid a visual flicker caused by
+            // the configuration host populating properties after child controls are created.
+            Timer {
+                interval: 100
+                repeat: false
+                running: true
+                onTriggered: {
+                    try {
+                        if (typeof root.cfg_enableMarkdown === 'boolean') {
+                            try {
+                                if (typeof enableMarkdownCheckbox !== 'undefined' && enableMarkdownCheckbox !== null) {
+                                    enableMarkdownCheckbox.checked = !!root.cfg_enableMarkdown;
+                                }
+                            } catch (e) {}
+                        }
+                    } catch (e) {
+                        try { Utils.debugLog('warn', 'ConfigAppearance: enableMarkdownCheckbox Timer re-sync failed', e); } catch (ee) {}
+                    }
+                }
+            }
+
+            // When applied by the KCM framework, the top-level plasmoid configuration system will set
+            // `cfg_enableMarkdown` on this component. SimpleKCM will read cfg_* properties when Apply is clicked.
         }
 
         QQC2.CheckBox {

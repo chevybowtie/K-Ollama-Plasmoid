@@ -3,7 +3,10 @@
   Polls the configured server's /api/tags endpoint on a timer and exposes
   `connected`, `status`, and `error` properties for UI binding.
 */
+// Qt modules
 import QtQuick 2.15
+
+// Local imports
 import "../js/utils.js" as Utils
 
 Item {
@@ -132,5 +135,25 @@ Item {
         // start polling immediately
     Utils.debugLog('debug', "ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
         if (root.running) pollTimer.start();
+    }
+
+    Component.onDestruction: {
+        // Stop all timers
+        if (pollTimer.running) {
+            pollTimer.stop();
+        }
+        if (requestTimer.running) {
+            requestTimer.stop();
+        }
+        
+        // Abort any in-flight request
+        if (root._currentXhr) {
+            try { 
+                root._currentXhr.abort(); 
+            } catch(e) {}
+            root._currentXhr = null;
+        }
+        
+        Utils.debugLog('debug', 'ConnectionManager: Component destroyed and cleaned up');
     }
 }

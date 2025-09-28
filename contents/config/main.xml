@@ -58,5 +58,15 @@
       <label>Enable debug console logs</label>
       <default>false</default>
     </entry>
+    <entry name="enableMarkdown" type="Bool">
+      <label>Enable markdown rendering in AI responses</label>
+      <default>false</default>
+    </entry>
+    <entry name="ollamaTemperature" type="Double">
+      <label>AI model temperature for response creativity</label>
+      <default>0.7</default>
+      <min>0.0</min>
+      <max>2.0</max>
+    </entry>
   </group>
 </kcfg>

@@ -3,46 +3,20 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
+// KDE modules
 import org.kde.kirigami as Kirigami
-import org.kde.kcmutils as KCM
 
-KCM.SimpleKCM {
+ConfigDefaults {
     id: root
+    
+    // This page's specific configuration bindings
     property alias cfg_ollamaServerUrl: serverUrlField.text
-    
-    // Ignore appearance-related properties that get assigned to all config pages
-    property bool cfg_useFilledIcon: false
-    property bool cfg_useOutlinedIcon: false
-    property bool cfg_useFilledLightIcon: false
-    property bool cfg_useFilledDarkIcon: false
-    property bool cfg_useOutlinedLightIcon: false
-    property bool cfg_useOutlinedDarkIcon: false
-    property string cfg_icon: ""
-    property bool cfg_pin: false
-    property string cfg_selectedModel: ""
-    property bool cfg_enterToSend: false
-    property bool cfg_completionSound: false
-    
-    // Ignore "Default" variants that the configuration system tries to assign
-    property bool cfg_useFilledIconDefault: false
-    property bool cfg_useOutlinedIconDefault: false
-    property bool cfg_useFilledLightIconDefault: false
-    property bool cfg_useFilledDarkIconDefault: false
-    property bool cfg_useOutlinedLightIconDefault: false
-    property bool cfg_useOutlinedDarkIconDefault: false
-    property string cfg_ollamaServerUrlDefault: ""
-    property bool cfg_enterToSendDefault: false
-    property bool cfg_completionSoundDefault: false
-    property string cfg_iconDefault: ""
-    property bool cfg_pinDefault: false
-    property string cfg_selectedModelDefault: ""
-        // Ollama generation temperature (0.0 - 2.0)
-        property real cfg_ollamaTemperature: 0.7
-        property real cfg_ollamaTemperatureDefault: 0.7
+    // Temperature property inherited from base, just use default value of 0.7
 
     Kirigami.FormLayout {
         Component.onCompleted: {

@@ -4,16 +4,19 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
+import QtCore
+import QtMultimedia
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia
+
+// KDE modules
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
-import QtCore
 import "../js/utils.js" as Utils
 
 PlasmoidItem {
@@ -26,6 +29,11 @@ PlasmoidItem {
     property string modelsComboboxCurrentValue: ''
     property var modelsArray: []
     property bool hasLocalModel: false
+    
+    // Translation function for delegate access
+    function translate(text) {
+        return i18n(text);
+    }
 
     // 3. Internal state properties
     property string parentMessageId: ''
@@ -35,6 +43,10 @@ PlasmoidItem {
     property bool isLoading: false
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
+    
+    // 4. Computed state properties for UI binding
+    readonly property bool isReady: hasLocalModel && !isLoading  // UI elements that need both conditions
+    readonly property bool canSend: isReady && currentXhr === null  // Additional condition for send button
 
     // Completion sound effect for AI responses
     SoundEffect {
@@ -50,31 +62,41 @@ PlasmoidItem {
         property real ollamaTemperature: 0.7
     }
 
-    // Watch for server URL configuration changes
+    // Configuration Change Handlers
+    // These Connections objects listen for configuration changes and update the UI state accordingly
+    
+    // Monitor server URL changes and reset model state when the server changes
     Connections {
         target: Plasmoid.configuration
         function onOllamaServerUrlChanged() {
             Utils.debugLog('info', "Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
+            // Reset model-related state since we're connecting to a different server
+            // This prevents stale model data and forces a fresh model list fetch
             root.hasLocalModel = false;
             modelsArray = [];
             modelsComboboxCurrentValue = '';
-            getModels();
+            getModels(); // Fetch available models from the new server
         }
     }
 
-    // Persist temperature changes from the settings UI into local Settings
+    // Synchronize temperature changes from KCM configuration to persistent settings
+    // The KCM system provides ollamaTemperature as a configuration property,
+    // but we need to persist it in Settings for runtime use across sessions
     Connections {
         target: Plasmoid.configuration
         function onOllamaTemperatureChanged() {
-            if (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null) {
-                appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
-            }
+            // Use helper function for consistent temperature validation
+            appSettings.ollamaTemperature = getValidTemperature(Plasmoid.configuration.ollamaTemperature);
         }
     }
 
-    // Auto-focus textarea when plasmoid becomes visible
+    // UI Focus Management
+    // Automatically focus the message input field when the plasmoid becomes visible
+    // This provides immediate keyboard access for user interaction without requiring a click
     onVisibleChanged: {
         if (visible && root.hasLocalModel && !root.isLoading && messageField) {
+            // Only auto-focus if we have a model available and aren't in a loading state
+            // messageField is defined in the CompactRepresentation component
             messageField.forceActiveFocus();
         }
     }
@@ -88,147 +110,265 @@ PlasmoidItem {
         return Utils.parseTextToComboBox(text);
     }
 
+    /**
+     * Centralized connection manager status update helper
+     * Handles safe status updates with error protection
+     * @param status - The status to set ("connected" | "disconnected" | "connecting")
+     */
+    function setConnectionStatus(status) {
+        try { 
+            connMgr.status = status; 
+        } catch (e) { 
+            Utils.debugLog('warn', 'Failed to update connection status:', e.message);
+        }
+    }
+
+    /**
+     * Centralized request cleanup helper function
+     * Handles consistent cleanup of XHR state, loading indicators, and logging
+     * @param reason - A descriptive reason for the request completion (e.g., "completed", "error", "aborted", "timeout")
+     */
+    function finishRequest(reason) {
+        // State cleanup
+        root.isLoading = false;
+        
+        // XHR cleanup with error protection
+        try { 
+            root.currentXhr = null; 
+        } catch(e) {
+            Utils.debugLog('warn', 'Error clearing currentXhr during finishRequest:', e.message);
+        }
+        
+        // Consistent logging for debugging and monitoring
+        Utils.debugLog('debug', 'Request finished:', reason);
+    }
+
+    /**
+     * Temperature configuration validation and conversion helper
+     * Handles the null/undefined check pattern used throughout the component
+     * @param configValue - The raw configuration value to validate
+     * @param fallback - The fallback value to use if configValue is invalid
+     * @returns A valid number for temperature
+     */
+    function getValidTemperature(configValue, fallback = 0.7) {
+        return (configValue !== undefined && configValue !== null) ? Number(configValue) : fallback;
+    }
+
+    /**
+     * Core chat request function that handles the complete conversation flow
+     * @param messageField - The input text field to clear after sending
+     * @param listModel - The conversation history model to append messages to
+     * @param scrollView - The scroll view containing the conversation for auto-scroll behavior
+     * @param prompt - The user's message text to send to Ollama
+     */
     function request(messageField, listModel, scrollView, prompt) {
-        // Save last user message (trimmed) so Up-Arrow can recall it later
+        // Message State Management
+        // Store the last user message for Up-Arrow recall functionality
+        // Only store non-empty messages to prevent recalling empty strings
         if (prompt && prompt.toString().trim().length > 0) {
             root.lastUserMessage = prompt.toString();
         }
 
+        // Clear the input field immediately to provide visual feedback that the message was sent
         messageField.text = '';
 
+        // Update Conversation History
+        // Add user message to the visual conversation list (listModel)
         listModel.append({
             "name": "User",
-            "number": prompt
+            "number": prompt // 'number' is legacy naming for message content
         });
 
+        // Add user message to the API conversation array for context preservation
+        // Ollama requires the full conversation history for context-aware responses
         promptArray.push({ "role": "user", "content": prompt, "images": [] });
 
+        // UI State Updates
+        // Set loading state to show progress indicators and disable input
         root.isLoading = true;
 
+        // Auto-scroll to bottom to show the new message and prepare for response
+        // Only scroll if auto-scroll hasn't been disabled by user interaction
         if (!root.disableAutoScroll && scrollView.ScrollBar) {
-            scrollView.ScrollBar.vertical.position = 1;
+            scrollView.ScrollBar.vertical.position = 1; // 1 = bottom
         }
 
+        // HTTP Request Preparation
+        // Track initial conversation length for streaming response insertion
         const oldLength = listModel.count;
+        
+        // Build Ollama API endpoint URL
         const url = getServerUrl('chat');
+        
+        // Construct request payload with conversation context and model parameters
         const data = JSON.stringify({
-            "model": modelsComboboxCurrentValue,
-            "keep_alive": "5m",
+            "model": modelsComboboxCurrentValue, // Currently selected AI model
+            "keep_alive": "5m", // Keep model loaded in memory for 5 minutes after request
             "options": {
-                "temperature": Number(Plasmoid.configuration.ollamaTemperature || 0.7)
+                // Use helper function for consistent temperature handling
+                "temperature": getValidTemperature(Plasmoid.configuration.ollamaTemperature)
             },
-            "messages": promptArray
+            "messages": promptArray // Full conversation history for context
         });
         
-    let xhr = new XMLHttpRequest();
-    // Record current XHR so UI can abort it via "Stop generating"
-    root.currentXhr = xhr;
+        // XMLHttpRequest Setup
+        // Create new request instance for this conversation turn
+        let xhr = new XMLHttpRequest();
+        // Store reference globally so "Stop generating" button can abort mid-stream
+        root.currentXhr = xhr;
 
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         
-        let lastProcessedLength = 0; // Track how much we've already processed
+        // Streaming Response Processing Setup
+        // Track processed content length to avoid reprocessing the same data
+        // Ollama streams responses as multiple JSON objects separated by newlines
+        let lastProcessedLength = 0;
         
+        /**
+         * Real-time streaming response handler
+         * Processes incoming data incrementally as it arrives from Ollama
+         * This enables live text generation display instead of waiting for complete responses
+         */
         xhr.onreadystatechange = function() {
-            // Only process during loading states to avoid unnecessary calls
+            // State Filtering: Only process during active data transfer or completion
+            // LOADING = data is actively being received, DONE = transfer complete
             if (xhr.readyState !== XMLHttpRequest.LOADING && xhr.readyState !== XMLHttpRequest.DONE) {
                 return;
             }
             
+            // Incremental Processing: Only handle new data since last processing cycle
             const responseText = xhr.responseText;
             if (responseText.length <= lastProcessedLength) {
-                return; // No new data to process
+                return; // No new data to process - avoid redundant work
             }
             
-            // Only process the new part of the response
+            // Extract only the new portion of the response stream
+            // This prevents reprocessing already-handled content on each event
             const newText = responseText.substring(lastProcessedLength);
-            const newObjects = newText.split('\n');
+            const newObjects = newText.split('\n'); // Ollama sends one JSON per line
             
-            // Update our tracking
+            // Update processing checkpoint for next iteration
             lastProcessedLength = responseText.length;
             
+            // Response Accumulation: Build complete text from streaming chunks
             let text = '';
             
-            // Get existing text if we already have a response
+            // Retrieve existing accumulated text if this is a continuation update
+            // Assistant responses are appended at position oldLength in the conversation
             if (listModel.count > oldLength) {
                 const lastValue = listModel.get(oldLength);
-                text = lastValue.number;
+                text = lastValue.number; // Start with previously accumulated content
             }
 
+            // JSON Stream Processing: Parse each line as a separate JSON object
+            // Ollama's streaming format sends one JSON object per line, containing message chunks
             newObjects.forEach((object, index) => {
-                if (object.trim() === '') return; // Skip empty lines
+                if (object.trim() === '') return; // Skip empty lines between JSON objects
                 
                 try {
+                    // Parse JSON chunk and extract content from nested message structure
                     const parsedObject = JSON.parse(object);
-                    text = text + (parsedObject && parsedObject.message && parsedObject.message.content ? parsedObject.message.content : '');
+                    // Ollama format: { "message": { "content": "text chunk" }, ... }
+                    const messageContent = parsedObject && parsedObject.message && parsedObject.message.content ? parsedObject.message.content : '';
+                    text = text + messageContent; // Accumulate chunks into complete response
                 } catch (e) {
+                    // Log malformed JSON but continue processing - don't break the stream
                     Utils.debugLog('warn', 'Failed to parse JSON object:', object, 'Error:', e.message);
-                    return; // Skip malformed JSON
+                    return; // Skip this malformed chunk and continue with others
                 }
             });
 
-            // Batch UI updates to reduce frequency
+            // UI Update Strategy: Batch updates to minimize rendering overhead
+            // Only update the UI when we have actual content to display
             if (text.length > 0) {
+                // Auto-scroll Management: Keep the latest content visible during generation
+                // Position calculation keeps the scroll at the bottom without overshooting
                 if (!root.disableAutoScroll && scrollView.ScrollBar) {
                     scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
                 }
 
+                // Conversation Model Update: Create new entry or update existing one
                 if (listModel.count === oldLength) {
+                    // First chunk: Create new assistant message entry
                     listModel.append({
                         "name": "Assistant",
-                        "number": text
+                        "number": text // 'number' property holds the message content
                     });
                 } else {
+                    // Subsequent chunks: Update the existing assistant message with accumulated text
                     const lastValue = listModel.get(oldLength);
-                    lastValue.number = text;
+                    lastValue.number = text; // Replace content with updated accumulated text
                 }
             }
         };
 
+        /**
+         * Request Completion Handler
+         * Executed when the streaming response is fully complete
+         * Handles final cleanup and conversation context management
+         */
         xhr.onload = function() {
-            // Safely read the assistant's final text if it was appended during streaming.
+            // Final Response Text Extraction
+            // Safely retrieve the complete assistant response from the conversation model
             var assistantText = "";
             try {
                 if (listModel.count > oldLength) {
                     var lastValue = listModel.get(oldLength);
                     if (lastValue && typeof lastValue.number !== 'undefined' && lastValue.number !== null) {
-                        assistantText = lastValue.number;
+                        assistantText = lastValue.number; // Complete accumulated response text
                     }
                 }
             } catch (e) {
-                // defensive: leave assistantText empty
+                // Defensive programming: Handle potential model access errors gracefully
+                // Leave assistantText empty rather than crash the application
+                Utils.debugLog('warn', 'Error extracting assistant text:', e.message);
             }
 
-            root.isLoading = false;
+            // Response Validation and Feedback
             if (!assistantText || assistantText.length === 0) {
+                // Log missing response for debugging - this shouldn't happen in normal operation
                 Utils.debugLog('debug', 'xhr.onload: assistantText missing for request at oldLength=', oldLength, 'listModel.count=', listModel.count);
+                finishRequest('completed-empty-response');
             } else {
-                // Play completion sound when AI response is fully complete
+                // Audio Feedback: Play completion sound when configured by user
+                // Provides audible notification that the AI response is complete
                 if (Plasmoid.configuration.completionSound) {
                     typingSound.play();
                 }
+                finishRequest('completed-successfully');
             }
+            
+            // Conversation Context Preservation
+            // Add the assistant's response to the conversation array for future context
+            // This maintains conversation history for subsequent requests
             promptArray.push({ "role": "assistant", "content": assistantText, "images": [] });
-            // Clear currentXhr when complete
-            try { root.currentXhr = null; } catch(e) {}
         };
 
+        /**
+         * Request Abort Handler
+         * Triggered when user clicks "Stop generating" during an active response
+         */
         xhr.onabort = function() {
-            // Aborted by user
-            root.isLoading = false;
-            try { root.currentXhr = null; } catch(e) {}
+            finishRequest('aborted-by-user');
         };
 
+        /**
+         * Network Error Handler
+         * Handles connection failures, server errors, and other network issues
+         */
         xhr.onerror = function() {
-            root.isLoading = false;
             Utils.debugLog('error', 'Network error during chat request');
-            try { root.currentXhr = null; } catch(e) {}
+            finishRequest('network-error');
         };
 
+        /**
+         * Request Timeout Handler
+         * Triggered if the server doesn't respond within the configured timeout period
+         */
         xhr.ontimeout = function() {
-            root.isLoading = false;
             Utils.debugLog('warn', 'Chat request timeout');
-            try { root.currentXhr = null; } catch(e) {}
+            finishRequest('timeout');
         };
 
         xhr.timeout = 30000; // 30 seconds timeout
@@ -245,47 +385,70 @@ PlasmoidItem {
         }
     }
 
+    /**
+     * Model Discovery and State Management Function
+     * Fetches available AI models from the Ollama server and updates UI state
+     * This function is critical for establishing whether the plasmoid is functional
+     */
     function getModels() {
-        const url = getServerUrl('tags');
-    Utils.debugLog('debug', "Fetching models from:", url);
+        // API Endpoint Construction
+        const url = getServerUrl('tags'); // Ollama's /api/tags endpoint lists available models
+        Utils.debugLog('debug', "Fetching models from:", url);
 
+        // HTTP Request Setup
         let xhr = new XMLHttpRequest();
-
         xhr.open('GET', url);
         xhr.setRequestHeader('Content-Type', 'application/json');
 
+        /**
+         * Model Fetch Response Handler
+         * Processes the server response and updates the entire UI state based on availability
+         */
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
+                    // Response Processing: Extract model names from Ollama API format
+                    // Ollama returns: { "models": [{ "name": "model1", "model": "model1", ... }, ...] }
                     const objects = JSON.parse(xhr.responseText).models;
-                    
-                    const models = objects.map(object => object.model);
+                    const models = objects.map(object => object.model); // Extract just the model names
 
                     if (models.length) {
+                        // Success Path: Models available, enable UI functionality
                         root.hasLocalModel = true;
-                        // mark connection manager as connected when we successfully retrieved models
-                        try { connMgr.status = "connected"; } catch (e) { }
+                        
+                        // Connection State Synchronization: Update connection manager status
+                        // This provides consistent status across UI components
+                        setConnectionStatus("connected");
 
-                        // Try to restore the previously selected model, otherwise use first model
+                        // Model Selection Logic: Restore previous selection or use default
+                        // Maintains user preference across application restarts
                         const savedModel = Plasmoid.configuration.selectedModel;
                         if (savedModel && models.includes(savedModel)) {
+                            // Restore previously selected model if it still exists on server
                             modelsComboboxCurrentValue = savedModel;
                         } else {
+                            // Fall back to first available model and persist this choice
                             modelsComboboxCurrentValue = models[0];
-                            // Save the default selection
                             Plasmoid.configuration.selectedModel = models[0];
                         }
 
-                        root.modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
+                        // UI Model Array Construction: Create display-friendly model list
+                        // Maps internal model names to human-readable text for the ComboBox
+                        root.modelsArray = models.map(model => ({ 
+                            text: parseTextToComboBox(model), // Format for display
+                            value: model // Keep original name for API calls
+                        }));
                         Utils.debugLog('info', "Successfully loaded", models.length, "models");
                     } else {
+                        // Empty Response: Server has no models installed
                         root.hasLocalModel = false;
-                        try { connMgr.status = "disconnected"; } catch (e) { }
+                        setConnectionStatus("disconnected");
                         Utils.debugLog('info', "No models found on server");
                     }
                 } else {
+                    // Error Response: Server unreachable or API error
                     root.hasLocalModel = false;
-                    try { connMgr.status = "disconnected"; } catch (e) { }
+                    setConnectionStatus("disconnected");
                     Utils.debugLog('error', 'Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
@@ -293,13 +456,13 @@ PlasmoidItem {
 
         xhr.onerror = function() {
             root.hasLocalModel = false;
-            try { connMgr.status = "disconnected"; } catch (e) { }
+            setConnectionStatus("disconnected");
             Utils.debugLog('error', 'Network error when fetching models from:', url);
         };
 
         xhr.ontimeout = function() {
             root.hasLocalModel = false;
-            try { connMgr.status = "disconnected"; } catch (e) { }
+            setConnectionStatus("disconnected");
             Utils.debugLog('warn', 'Timeout when fetching models from:', url);
         };
 
@@ -309,14 +472,14 @@ PlasmoidItem {
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: root.i18n("Keep Open")
+            text: root.translate("Keep Open")
             icon.name: "window-pin"
             checkable: true
             checked: Plasmoid.configuration.pin
             onTriggered: Plasmoid.configuration.pin = checked
         },
         PlasmaCore.Action {
-            text: root.i18n("Clear chat")
+            text: root.translate("Clear chat")
             icon.name: "edit-clear"
             onTriggered: {
                 listModelController.clear();
@@ -324,7 +487,7 @@ PlasmoidItem {
             }
         },
         PlasmaCore.Action {
-            text: root.i18n("Disable auto scroll")
+            text: root.translate("Disable auto scroll")
             icon.name: "transform-move-vertical"
             checkable: true
             checked: disableAutoScroll
@@ -334,15 +497,41 @@ PlasmoidItem {
 
     compactRepresentation: CompactRepresentation {}
 
+    // Connection status manager - placed at top level for accessibility
+    ConnectionManager {
+        id: connMgr
+        interval: 5000
+        timeoutMs: 2500
+        serverBase: Plasmoid.configuration.ollamaServerUrl || ''
+    }
+
     Component.onCompleted: {
-        // Ensure temperature is initialized from persisted settings if the plasmoid config doesn't provide it
+        // Initialize temperature with bidirectional sync using helper function
+        const configTemp = getValidTemperature(Plasmoid.configuration.ollamaTemperature, appSettings.ollamaTemperature);
         if (Plasmoid.configuration.ollamaTemperature === undefined || Plasmoid.configuration.ollamaTemperature === null) {
-            Plasmoid.configuration.ollamaTemperature = appSettings.ollamaTemperature;
-        } else {
-            appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
+            Plasmoid.configuration.ollamaTemperature = configTemp;
         }
+        appSettings.ollamaTemperature = configTemp;
 
         getModels();
+    }
+
+    Component.onDestruction: {
+        // Abort any in-flight requests
+        if (currentXhr) {
+            try { 
+                currentXhr.abort(); 
+            } catch(e) {
+                Utils.debugLog('debug', 'Error aborting XHR during destruction:', e.message);
+            }
+            currentXhr = null;
+        }
+        
+        // Clear arrays to prevent memory leaks
+        promptArray = [];
+        modelsArray = [];
+        
+        Utils.debugLog('debug', 'Main plasmoid component destroyed and cleaned up');
     }
 
     fullRepresentation: ColumnLayout {
@@ -366,7 +555,7 @@ PlasmoidItem {
                     icon.name: "window-pin"
 
                     display: PlasmaComponents.AbstractButton.IconOnly
-                    text: root.i18n("Keep Open")
+                    text: root.translate("Keep Open")
 
                     PlasmaComponents.ToolTip.text: text
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
@@ -375,8 +564,8 @@ PlasmoidItem {
 
                 PlasmaComponents.ComboBox {
                     id: modelsCombobox
-                    enabled: root.hasLocalModel && !root.isLoading
-                    hoverEnabled: root.hasLocalModel && !root.isLoading
+                    enabled: root.isReady
+                    hoverEnabled: root.isReady
 
                     Layout.fillWidth: true
 
@@ -417,10 +606,10 @@ PlasmoidItem {
 
                 PlasmaComponents.Button {
                     icon.name: "edit-clear-symbolic"
-                    text: root.i18n("Clear chat")
+                    text: root.translate("Clear chat")
                     display: PlasmaComponents.AbstractButton.IconOnly
-                    enabled: hasLocalModel && !isLoading
-                    hoverEnabled: hasLocalModel && !isLoading
+                    enabled: root.isReady
+                    hoverEnabled: root.isReady
 
                     onClicked: {
                         listModelController.clear();
@@ -434,7 +623,7 @@ PlasmoidItem {
 
                 PlasmaComponents.Button {
                     icon.name: "configure"
-                    text: root.i18n("Configure")
+                    text: root.translate("Configure")
                     display: PlasmaComponents.AbstractButton.IconOnly
                     enabled: true
                     hoverEnabled: true
@@ -446,14 +635,6 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.text: text
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     PlasmaComponents.ToolTip.visible: hovered
-                }
-
-                // Connection status indicator
-                ConnectionManager {
-                    id: connMgr
-                    interval: 5000
-                    timeoutMs: 2500
-                    serverBase: Plasmoid.configuration.ollamaServerUrl || ''
                 }
 
                 // Connection indicator: colored dot only
@@ -482,7 +663,7 @@ PlasmoidItem {
                         opacity: connMgr.connected ? 1.0 : (connMgr.status === "connecting" ? 0.95 : 0.8)
                     }
 
-                    PlasmaComponents.ToolTip.text: connMgr.connected ? root.i18n("Connected to Ollama") : (connMgr.status === "connecting" ? root.i18n("Connecting...") : root.i18n("Disconnected. Click to retry."))
+                    PlasmaComponents.ToolTip.text: connMgr.connected ? root.translate("Connected to Ollama") : (connMgr.status === "connecting" ? root.translate("Connecting...") : root.translate("Disconnected. Click to retry."))
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     // Use containsMouse for a more robust hover check
                     PlasmaComponents.ToolTip.visible: hoverArea && hoverArea.containsMouse
@@ -509,7 +690,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: root.hasLocalModel ? root.i18n("I am ready...") : root.i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
+                    text: root.hasLocalModel ? root.translate("I am ready...") : root.translate("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -524,21 +705,62 @@ PlasmoidItem {
                     Layout.fillWidth: true
 
                     contentItem: Item {
-                        implicitHeight: textMessage.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
+                        implicitHeight: textMessageLoader.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
-                        TextEdit {
-                            id: textMessage
+                        /**
+                         * Dynamic Component Loading System for Message Rendering
+                         * Switches between plain text and markdown rendering based on user configuration
+                         * This architecture allows runtime switching without restart
+                         */
+                        Loader {
+                            id: textMessageLoader
                             
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
                             anchors.margins: 8
-
-                            readOnly: true
-                            wrapMode: Text.WordWrap
-                            text: number
-                            color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                            selectByMouse: true
+                            
+                            // Height calculation delegation to the loaded component
+                            // This ensures proper layout regardless of which component is active
+                            readonly property real implicitHeight: textMessageLoader.item ? textMessageLoader.item.implicitHeight : 0
+                            
+                            // Dynamic Component Selection: Load appropriate renderer based on markdown setting
+                            // Configuration changes trigger automatic component reloading
+                            sourceComponent: Plasmoid.configuration.enableMarkdown ? markdownComponent : plainTextComponent
+                            
+                            Component {
+                                id: plainTextComponent
+                                TextEdit {
+                                    id: textMessage
+                                    readOnly: true
+                                    wrapMode: Text.WordWrap
+                                    text: number
+                                    color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                    selectByMouse: true
+                                    
+                                    function selectAll() { textMessage.selectAll() }
+                                    function copy() { textMessage.copy() }
+                                    function deselect() { textMessage.deselect() }
+                                }
+                            }
+                            
+                            Component {
+                                id: markdownComponent
+                                TextArea {
+                                    id: markdownTextArea
+                                    readOnly: true
+                                    wrapMode: TextArea.Wrap
+                                    text: number
+                                    textFormat: TextArea.MarkdownText
+                                    color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                    selectByMouse: true
+                                    background: null
+                                    
+                                    function selectAll() { markdownTextArea.selectAll() }
+                                    function copy() { markdownTextArea.copy() }
+                                    function deselect() { markdownTextArea.deselect() }
+                                }
+                            }
                         }
 
                         RowLayout {
@@ -551,13 +773,15 @@ PlasmoidItem {
 
                             PlasmaComponents.Button {
                                 icon.name: "edit-copy-symbolic"
-                                text: root.i18n("Copy")
+                                text: root.translate("Copy")
                                 display: PlasmaComponents.AbstractButton.IconOnly
                                 
                                 onClicked: {
-                                    textMessage.selectAll();
-                                    textMessage.copy();
-                                    textMessage.deselect();
+                                    if (textMessageLoader.item) {
+                                        textMessageLoader.item.selectAll();
+                                        textMessageLoader.item.copy();
+                                        textMessageLoader.item.deselect();
+                                    }
                                 }
 
                                 PlasmaComponents.ToolTip.text: text
@@ -567,7 +791,7 @@ PlasmoidItem {
 
                             PlasmaComponents.Button {
                                 icon.name: "edit-delete-symbolic"
-                                text: root.i18n("Delete")
+                                text: root.translate("Delete")
                                 display: PlasmaComponents.AbstractButton.IconOnly
                                 
                                 onClicked: {
@@ -592,7 +816,7 @@ PlasmoidItem {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
             clip: true
-            visible: hasLocalModel
+            visible: root.hasLocalModel
 
             TextArea {
                 id: messageField
@@ -600,9 +824,9 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                enabled: hasLocalModel && !isLoading
-                hoverEnabled: hasLocalModel && !isLoading
-                placeholderText: root.i18n("Type here what you want to ask...")
+                enabled: root.isReady
+                hoverEnabled: root.isReady
+                placeholderText: root.translate("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 
                 Component.onCompleted: {
@@ -694,10 +918,10 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
 
-                text: root.i18n("Send")
-                hoverEnabled: hasLocalModel && !isLoading
-                enabled: hasLocalModel && !isLoading
-                visible: hasLocalModel
+                text: root.translate("Send")
+                hoverEnabled: root.isReady
+                enabled: root.isReady
+                visible: root.hasLocalModel
 
                 ToolTip.delay: 1000
                 ToolTip.visible: hovered
@@ -715,19 +939,25 @@ PlasmoidItem {
                 Layout.preferredWidth: implicitWidth
 
                 icon.name: "media-playback-stop"
-                visible: hasLocalModel
-                enabled: hasLocalModel && isLoading && root.currentXhr !== null
+                visible: root.hasLocalModel
+                enabled: root.hasLocalModel && root.isLoading && root.currentXhr !== null
 
                 ToolTip.delay: 1000
                 ToolTip.visible: hovered
-                ToolTip.text: root.i18n("Stop")
+                ToolTip.text: root.translate("Stop")
 
                 onClicked: {
                     if (root.currentXhr) {
-                        try { root.currentXhr.abort(); } catch (e) {}
-                        root.currentXhr = null;
+                        try { 
+                            root.currentXhr.abort(); // This will trigger xhr.onabort which calls finishRequest()
+                        } catch (e) {
+                            // If abort fails, still clean up manually
+                            finishRequest('stop-button-abort-failed');
+                        }
+                    } else {
+                        // No XHR but still in loading state - clean up anyway
+                        finishRequest('stop-button-no-xhr');
                     }
-                    isLoading = false;
                 }
             }
         }
@@ -736,7 +966,7 @@ PlasmoidItem {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             
-            text: root.i18n("Refresh models list")
+            text: root.translate("Refresh models list")
             visible: !root.hasLocalModel
             
             onClicked: root.getModels()

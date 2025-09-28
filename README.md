@@ -9,6 +9,7 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 - **Multi-Model Support** - Switch between all your Ollama models
 - **Persistent Settings** - Remembers your configuration across sessions  
 - **Configurable Input** - Enter-to-send or Ctrl+Enter-to-send modes
+- **Markdown Rendering** - Optional markdown formatting in AI responses (disabled by default)
 - **Pin Widget** - Keep chat open while working
 - **Multiple Themes** - Adaptive, filled, outlined icons (light/dark)
 - **Remote Servers** - Connect to Ollama on other machines
@@ -100,6 +101,9 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - **Input Behavior**: Configure how Enter key works:
   - **Modern Mode**: Enter sends message, Ctrl+Enter adds new line 
   - **Classic Mode**: Enter adds new line, Ctrl+Enter sends message (default)
+- **Text Rendering**: Enable markdown formatting in AI responses:
+  - **Disabled** (default): Responses shown as plain text
+  - **Enabled**: Supports bold, italics, code blocks, lists, headers, and other markdown formatting
 
 ### Server Tab
 - **Ollama Server URL**: Set your server location (default: `http://127.0.0.1:11434`)
@@ -121,9 +125,11 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 4. **Pin the widget** (optional) using the pin button to keep it open while working
 
-5. **Start chatting** with your AI models! The input field is automatically focused and ready for typing
+5. **Enable markdown rendering** (optional) in Appearance & Behavior settings to see formatted AI responses with bold text, code blocks, lists, etc.
 
-6. **Copy responses** using the copy button that appears when hovering over messages
+6. **Start chatting** with your AI models! The input field is automatically focused and ready for typing
+
+7. **Copy responses** using the copy button that appears when hovering over messages
 
 ## Troubleshooting
 
@@ -222,14 +228,17 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests
 - [x] Stop generating button & connection status
 - [x] Temperature settings & message management  
 - [x] Debug logging & comprehensive UI tests
-- [ ] System prompts & request timeouts
+- [x] Centralized request cleanup with finishRequest() helper
 - [ ] Esc-to-abort in flight conversation
 - [ ] allow a system prompt
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that answers questions in plain English."
+    }
 - [ ] add a request timeout
 - [ ] add retry/backoff for transient failures
 - [x] UI tests
-- [ ] add a single cleanup helper finishRequest(reason) that clears root.currentXhr, sets isLoading=false, and logs the reason. Use it in onload, onerror, onabort.
-- [ ] add support for rendering markdown or provide a system prompt so LLM doesn't present markdown in its reply
+- [x] add support for rendering markdown
 
 ## Contributors
 
