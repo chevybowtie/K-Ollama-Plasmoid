@@ -416,6 +416,22 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.visible: hovered
                 }
 
+                PlasmaComponents.Button {
+                    icon.name: "configure"
+                    text: i18n("Configure")
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    enabled: true
+                    hoverEnabled: true
+
+                    onClicked: {
+                        Plasmoid.internalAction("configure").trigger();
+                    }
+
+                    PlasmaComponents.ToolTip.text: text
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
                 // Connection status indicator
                 ConnectionManager {
                     id: connMgr
