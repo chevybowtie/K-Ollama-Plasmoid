@@ -30,12 +30,75 @@ if [[ "${SKIP_QML_LINT:-}" != "1" ]]; then
 
   if (( ${#QML_FILES[@]} > 0 )); then
     echo "Running qmllint on ${#QML_FILES[@]} QML files..."
+
     QML_LINT_ARGS=()
-  QML_LINTER_HELP="$("$QML_LINTER" --help 2>&1 || true)"
+    QML_LINTER_HELP="$("$QML_LINTER" --help 2>&1 || true)"
     if [[ "$QML_LINTER_HELP" == *"--strict"* ]]; then
       QML_LINT_ARGS+=("--strict")
     else
       echo "qmllint: --strict flag not supported; running without it."
+    fi
+
+    QML_LINTER_VERSION="$("$QML_LINTER" --version 2>/dev/null || true)"
+    QML_LINTER_MAJOR=""
+  if [[ "$QML_LINTER_VERSION" =~ ([0-9]+)\. ]]; then
+      QML_LINTER_MAJOR="${BASH_REMATCH[1]}"
+    fi
+
+    declare -a _QMLDIR_CANDIDATES=("$CONTENTS_DIR" "$CONTENTS_DIR/ui")
+    if [[ -n "${QML_IMPORT_PATH:-}" ]]; then
+      IFS=':' read -r -a _IMPORT_PATHS <<< "${QML_IMPORT_PATH}"
+      _QMLDIR_CANDIDATES+=("${_IMPORT_PATHS[@]}")
+    fi
+    if [[ -n "${QML2_IMPORT_PATH:-}" ]]; then
+      IFS=':' read -r -a _IMPORT_PATHS2 <<< "${QML2_IMPORT_PATH}"
+      _QMLDIR_CANDIDATES+=("${_IMPORT_PATHS2[@]}")
+    fi
+    if [[ -n "${QML_LINT_EXTRA_QMLDIRS:-}" ]]; then
+      IFS=':' read -r -a _EXTRA_QMLDIRS <<< "${QML_LINT_EXTRA_QMLDIRS}"
+      _QMLDIR_CANDIDATES+=("${_EXTRA_QMLDIRS[@]}")
+    fi
+
+    QT_QML_DIR=""
+    if [[ "$QML_LINTER_MAJOR" == "6" ]]; then
+      if command -v qtpaths6 >/dev/null 2>&1; then
+        QT_QML_DIR="$(qtpaths6 --qt-query QT_INSTALL_QML 2>/dev/null || true)"
+      fi
+      _QMLDIR_CANDIDATES+=(
+        "/usr/lib/qt6/qml"
+        "/usr/lib/x86_64-linux-gnu/qt6/qml"
+        "/usr/lib64/qt6/qml"
+      )
+    else
+      if command -v qtpaths >/dev/null 2>&1; then
+        QT_QML_DIR="$(qtpaths --qt-query QT_INSTALL_QML 2>/dev/null || true)"
+      fi
+      _QMLDIR_CANDIDATES+=(
+        "/usr/lib/qt5/qml"
+        "/usr/lib/x86_64-linux-gnu/qt5/qml"
+        "/usr/lib64/qt5/qml"
+      )
+    fi
+    if [[ -n "${QT_QML_DIR:-}" ]]; then
+      _QMLDIR_CANDIDATES+=("$QT_QML_DIR")
+    fi
+
+    declare -A _QMLDIR_SEEN=()
+    for _dir in "${_QMLDIR_CANDIDATES[@]}"; do
+      if [[ -n "${_dir:-}" && -d "${_dir}" && -z "${_QMLDIR_SEEN[$_dir]:-}" ]]; then
+        _QMLDIR_SEEN[$_dir]=1
+        QML_LINT_ARGS+=("--qmldirs" "${_dir}")
+      fi
+    done
+
+    if [[ -z "${QML_LINT_DISABLE_DEFAULT_FILTERS:-}" ]]; then
+      QML_LINT_ARGS+=("--import" "info" "--missing-type" "info" "--unresolved-type" "info" "--missing-property" "info")
+    fi
+
+    if [[ -n "${QML_LINT_EXTRA_ARGS:-}" ]]; then
+      # shellcheck disable=SC2206
+      EXTRA_LINT_ARGS=(${QML_LINT_EXTRA_ARGS})
+      QML_LINT_ARGS+=("${EXTRA_LINT_ARGS[@]}")
     fi
 
     "$QML_LINTER" "${QML_LINT_ARGS[@]}" "${QML_FILES[@]}"

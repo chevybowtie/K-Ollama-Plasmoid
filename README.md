@@ -220,6 +220,14 @@ Using the provided wrapper
 
 This repository includes `scripts/run-tests`, a small wrapper that detects `qmltestrunner` (or you can set `QMLTEST_RUNNER`) and runs the tests with the correct `-import` and `-input` flags so the tests can import the runtime JS helpers.
 
+Before invoking the tests, the wrapper validates every QML file under `contents/` with `qmllint`. By default it tries to use the Qt6 tooling (`/usr/lib/qt6/bin/qmllint`) and falls back to whatever is found on `PATH`. Some common environment knobs:
+
+- `QMLLINT_BIN` – override the `qmllint` binary.
+- `SKIP_QML_LINT=1` – skip the validation step entirely (useful while iterating without KDE imports available).
+- `QML_LINT_EXTRA_QMLDIRS=/path/one:/path/two` – add extra search paths so `qmllint` can resolve custom modules.
+- `QML_LINT_EXTRA_ARGS="--foo info --bar warning"` – pass additional raw arguments to `qmllint`.
+- `QML_LINT_DISABLE_DEFAULT_FILTERS=1` – restore the original warning levels if you want `--import`/`--missing-type`/`--unresolved-type` to fail the run.
+
 Examples:
 
 ```bash
