@@ -239,6 +239,7 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests
 - [ ] add retry/backoff for transient failures
 - [x] UI tests
 - [x] add support for rendering markdown
+- [x] add option to disable scroll in desktop mode
 
 ## Contributors
 

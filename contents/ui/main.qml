@@ -189,8 +189,8 @@ PlasmoidItem {
 
         // Auto-scroll to bottom to show the new message and prepare for response
         // Only scroll if auto-scroll hasn't been disabled by user interaction
-        if (!root.disableAutoScroll && scrollView.ScrollBar) {
-            scrollView.ScrollBar.vertical.position = 1; // 1 = bottom
+        if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
+            scrollView.contentItem.positionViewAtEnd();
         }
 
         // HTTP Request Preparation
@@ -283,9 +283,9 @@ PlasmoidItem {
             // Only update the UI when we have actual content to display
             if (text.length > 0) {
                 // Auto-scroll Management: Keep the latest content visible during generation
-                // Position calculation keeps the scroll at the bottom without overshooting
-                if (!root.disableAutoScroll && scrollView.ScrollBar) {
-                    scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
+                // Use ListView's built-in method for reliable scrolling to the end
+                if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
+                    scrollView.contentItem.positionViewAtEnd();
                 }
 
                 // Conversation Model Update: Create new entry or update existing one
@@ -633,6 +633,25 @@ PlasmoidItem {
                     }
 
                     PlasmaComponents.ToolTip.text: text
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
+                PlasmaComponents.Button {
+                    icon.name: "transform-move-vertical"
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    checkable: true
+                    checked: root.disableAutoScroll
+                    enabled: true
+                    hoverEnabled: true
+
+                    onToggled: {
+                        root.disableAutoScroll = checked
+                    }
+
+                    PlasmaComponents.ToolTip.text: root.disableAutoScroll ? 
+                        root.translate("Enable auto scroll") : 
+                        root.translate("Disable auto scroll")
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     PlasmaComponents.ToolTip.visible: hovered
                 }
