@@ -102,7 +102,7 @@ These are practical guidelines for contributors and code assistants to keep the 
 
 8) Testing conventions
    - Test files: `tests/tst_*.qml` using Qt Quick Test.
-   - Use `scripts/run-tests` to run the suite with the correct imports for Qt6.
+   - Use `scripts/run-tests.sh` or `./build.sh test` to run the suite with the correct imports for Qt6.
    - Avoid writing to protected globals (e.g., `plasmoid`) in tests; use test hooks or helper setters like `Utils.debugLogSetTestConfig`.
 
 9) Naming conventions & small idioms

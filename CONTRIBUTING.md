@@ -30,13 +30,13 @@ TestCase {
 - Run tests locally with the bundled wrapper from the repository root:
 
 ```bash
-scripts/run-tests
+scripts/run-tests.sh
 ```
 
 If your system uses multiple Qt versions, you can force a specific runner:
 
 ```bash
-QMLTEST_RUNNER=/opt/qt/6.8.2/bin/qmltestrunner scripts/run-tests
+QMLTEST_RUNNER=/opt/qt/6.8.2/bin/qmltestrunner scripts/run-tests.sh
 ```
 
 Tips

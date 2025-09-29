@@ -1,0 +1,199 @@
+# Spanish translation for K-Ollama-Plasmoid.
+# Copyright (C) 2025 Paul Sturm
+# This file is distributed under the same license as the K-Ollama-Plasmoid package.
+# Paul Sturm <paul.sturm@cotton-software.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: K-Ollama-Plasmoid 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
+"POT-Creation-Date: 2025-09-28 21:16-0500\n"
+"PO-Revision-Date: 2025-09-28 21:20-0500\n"
+"Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Appearance & Behavior"
+msgstr "Apariencia y comportamiento"
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Server"
+msgstr "Servidor"
+
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "URL del servidor Ollama:"
+
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
+
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"URL del servidor Ollama. Use localhost (127.0.0.1) para servidor local o IP "
+"de LAN para servidor remoto"
+
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"Ejemplos:\n"
+"• Servidor local: http://127.0.0.1:11434\n"
+"• Servidor remoto: http://192.168.1.100:11434"
+
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "Temperatura"
+
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "Menor = más determinista, mayor = más creativo (0.0–2.0)"
+
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "Indicación del sistema"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "Habilitar indicación del sistema"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr "Antepone un mensaje del sistema a cada solicitud de API. No incluya secretos."
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr "Eres un asistente útil que responde preguntas en español sencillo."
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "Las indicaciones largas pueden aumentar el tamaño de la solicitud."
+
+#: contents/ui/ConfigAppearance.qml:92
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "Icono:"
+
+#: contents/ui/ConfigAppearance.qml:93
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "Icono adaptativo relleno"
+
+#: contents/ui/ConfigAppearance.qml:101
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "Icono adaptativo contorneado"
+
+#: contents/ui/ConfigAppearance.qml:109
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "Icono oscuro relleno"
+
+#: contents/ui/ConfigAppearance.qml:117
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "Icono claro relleno"
+
+#: contents/ui/ConfigAppearance.qml:125
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "Icono oscuro contorneado"
+
+#: contents/ui/ConfigAppearance.qml:133
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "Icono claro contorneado"
+
+#: contents/ui/ConfigAppearance.qml:141
+msgctxt "@label:checkbox"
+msgid "Input behavior:"
+msgstr "Comportamiento de entrada:"
+
+#: contents/ui/ConfigAppearance.qml:142
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "Usar Enter para enviar mensaje"
+
+#: contents/ui/ConfigAppearance.qml:144
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use `send` button to submit."
+msgstr ""
+"Cuando está habilitado: Enter envía el mensaje, Ctrl+Enter añade nueva línea.\n"
+"Cuando está deshabilitado: Enter añade nueva línea, usa el botón `enviar` para mandar."
+
+#: contents/ui/ConfigAppearance.qml:152
+msgctxt "@label:checkbox"
+msgid "Sound effects:"
+msgstr "Efectos de sonido:"
+
+#: contents/ui/ConfigAppearance.qml:153
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "Reproducir sonido cuando la respuesta de IA esté completa"
+
+#: contents/ui/ConfigAppearance.qml:155
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "Reproduce un ligero sonido de pitido después de que la respuesta esté completada."
+
+#: contents/ui/ConfigAppearance.qml:163
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "Renderizado de texto:"
+
+#: contents/ui/ConfigAppearance.qml:164
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "Habilitar renderizado de markdown en respuestas de IA"
+
+#: contents/ui/ConfigAppearance.qml:166
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"Renderiza el formato markdown (negrita, cursiva, bloques de código, etc.) en las "
+"respuestas de IA. Cuando está deshabilitado, las respuestas se muestran como texto plano."
+
+#: contents/ui/ConfigAppearance.qml:222
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "Registro de depuración:"
+
+#: contents/ui/ConfigAppearance.qml:223
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "Habilitar registros de consola de depuración"
+
+#: contents/ui/ConfigAppearance.qml:225
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"Muestra mensajes de console.log de depuración para solución de problemas. Esta "
+"configuración se mantiene persistente."

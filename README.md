@@ -117,7 +117,27 @@ Before installing K-Ollama, ensure you have the following:
    plasmashell --replace &
    ```
 
-3. **Add the widget as described in Method 1, step 3**
+### Development Workflow
+
+**Making changes:**
+```bash
+# Edit your code, then apply changes:
+cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+```
+
+**Running tests:**
+```bash
+./scripts/run-tests.sh
+```
+
+### Troubleshooting Development
+
+**If you get installation errors with kpackagetool6:**
+```bash
+# Remove existing installation and reinstall
+kpackagetool6 -r K-Ollama-Plasmoid
+kpackagetool6 -i .
+```
 
 
 
@@ -189,8 +209,7 @@ Running tests (Qt Quick Test)
 If you want to run the QML unit tests locally we use Qt Quick Test (QtTest). On Debian 13 (trixie) you can install the Qt6 test modules with:
 
 ```bash
-sudo apt update
-sudo apt install -y qml6-module-qttest libqt6quicktest6
+./scripts/run-tests.sh
 ```
 
 Notes:
@@ -205,7 +224,14 @@ Running the tests
 - Run all tests in the `tests/` directory (Qt6):
 
 ```bash
-/usr/lib/qt6/bin/qmltestrunner -import /usr/lib/x86_64-linux-gnu/qt6/qml -input tests
+# Run with verbose output
+./scripts/run-tests.sh -v2
+
+# Skip QML linting (faster iteration)
+SKIP_QML_LINT=1 ./scripts/run-tests.sh
+
+# Use specific qmltestrunner
+QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
 ```
 
 - Run a single test file:
@@ -280,11 +306,58 @@ Development and live reload
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with `plasmoidviewer -a .`
-5. Submit a pull request
+### Quick Contribution Guide
+
+1. **Fork the repository** on GitHub
+2. **Clone your fork:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/K-Ollama-Plasmoid.git
+   cd K-Ollama-Plasmoid
+   ```
+
+3. **Set up development environment:**
+   ```bash
+   # Install for local testing
+   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+   ```
+
+4. **Create a feature branch:**
+   ```bash
+   git checkout -b fix-something-awesome
+   ```
+
+5. **Make your changes and test:**
+   ```bash
+   # Apply changes during development
+   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+   
+   # Run tests
+   ./scripts/run-tests.sh
+   ```
+
+6. **Submit a pull request** with a clear description of your changes
+
+### Development Notes
+- Tests must pass: `./scripts/run-tests.sh`
+- Follow existing code style and patterns
+
+### Roadmap
+- [x] Stop generating button & connection status
+- [x] Temperature settings & message management  
+- [x] Debug logging & comprehensive UI tests
+- [x] Centralized request cleanup with finishRequest() helper
+- [x] Esc-to-abort in flight conversation
+- [ ] allow a system prompt
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that answers questions in plain English."
+    }
+- [ ] add a request timeout
+- [ ] add retry/backoff for transient failures
+- [x] UI tests
+- [x] add support for rendering markdown
+- [x] add option to disable scroll in desktop mode
+- [ ] explore mic input
 
 ## Contributors
 

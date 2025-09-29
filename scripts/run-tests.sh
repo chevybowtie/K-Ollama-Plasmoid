@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# scripts/run-tests
+# scripts/run-tests.sh
 # Wrapper to run Qt QML tests for this project.
-# Usage: scripts/run-tests [additional qmltestrunner args]
+# Usage: scripts/run-tests.sh [additional qmltestrunner args]
 # Environment variables:
 #   QMLTEST_RUNNER - path to qmltestrunner binary to use (optional)
 
