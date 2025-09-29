@@ -3,59 +3,35 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
+// KDE modules
 import org.kde.kirigami as Kirigami
-import org.kde.kcmutils as KCM
+import org.kde.plasma.plasmoid
 
-KCM.SimpleKCM {
+ConfigDefaults {
+    id: root
+    
+    // This page's specific configuration bindings
     property alias cfg_ollamaServerUrl: serverUrlField.text
-    
-    // Ignore appearance-related properties that get assigned to all config pages
-    property bool cfg_useFilledIcon: false
-    property bool cfg_useOutlinedIcon: false
-    property bool cfg_useFilledLightIcon: false
-    property bool cfg_useFilledDarkIcon: false
-    property bool cfg_useOutlinedLightIcon: false
-    property bool cfg_useOutlinedDarkIcon: false
-    property string cfg_icon: ""
-    property bool cfg_pin: false
-    property string cfg_selectedModel: ""
-    property bool cfg_enterToSend: false
-    property bool cfg_completionSound: false
-    
-    // Ignore "Default" variants that the configuration system tries to assign
-    property bool cfg_useFilledIconDefault: false
-    property bool cfg_useOutlinedIconDefault: false
-    property bool cfg_useFilledLightIconDefault: false
-    property bool cfg_useFilledDarkIconDefault: false
-    property bool cfg_useOutlinedLightIconDefault: false
-    property bool cfg_useOutlinedDarkIconDefault: false
-    property string cfg_ollamaServerUrlDefault: ""
-    property bool cfg_enterToSendDefault: false
-    property bool cfg_completionSoundDefault: false
-    property string cfg_iconDefault: ""
-    property bool cfg_pinDefault: false
-    property string cfg_selectedModelDefault: ""
-        // Ollama generation temperature (0.0 - 2.0)
-        property real cfg_ollamaTemperature: 0.7
-        property real cfg_ollamaTemperatureDefault: 0.7
+    // Temperature property inherited from base, just use default value of 0.7
 
     Kirigami.FormLayout {
         Component.onCompleted: {
             // If the KCM host didn't populate cfg_ollamaServerUrl, initialize it from the current plasmoid configuration
-            if (!cfg_ollamaServerUrl || cfg_ollamaServerUrl.length === 0) {
+            if (!root.cfg_ollamaServerUrl || root.cfg_ollamaServerUrl.length === 0) {
                 try {
-                    cfg_ollamaServerUrl = plasmoid.configuration.ollamaServerUrl || '';
+                    root.cfg_ollamaServerUrl = Plasmoid.configuration.ollamaServerUrl || '';
                 } catch (e) {}
             }
 
             // Also initialize cfg_ollamaTemperature if not set
-            if (typeof cfg_ollamaTemperature !== 'number' || isNaN(cfg_ollamaTemperature)) {
+            if (typeof root.cfg_ollamaTemperature !== 'number' || isNaN(root.cfg_ollamaTemperature)) {
                 try {
-                    cfg_ollamaTemperature = (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null) ? plasmoid.configuration.ollamaTemperature : cfg_ollamaTemperature;
+                    root.cfg_ollamaTemperature = (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null) ? Plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature;
                 } catch (e) {}
             }
         }
@@ -66,8 +42,8 @@ KCM.SimpleKCM {
             placeholderText: i18nc("@info:placeholder", "http://127.0.0.1:11434")
             
             // Bind to cfg_ollamaServerUrl (KCM pattern). Initialize from existing configuration on completed.
-            text: cfg_ollamaServerUrl
-            onTextChanged: cfg_ollamaServerUrl = text
+            text: root.cfg_ollamaServerUrl
+            onTextChanged: root.cfg_ollamaServerUrl = text
 
             QQC2.ToolTip.text: i18nc("@info:tooltip", "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN IP for remote server")
             QQC2.ToolTip.visible: hovered
@@ -98,9 +74,9 @@ KCM.SimpleKCM {
                     to: 2.0
                     stepSize: 0.01
                     // initialize from cfg_ollamaTemperature (which the KCM host may populate). If absent, fall back to existing plasmoid configuration.
-                    value: (typeof cfg_ollamaTemperature === 'number') ? cfg_ollamaTemperature : (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null ? plasmoid.configuration.ollamaTemperature : cfg_ollamaTemperature)
+                    value: (typeof root.cfg_ollamaTemperature === 'number') ? root.cfg_ollamaTemperature : (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null ? Plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature)
                     onValueChanged: {
-                        cfg_ollamaTemperature = value
+                        root.cfg_ollamaTemperature = value
                     }
                     Layout.fillWidth: true
                 }
@@ -112,6 +88,56 @@ KCM.SimpleKCM {
 
                 QQC2.ToolTip.text: i18nc("@info", "Lower = more deterministic, higher = more creative (0.0–2.0)")
                 QQC2.ToolTip.visible: tempSlider.hovered
+            }
+
+            // System prompt controls (Server tab)
+            QQC2.CheckBox {
+                id: enableSystemPrompt
+                Kirigami.FormData.label: i18nc("@label:checkbox", "System prompt")
+                text: i18nc("@option", "Enable system prompt")
+                checked: root.cfg_systemPromptEnabled
+                onCheckedChanged: root.cfg_systemPromptEnabled = checked
+
+                QQC2.ToolTip.text: i18nc("@info", "Prepend a system message to every API request. Do not include secrets.")
+                QQC2.ToolTip.visible: hovered
+                QQC2.ToolTip.delay: 1000
+            }
+
+            QQC2.TextArea {
+                id: systemPromptArea
+                visible: enableSystemPrompt.checked
+                wrapMode: QQC2.TextArea.Wrap
+                placeholderText: i18nc("@info:placeholder", "You are a helpful assistant that answers questions in plain English.")
+                text: root.cfg_systemPrompt
+                onTextChanged: {
+                    // TextArea in some Qt/Controls versions doesn't have maximumLength.
+                    // Enforce the 2048-char limit here to stay compatible across environments.
+                    if (text && text.length > 2048) {
+                        text = text.slice(0, 2048);
+                    }
+                    root.cfg_systemPrompt = text;
+                }
+                Layout.fillWidth: true
+                Layout.preferredHeight: 100
+            }
+
+            RowLayout {
+                visible: enableSystemPrompt.checked
+                spacing: Kirigami.Units.smallSpacing
+                Layout.fillWidth: true
+
+                Text {
+                    // Qt.formatNumber is not available in all Qt versions/environments; use a safe JS conversion.
+                    text: String(systemPromptArea.text.length) + "/2048"
+                    font.pointSize: Kirigami.Theme.smallFont.pointSize
+                    color: "gray"
+                }
+
+                Text {
+                    visible: systemPromptArea.text.length > 1024
+                    text: i18nc("@info", "Long prompts may increase request size.")
+                    color: "orange"
+                }
             }
     }
 }

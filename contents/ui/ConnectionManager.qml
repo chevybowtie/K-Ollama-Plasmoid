@@ -3,11 +3,17 @@
   Polls the configured server's /api/tags endpoint on a timer and exposes
   `connected`, `status`, and `error` properties for UI binding.
 */
+// Qt modules
 import QtQuick 2.15
+
+// Local imports
 import "../js/utils.js" as Utils
 
 Item {
     id: root
+
+    // Global JavaScript API reference to reduce qmllint warnings
+    readonly property var httpRequestConstructor: XMLHttpRequest
 
     // Public state
     // `connected` is derived from `status` to keep both values consistent
@@ -22,7 +28,7 @@ Item {
     property int connectedPollInterval: 30000
     property int disconnectedPollInterval: 5000
     property int timeoutMs: 3000         // ms before aborting a single request
-    property string endpoint: "/api/tags"
+    property string endpoint: "tags"
     property bool running: true
     // Optional server base URL (e.g. "http://127.0.0.1:11434"). If empty, falls back to default.
     property string serverBase: ""
@@ -57,9 +63,9 @@ Item {
                 try { root._currentXhr.abort(); } catch(e) {}
                 root._currentXhr = null;
             }
-            status = "disconnected";
-            error = "timeout";
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = "timeout";
+            root.lastChecked = new Date().toISOString();
         }
     }
 
@@ -71,18 +77,18 @@ Item {
     }
 
     function getUrl() {
-        // Utils.buildServerUrl returns base + endpoint (endpoint may include leading slash)
-        return Utils.buildServerUrl(getServerBase(), root.endpoint);
+        // Use Utils.getServerUrl for consistent API endpoint building
+        return Utils.getServerUrl(getServerBase(), root.endpoint);
     }
 
     function check() {
     Utils.debugLog('debug', "ConnectionManager: check() starting. endpoint=", root.endpoint, "serverBase=", root.serverBase);
-        status = "connecting";
-        error = "";
+        root.status = "connecting";
+        root.error = "";
 
         var url = getUrl();
     Utils.debugLog('debug', "ConnectionManager: checking URL ->", url);
-        var xhr = new XMLHttpRequest();
+        var xhr = new httpRequestConstructor();
 
         // start the request timeout timer and keep reference to xhr so it can be aborted
         root._currentXhr = xhr;
@@ -93,17 +99,17 @@ Item {
         xhr.setRequestHeader('Content-Type', 'application/json');
 
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.readyState === httpRequestConstructor.DONE) {
                 requestTimer.stop();
                 root._currentXhr = null;
-                lastChecked = new Date().toISOString();
+                root.lastChecked = new Date().toISOString();
                     Utils.debugLog('info', "ConnectionManager: check DONE, status=", xhr.status);
                 if (xhr.status === 200) {
-                    status = "connected";
-                    error = "";
+                    root.status = "connected";
+                    root.error = "";
                 } else {
-                    status = "disconnected";
-                    error = "HTTP " + xhr.status;
+                    root.status = "disconnected";
+                    root.error = "HTTP " + xhr.status;
                 }
             }
         };
@@ -112,9 +118,9 @@ Item {
             requestTimer.stop();
             root._currentXhr = null;
             Utils.debugLog('warn', "ConnectionManager: network error when checking URL");
-            status = "disconnected";
-            error = 'network error';
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = 'network error';
+            root.lastChecked = new Date().toISOString();
         };
 
         try {
@@ -122,9 +128,9 @@ Item {
         } catch (e) {
             requestTimer.stop();
             root._currentXhr = null;
-            status = "disconnected";
-            error = e.toString();
-            lastChecked = new Date().toISOString();
+            root.status = "disconnected";
+            root.error = e.toString();
+            root.lastChecked = new Date().toISOString();
         }
     }
 
@@ -132,5 +138,25 @@ Item {
         // start polling immediately
     Utils.debugLog('debug', "ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
         if (root.running) pollTimer.start();
+    }
+
+    Component.onDestruction: {
+        // Stop all timers
+        if (pollTimer.running) {
+            pollTimer.stop();
+        }
+        if (requestTimer.running) {
+            requestTimer.stop();
+        }
+        
+        // Abort any in-flight request
+        if (root._currentXhr) {
+            try { 
+                root._currentXhr.abort(); 
+            } catch(e) {}
+            root._currentXhr = null;
+        }
+        
+        Utils.debugLog('debug', 'ConnectionManager: Component destroyed and cleaned up');
     }
 }

@@ -60,6 +60,7 @@ Notes for copilot / code assistants
 - When adding new settings, prefer `cfg_*` properties and aliases so the KCM host detects changes.
 - Avoid introducing direct writes to `Plasmoid.configuration` unless the setting is intentionally immediate.
 - Keep the UI bindings declarative and side-effect-free where possible to simplify testing.
+- The developer PC probably only uses Python 3. Ensure any scripts or tools used in the development workflow are compatible with Python 3.
 
 Additional patterns and conventions
 ----------------------------------

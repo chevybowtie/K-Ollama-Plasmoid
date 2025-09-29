@@ -58,5 +58,25 @@
       <label>Enable debug console logs</label>
       <default>false</default>
     </entry>
+    <entry name="enableMarkdown" type="Bool">
+      <label>Enable markdown rendering in AI responses</label>
+      <default>false</default>
+    </entry>
+    <entry name="ollamaTemperature" type="Double">
+      <label>AI model temperature for response creativity</label>
+      <default>0.7</default>
+      <min>0.0</min>
+      <max>2.0</max>
+    </entry>
+    <entry name="systemPromptEnabled" type="Bool">
+      <label>Enable system prompt</label>
+      <default>false</default>
+    </entry>
+
+    <entry name="systemPrompt" type="String">
+      <label>System prompt</label>
+      <default>You are a helpful assistant that answers questions in plain English.</default>
+      <maxlength>2048</maxlength>
+    </entry>
   </group>
 </kcfg>
