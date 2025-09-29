@@ -56,14 +56,14 @@ check_dependencies() {
         missing_deps+=("qt6-base-dev")
     fi
     
-    # Check for KDE Plasma development packages
+    # Check for KDE Plasma development packages (try both KF6 and KF5)
     if ! pkg-config --exists KF6Plasma 2>/dev/null && ! pkg-config --exists KF5Plasma 2>/dev/null; then
-        missing_deps+=("libkf6plasma-dev")
+        missing_deps+=("plasma-dev")
     fi
     
     # Check for KDE i18n development packages  
     if ! pkg-config --exists KF6I18n 2>/dev/null && ! pkg-config --exists KF5I18n 2>/dev/null; then
-        missing_deps+=("libkf6i18n-dev")
+        missing_deps+=("ki18n-dev")
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -71,8 +71,11 @@ check_dependencies() {
         echo
         echo "Package installation commands for different distributions:"
         echo
-        echo "Ubuntu/Debian:"
-        echo "  sudo apt install ${missing_deps[*]} extra-cmake-modules libkf6plasma-dev libkf6i18n-dev"
+        echo "Ubuntu/Debian (KF6):"
+        echo "  sudo apt install cmake gettext extra-cmake-modules qt6-base-dev libkf6plasma-dev libkf6i18n-dev"
+        echo
+        echo "Ubuntu/Debian (KF5 fallback):"
+        echo "  sudo apt install cmake gettext extra-cmake-modules qtbase5-dev libkf5plasma-dev libkf5i18n-dev"
         echo
         echo "Fedora:"
         echo "  sudo dnf install cmake gettext qt6-qtbase-devel extra-cmake-modules kf6-plasma-devel kf6-ki18n-devel"
@@ -82,6 +85,9 @@ check_dependencies() {
         echo
         echo "openSUSE:"
         echo "  sudo zypper install cmake gettext-tools qt6-base-devel extra-cmake-modules plasma6-framework-devel ki18n-devel"
+        echo
+        echo "NOTE: If KF6 packages are not available, try KF5 alternatives:"
+        echo "  libkf5plasma-dev, libkf5i18n-dev, qtbase5-dev"
         echo
         exit 1
     fi

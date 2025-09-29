@@ -101,11 +101,18 @@ Following standard conventions:
 
 #### Install Dependencies
 
-**Debian/Ubuntu:**
+**Debian/Ubuntu (KF6 - preferred):**
 ```bash
 sudo apt install cmake extra-cmake-modules \
     qt6-base-dev libkf6plasma-dev libkf6i18n-dev \
     libkf6configwidgets-dev gettext
+```
+
+**Debian/Ubuntu (KF5 - fallback):**
+```bash
+sudo apt install cmake extra-cmake-modules \
+    qtbase5-dev libkf5plasma-dev libkf5i18n-dev \
+    libkf5configwidgets-dev gettext
 ```
 
 **Fedora:**
@@ -149,4 +156,39 @@ make
 cd build
 make package  # Creates .tar.gz
 cpack -G DEB  # Creates .deb package
+```
+
+## Troubleshooting
+
+### Missing KDE Framework Packages
+
+**Problem**: `Package 'libkf6plasma-dev' has no installation candidate`
+
+**Solution**: Your distribution might not have KF6 packages yet. Try KF5 alternatives:
+
+```bash
+# Instead of KF6 packages, use KF5:
+sudo apt install cmake extra-cmake-modules \
+    qtbase5-dev libkf5plasma-dev libkf5i18n-dev \
+    libkf5configwidgets-dev gettext
+```
+
+**Check what's available:**
+```bash
+# Search for available plasma packages
+apt search plasma.*dev | grep -i plasma
+
+# Search for available ki18n packages  
+apt search ki18n.*dev
+```
+
+### CMake Configuration Issues
+
+**Problem**: CMake can't find Qt or KDE packages
+
+**Solution**: Ensure pkg-config can find the packages:
+```bash
+# Test if packages are detectable
+pkg-config --exists Qt6Core && echo "Qt6 OK" || echo "Qt6 missing"
+pkg-config --exists KF6Plasma && echo "KF6 OK" || pkg-config --exists KF5Plasma && echo "KF5 OK" || echo "Plasma missing"
 ```
