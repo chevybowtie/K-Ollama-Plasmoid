@@ -6,6 +6,7 @@
 
 import QtQuick
 import org.kde.plasma.configuration
+import org.kde.kirigami as Kirigami
 
 ConfigModel {
     ConfigCategory {

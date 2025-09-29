@@ -13,6 +13,7 @@ import org.kde.iconthemes as KIconThemes
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
 import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.plasmoid
 
 // Local imports
 import "../js/utils.js" as Utils
@@ -22,7 +23,7 @@ ConfigDefaults {
     
     // === ACTIVE CONFIGURATION PROPERTIES ===
     // Icon configuration aliases - bound to radio button states
-    property string cfg_icon: plasmoid.configuration.icon || ""
+    property string cfg_icon: Plasmoid.configuration.icon || ""
     property alias cfg_useFilledIcon: useFilledIcon.checked
     property alias cfg_useOutlinedIcon: useOutlinedIcon.checked
     property alias cfg_useFilledLightIcon: useFilledLightIcon.checked
@@ -49,36 +50,36 @@ ConfigDefaults {
     Kirigami.FormLayout {
         Component.onCompleted: {
             try {
-                try { Utils.debugLog('info', 'ConfigAppearance: plasmoid.configuration snapshot ->', JSON.stringify(plasmoid.configuration)); } catch (e) {}
+                try { Utils.debugLog('info', 'ConfigAppearance: Plasmoid.configuration snapshot ->', JSON.stringify(Plasmoid.configuration)); } catch (e) {}
             } catch (e) {
-                try { Utils.debugLog('warn', 'ConfigAppearance: failed to stringify plasmoid.configuration', e); } catch (ee) {}
+                try { Utils.debugLog('warn', 'ConfigAppearance: failed to stringify Plasmoid.configuration', e); } catch (ee) {}
             }
             // Initialize cfg_* properties from Plasmoid.configuration if KCM hasn't provided values
             try {
-                if ((cfg_icon === undefined || cfg_icon === '') && plasmoid.configuration.icon) cfg_icon = plasmoid.configuration.icon;
+                if ((cfg_icon === undefined || cfg_icon === '') && Plasmoid.configuration.icon) cfg_icon = Plasmoid.configuration.icon;
             } catch (e) {}
-            try { if (typeof cfg_useFilledIcon !== 'boolean') cfg_useFilledIcon = !!plasmoid.configuration.useFilledIcon; } catch (e) {}
-            try { if (typeof cfg_useOutlinedIcon !== 'boolean') cfg_useOutlinedIcon = !!plasmoid.configuration.useOutlinedIcon; } catch (e) {}
-            try { if (typeof cfg_useFilledLightIcon !== 'boolean') cfg_useFilledLightIcon = !!plasmoid.configuration.useFilledLightIcon; } catch (e) {}
-            try { if (typeof cfg_useFilledDarkIcon !== 'boolean') cfg_useFilledDarkIcon = !!plasmoid.configuration.useFilledDarkIcon; } catch (e) {}
-            try { if (typeof cfg_useOutlinedLightIcon !== 'boolean') cfg_useOutlinedLightIcon = !!plasmoid.configuration.useOutlinedLightIcon; } catch (e) {}
-            try { if (typeof cfg_useOutlinedDarkIcon !== 'boolean') cfg_useOutlinedDarkIcon = !!plasmoid.configuration.useOutlinedDarkIcon; } catch (e) {}
-            try { if (typeof cfg_enterToSend !== 'boolean') cfg_enterToSend = !!plasmoid.configuration.enterToSend; } catch (e) {}
-            try { if (typeof cfg_completionSound !== 'boolean') cfg_completionSound = !!plasmoid.configuration.completionSound; } catch (e) {}
-            // Initialize cfg_debugLogs from the stored plasmoid configuration if present.
+            try { if (typeof cfg_useFilledIcon !== 'boolean') cfg_useFilledIcon = !!Plasmoid.configuration.useFilledIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedIcon !== 'boolean') cfg_useOutlinedIcon = !!Plasmoid.configuration.useOutlinedIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledLightIcon !== 'boolean') cfg_useFilledLightIcon = !!Plasmoid.configuration.useFilledLightIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledDarkIcon !== 'boolean') cfg_useFilledDarkIcon = !!Plasmoid.configuration.useFilledDarkIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedLightIcon !== 'boolean') cfg_useOutlinedLightIcon = !!Plasmoid.configuration.useOutlinedLightIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedDarkIcon !== 'boolean') cfg_useOutlinedDarkIcon = !!Plasmoid.configuration.useOutlinedDarkIcon; } catch (e) {}
+            try { if (typeof cfg_enterToSend !== 'boolean') cfg_enterToSend = !!Plasmoid.configuration.enterToSend; } catch (e) {}
+            try { if (typeof cfg_completionSound !== 'boolean') cfg_completionSound = !!Plasmoid.configuration.completionSound; } catch (e) {}
+            // Initialize cfg_debugLogs from the stored Plasmoid configuration if present.
             // Note: cfg_debugLogs is declared as a bool property so typeof checks are unreliable
             // for determining whether the host already provided a value. Check the stored
             // configuration explicitly instead.
             try {
-                if (plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs !== undefined) {
-                    root.cfg_debugLogs = !!plasmoid.configuration.debugLogs;
+                if (Plasmoid && Plasmoid.configuration && Plasmoid.configuration.debugLogs !== undefined) {
+                    root.cfg_debugLogs = !!Plasmoid.configuration.debugLogs;
                 }
             } catch (e) {
-                try { Utils.debugLog('warn', "ConfigAppearance: failed to read plasmoid.configuration.debugLogs:", e); } catch (ee) {}
+                try { Utils.debugLog('warn', "ConfigAppearance: failed to read Plasmoid.configuration.debugLogs:", e); } catch (ee) {}
             }
-            try { if (typeof cfg_ollamaTemperature !== 'number') cfg_ollamaTemperature = Number(plasmoid.configuration.ollamaTemperature || 0.7); } catch (e) {}
-            try { if (typeof cfg_pin !== 'boolean') cfg_pin = !!plasmoid.configuration.pin; } catch (e) {}
-            try { if (!cfg_selectedModel && plasmoid.configuration.selectedModel) cfg_selectedModel = plasmoid.configuration.selectedModel; } catch (e) {}
+            try { if (typeof cfg_ollamaTemperature !== 'number') cfg_ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature || 0.7); } catch (e) {}
+            try { if (typeof cfg_pin !== 'boolean') cfg_pin = !!Plasmoid.configuration.pin; } catch (e) {}
+            try { if (!cfg_selectedModel && Plasmoid.configuration.selectedModel) cfg_selectedModel = Plasmoid.configuration.selectedModel; } catch (e) {}
         }
 
         QQC2.ButtonGroup {
@@ -181,7 +182,7 @@ ConfigDefaults {
                                 }
                             } catch (e) {}
                             try { Utils.debugLog('info', 'ConfigAppearance: enableMarkdownCheckbox initialized checked ->', enableMarkdownCheckbox && enableMarkdownCheckbox.checked); } catch (e) {}
-                            try { Utils.debugLog('debug', 'ConfigAppearance: plasmoid.configuration.enableMarkdown ->', plasmoid && plasmoid.configuration && plasmoid.configuration.enableMarkdown); } catch (e) {}
+                            try { Utils.debugLog('debug', 'ConfigAppearance: Plasmoid.configuration.enableMarkdown ->', Plasmoid && Plasmoid.configuration && Plasmoid.configuration.enableMarkdown); } catch (e) {}
                         } else {
                             try { Utils.debugLog('debug', 'ConfigAppearance: enableMarkdownCheckbox initialized but cfg_enableMarkdown not boolean ->', root.cfg_enableMarkdown); } catch (e) {}
                         }
@@ -240,7 +241,7 @@ ConfigDefaults {
                                 }
                             } catch (e) {}
                             try { Utils.debugLog('info', 'ConfigAppearance: debugLogsCheckbox initialized checked ->', debugLogsCheckbox && debugLogsCheckbox.checked); } catch (e) {}
-                            try { Utils.debugLog('debug', 'ConfigAppearance: plasmoid.configuration.debugLogs ->', plasmoid && plasmoid.configuration && plasmoid.configuration.debugLogs); } catch (e) {}
+                            try { Utils.debugLog('debug', 'ConfigAppearance: Plasmoid.configuration.debugLogs ->', Plasmoid && Plasmoid.configuration && Plasmoid.configuration.debugLogs); } catch (e) {}
                         } else {
                             try { Utils.debugLog('debug', 'ConfigAppearance: debugLogsCheckbox initialized but cfg_debugLogs not boolean ->', root.cfg_debugLogs); } catch (e) {}
                         }

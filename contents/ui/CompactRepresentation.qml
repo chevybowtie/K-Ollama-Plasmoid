@@ -11,7 +11,10 @@ import org.kde.plasma.plasmoid
 import "../js/utils.js" as Utils
 
 Loader {
-    property var models;
+    property var models
+    
+    // Reference to the main plasmoid root for expanded state
+    readonly property var plasmoidRoot: root
 
     TapHandler {
         id: tapHandler
@@ -20,9 +23,9 @@ Loader {
         acceptedButtons: Qt.LeftButton
 
         onPressedChanged: if (pressed) {
-            tapHandler.wasExpanded = root.expanded;
+            tapHandler.wasExpanded = plasmoidRoot.expanded;
         }
-        onTapped: root.expanded = !tapHandler.wasExpanded
+        onTapped: plasmoidRoot.expanded = !tapHandler.wasExpanded
     }
 
     Kirigami.Icon {

@@ -10,6 +10,7 @@ import QtQuick.Layouts
 
 // KDE modules
 import org.kde.kirigami as Kirigami
+import org.kde.plasma.plasmoid
 
 ConfigDefaults {
     id: root
@@ -23,14 +24,14 @@ ConfigDefaults {
             // If the KCM host didn't populate cfg_ollamaServerUrl, initialize it from the current plasmoid configuration
             if (!root.cfg_ollamaServerUrl || root.cfg_ollamaServerUrl.length === 0) {
                 try {
-                    root.cfg_ollamaServerUrl = plasmoid.configuration.ollamaServerUrl || '';
+                    root.cfg_ollamaServerUrl = Plasmoid.configuration.ollamaServerUrl || '';
                 } catch (e) {}
             }
 
             // Also initialize cfg_ollamaTemperature if not set
             if (typeof root.cfg_ollamaTemperature !== 'number' || isNaN(root.cfg_ollamaTemperature)) {
                 try {
-                    root.cfg_ollamaTemperature = (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null) ? plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature;
+                    root.cfg_ollamaTemperature = (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null) ? Plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature;
                 } catch (e) {}
             }
         }
@@ -73,7 +74,7 @@ ConfigDefaults {
                     to: 2.0
                     stepSize: 0.01
                     // initialize from cfg_ollamaTemperature (which the KCM host may populate). If absent, fall back to existing plasmoid configuration.
-                    value: (typeof root.cfg_ollamaTemperature === 'number') ? root.cfg_ollamaTemperature : (plasmoid.configuration.ollamaTemperature !== undefined && plasmoid.configuration.ollamaTemperature !== null ? plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature)
+                    value: (typeof root.cfg_ollamaTemperature === 'number') ? root.cfg_ollamaTemperature : (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null ? Plasmoid.configuration.ollamaTemperature : root.cfg_ollamaTemperature)
                     onValueChanged: {
                         root.cfg_ollamaTemperature = value
                     }

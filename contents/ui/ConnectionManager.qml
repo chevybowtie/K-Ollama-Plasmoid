@@ -12,6 +12,9 @@ import "../js/utils.js" as Utils
 Item {
     id: root
 
+    // Global JavaScript API reference to reduce qmllint warnings
+    readonly property var httpRequestConstructor: XMLHttpRequest
+
     // Public state
     // `connected` is derived from `status` to keep both values consistent
     property string status: "disconnected" // "connected" | "connecting" | "disconnected"
@@ -85,7 +88,7 @@ Item {
 
         var url = getUrl();
     Utils.debugLog('debug', "ConnectionManager: checking URL ->", url);
-        var xhr = new XMLHttpRequest();
+        var xhr = new httpRequestConstructor();
 
         // start the request timeout timer and keep reference to xhr so it can be aborted
         root._currentXhr = xhr;
@@ -96,7 +99,7 @@ Item {
         xhr.setRequestHeader('Content-Type', 'application/json');
 
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.readyState === httpRequestConstructor.DONE) {
                 requestTimer.stop();
                 root._currentXhr = null;
                 root.lastChecked = new Date().toISOString();

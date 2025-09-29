@@ -48,6 +48,9 @@ PlasmoidItem {
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
     
+    // Global JavaScript API reference to reduce qmllint warnings
+    readonly property var httpRequestConstructor: XMLHttpRequest
+    
     // 4. Computed state properties for UI binding
     readonly property bool isReady: hasLocalModel && !isLoading  // UI elements that need both conditions
     readonly property bool canSend: isReady && currentXhr === null  // Additional condition for send button
@@ -252,7 +255,7 @@ PlasmoidItem {
         
         // XMLHttpRequest Setup
         // Create new request instance for this conversation turn
-        let xhr = new XMLHttpRequest();
+        let xhr = new httpRequestConstructor();
         // Store reference globally so "Stop generating" button can abort mid-stream
         root.currentXhr = xhr;
 
@@ -272,7 +275,7 @@ PlasmoidItem {
         xhr.onreadystatechange = function() {
             // State Filtering: Only process during active data transfer or completion
             // LOADING = data is actively being received, DONE = transfer complete
-            if (xhr.readyState !== XMLHttpRequest.LOADING && xhr.readyState !== XMLHttpRequest.DONE) {
+            if (xhr.readyState !== httpRequestConstructor.LOADING && xhr.readyState !== httpRequestConstructor.DONE) {
                 return;
             }
             
@@ -435,7 +438,7 @@ PlasmoidItem {
         Utils.debugLog('debug', "Fetching models from:", url);
 
         // HTTP Request Setup
-        let xhr = new XMLHttpRequest();
+        let xhr = new httpRequestConstructor();
         xhr.open('GET', url);
         xhr.setRequestHeader('Content-Type', 'application/json');
 
@@ -444,7 +447,7 @@ PlasmoidItem {
          * Processes the server response and updates the entire UI state based on availability
          */
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.readyState === httpRequestConstructor.DONE) {
                 if (xhr.status === 200) {
                     // Response Processing: Extract model names from Ollama API format
                     // Ollama returns: { "models": [{ "name": "model1", "model": "model1", ... }, ...] }
