@@ -99,11 +99,33 @@ Following standard conventions:
 - KDE Frameworks 6 (Plasma, I18n, ConfigWidgets)
 - gettext tools
 
-#### Install on Debian/Ubuntu
+#### Install Dependencies
+
+**Debian/Ubuntu:**
 ```bash
 sudo apt install cmake extra-cmake-modules \
     qt6-base-dev libkf6plasma-dev libkf6i18n-dev \
     libkf6configwidgets-dev gettext
+```
+
+**Fedora:**
+```bash
+sudo dnf install cmake extra-cmake-modules \
+    qt6-qtbase-devel kf6-plasma-devel kf6-ki18n-devel \
+    kf6-kconfigwidgets-devel gettext
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S cmake extra-cmake-modules \
+    qt6-base plasma-framework ki18n kconfigwidgets gettext
+```
+
+**openSUSE:**
+```bash
+sudo zypper install cmake extra-cmake-modules \
+    qt6-base-devel plasma6-framework-devel ki18n-devel \
+    kconfigwidgets-devel gettext-tools
 ```
 
 ### Advanced Usage

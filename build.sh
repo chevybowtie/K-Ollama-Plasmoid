@@ -56,9 +56,33 @@ check_dependencies() {
         missing_deps+=("qt6-base-dev")
     fi
     
+    # Check for KDE Plasma development packages
+    if ! pkg-config --exists KF6Plasma 2>/dev/null && ! pkg-config --exists KF5Plasma 2>/dev/null; then
+        missing_deps+=("libkf6plasma-dev")
+    fi
+    
+    # Check for KDE i18n development packages  
+    if ! pkg-config --exists KF6I18n 2>/dev/null && ! pkg-config --exists KF5I18n 2>/dev/null; then
+        missing_deps+=("libkf6i18n-dev")
+    fi
+    
     if [ ${#missing_deps[@]} -ne 0 ]; then
         print_error "Missing dependencies: ${missing_deps[*]}"
-        echo "Install with: sudo apt install ${missing_deps[*]} extra-cmake-modules libkf6plasma-dev libkf6i18n-dev"
+        echo
+        echo "Package installation commands for different distributions:"
+        echo
+        echo "Ubuntu/Debian:"
+        echo "  sudo apt install ${missing_deps[*]} extra-cmake-modules libkf6plasma-dev libkf6i18n-dev"
+        echo
+        echo "Fedora:"
+        echo "  sudo dnf install cmake gettext qt6-qtbase-devel extra-cmake-modules kf6-plasma-devel kf6-ki18n-devel"
+        echo
+        echo "Arch Linux:"
+        echo "  sudo pacman -S cmake gettext qt6-base extra-cmake-modules plasma-framework ki18n"
+        echo
+        echo "openSUSE:"
+        echo "  sudo zypper install cmake gettext-tools qt6-base-devel extra-cmake-modules plasma6-framework-devel ki18n-devel"
+        echo
         exit 1
     fi
     
