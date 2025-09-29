@@ -15,7 +15,7 @@
         "Description": "Enhanced Ollama client with persistent settings, configurable input, and modern Plasma 6 compatibility",
         "Icon": "org.kde.neochat.tray",
         "Id": "K-Ollama-Plasmoid",
-        "License": "LGPL-2.1+",
+        "License": "LGPL-2.1-or-later",
         "Name": "K-Ollama",
         "Version": "1.0.0",
         "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid"
