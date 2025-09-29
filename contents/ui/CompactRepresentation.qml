@@ -1,22 +1,31 @@
+// Qt modules
 import QtQuick
-import QtQuick.Layouts 1.1
-import org.kde.kirigami 2.20 as Kirigami
-import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
+import QtQuick.Layouts
+
+// KDE modules
+import org.kde.kirigami as Kirigami
+import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.plasmoid
+
+// Local imports
 import "../js/utils.js" as Utils
 
 Loader {
-    property var models;
+    property var models
+    
+    // Reference to the main plasmoid root for expanded state
+    readonly property var plasmoidRoot: root
 
     TapHandler {
+        id: tapHandler
         property bool wasExpanded: false
 
         acceptedButtons: Qt.LeftButton
 
         onPressedChanged: if (pressed) {
-            wasExpanded = root.expanded;
+            tapHandler.wasExpanded = plasmoidRoot.expanded;
         }
-        onTapped: root.expanded = !wasExpanded
+        onTapped: plasmoidRoot.expanded = !tapHandler.wasExpanded
     }
 
     Kirigami.Icon {

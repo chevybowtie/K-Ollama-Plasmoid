@@ -97,20 +97,6 @@ function chooseIconPath(config, colorContrast) {
 }
 
 /**
- * Normalize a server base URL (trim trailing slashes) and build a final URL by joining endpoint.
- * @param {string|null|undefined} baseUrl
- * @param {string} endpoint (may include leading slash)
- * @returns {string}
- */
-function buildServerUrl(baseUrl, endpoint) {
-    var base = baseUrl || 'http://127.0.0.1:11434';
-    base = ('' + base).replace(/\/+$/, '');
-    endpoint = (endpoint || '').replace(/^\/+/, '');
-    return base + (endpoint ? '/' + endpoint : '');
-}
-
-
-/**
  * Centralized debug logging helper.
  *
  * Levels supported: 'debug', 'info', 'warn', 'error'.
