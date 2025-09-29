@@ -41,6 +41,9 @@ KCM.SimpleKCM {
     property bool cfg_completionSound: false
     property bool cfg_debugLogs: false
     property bool cfg_enableMarkdown: false
+    // === SYSTEM PROMPT CONFIG ===
+    property bool cfg_systemPromptEnabled: false
+    property string cfg_systemPrompt: "You are a helpful assistant that answers questions in plain English."
 
     // === "DEFAULT" VARIANTS ===
     // KDE automatically tries to assign these for every configuration property
@@ -60,6 +63,9 @@ KCM.SimpleKCM {
     property bool cfg_completionSoundDefault: false
     property bool cfg_debugLogsDefault: false
     property bool cfg_enableMarkdownDefault: false
+    // === SYSTEM PROMPT DEFAULT VARIANTS ===
+    property bool cfg_systemPromptEnabledDefault: false
+    property string cfg_systemPromptDefault: "You are a helpful assistant that answers questions in plain English."
 
     // === SYSTEM PROPERTIES ===
     // Special system properties that KDE tries to assign

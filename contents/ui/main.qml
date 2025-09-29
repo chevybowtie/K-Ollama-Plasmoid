@@ -222,14 +222,32 @@ PlasmoidItem {
         const url = getServerUrl('chat');
         
         // Construct request payload with conversation context and model parameters
+        // Build messages array and prepend system prompt if enabled
+        let messagesForRequest = [];
+        try {
+            if (Plasmoid.configuration.systemPromptEnabled) {
+                let sp = (Plasmoid.configuration.systemPrompt || "").toString().trim();
+                if (sp.length > 0) {
+                    // Enforce a max length to avoid accidental huge payloads
+                    const maxLen = 2048;
+                    if (sp.length > maxLen) sp = sp.slice(0, maxLen);
+                    messagesForRequest.push({ role: "system", content: sp });
+                }
+            }
+        } catch (e) {
+            try { Utils.debugLog('warn', 'Failed to include system prompt:', e && e.message ? e.message : e); } catch (ee) {}
+        }
+
+        // Append the rest of the conversation (user + assistant messages)
+        messagesForRequest = messagesForRequest.concat(promptArray);
+
         const data = JSON.stringify({
-            "model": modelsComboboxCurrentValue, // Currently selected AI model
-            "keep_alive": "5m", // Keep model loaded in memory for 5 minutes after request
+            "model": modelsComboboxCurrentValue,
+            "keep_alive": "5m",
             "options": {
-                // Use helper function for consistent temperature handling
                 "temperature": getValidTemperature(Plasmoid.configuration.ollamaTemperature)
             },
-            "messages": promptArray // Full conversation history for context
+            "messages": messagesForRequest
         });
         
         // XMLHttpRequest Setup

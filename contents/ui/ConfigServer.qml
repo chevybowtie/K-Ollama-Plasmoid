@@ -88,5 +88,55 @@ ConfigDefaults {
                 QQC2.ToolTip.text: i18nc("@info", "Lower = more deterministic, higher = more creative (0.0–2.0)")
                 QQC2.ToolTip.visible: tempSlider.hovered
             }
+
+            // System prompt controls (Server tab)
+            QQC2.CheckBox {
+                id: enableSystemPrompt
+                Kirigami.FormData.label: i18nc("@label:checkbox", "System prompt")
+                text: i18nc("@option", "Enable system prompt")
+                checked: root.cfg_systemPromptEnabled
+                onCheckedChanged: root.cfg_systemPromptEnabled = checked
+
+                QQC2.ToolTip.text: i18nc("@info", "Prepend a system message to every API request. Do not include secrets.")
+                QQC2.ToolTip.visible: hovered
+                QQC2.ToolTip.delay: 1000
+            }
+
+            QQC2.TextArea {
+                id: systemPromptArea
+                visible: enableSystemPrompt.checked
+                wrapMode: QQC2.TextArea.Wrap
+                placeholderText: i18nc("@info:placeholder", "You are a helpful assistant that answers questions in plain English.")
+                text: root.cfg_systemPrompt
+                onTextChanged: {
+                    // TextArea in some Qt/Controls versions doesn't have maximumLength.
+                    // Enforce the 2048-char limit here to stay compatible across environments.
+                    if (text && text.length > 2048) {
+                        text = text.slice(0, 2048);
+                    }
+                    root.cfg_systemPrompt = text;
+                }
+                Layout.fillWidth: true
+                Layout.preferredHeight: 100
+            }
+
+            RowLayout {
+                visible: enableSystemPrompt.checked
+                spacing: Kirigami.Units.smallSpacing
+                Layout.fillWidth: true
+
+                Text {
+                    // Qt.formatNumber is not available in all Qt versions/environments; use a safe JS conversion.
+                    text: String(systemPromptArea.text.length) + "/2048"
+                    font.pointSize: Kirigami.Theme.smallFont.pointSize
+                    color: "gray"
+                }
+
+                Text {
+                    visible: systemPromptArea.text.length > 1024
+                    text: i18nc("@info", "Long prompts may increase request size.")
+                    color: "orange"
+                }
+            }
     }
 }

@@ -108,6 +108,11 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 ### Server Tab
 - **Ollama Server URL**: Set your server location (default: `http://127.0.0.1:11434`)
 - **Remote Server Support**: Connect to Ollama on other machines (e.g., `http://192.168.1.100:11434`)
+ - **System Prompt** (optional): An optional system message that will be prepended to every request sent to the model. Default:
+
+    > You are a helpful assistant that answers questions in plain English.
+
+    Enable it in the Server tab using "Enable system prompt" and edit the prompt text. Do not include secrets or other sensitive data. Max length: 2048 characters.
 
 ### Automatic Settings
 - **Model Persistence**: Your selected model is automatically remembered
