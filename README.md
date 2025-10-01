@@ -37,6 +37,8 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
    ./install.sh dev
    ```
 
+   This automatically removes any existing installation and installs the updated version.
+
 3. **Add to your panel:**
    - Right-click on your KDE panel → "Add Widgets..."
    - Search for "K-Ollama" → Drag to panel
@@ -76,15 +78,6 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 ```bash
 ./translate.sh all    # Extract, update, and compile translations
 ./translate.sh stats  # Check translation completion
-```
-
-### Troubleshooting Development
-
-**If you get installation errors with kpackagetool6:**
-```bash
-# Remove existing installation and reinstall
-kpackagetool6 -r K-Ollama-Plasmoid
-kpackagetool6 -i .
 ```
 
 
@@ -226,4 +219,3 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
    ```bash
    ./translate.sh all
    ```
-```

@@ -35,6 +35,19 @@ print_error() {
 install_dev() {
     print_step "Installing plasmoid for development..."
 
+    # Check if already installed and remove it first
+    if kpackagetool6 --type Plasma/Applet --list | grep -q "${PLASMOID_ID}"; then
+        print_step "Removing existing installation..."
+        kpackagetool6 --type Plasma/Applet --remove "${PLASMOID_ID}" 2>/dev/null || true
+    fi
+
+    # Also check for manual installation directory
+    local user_dir="$HOME/.local/share/plasma/plasmoids/${PLASMOID_ID}"
+    if [ -d "$user_dir" ]; then
+        print_step "Removing manual installation..."
+        rm -rf "$user_dir"
+    fi
+
     # Use kpackagetool6 for proper installation
     if kpackagetool6 --type Plasma/Applet --install .; then
         print_success "Development installation complete"
@@ -141,7 +154,7 @@ usage() {
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  dev       Install for development (user directory)"
+    echo "  dev       Install for development (auto-removes existing, user directory)"
     echo "  system    Install system-wide (requires root)"
     echo "  uninstall Remove plasmoid from system"
     echo "  status    Check installation status"

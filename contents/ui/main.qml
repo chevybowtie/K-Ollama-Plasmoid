@@ -586,7 +586,6 @@ PlasmoidItem {
             width: parent.width
 
             contentItem: RowLayout {
-                visible: root.hasLocalModel
                 Layout.fillWidth: true
 
                 PlasmaComponents.Button {
@@ -611,8 +610,10 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.visible: hovered
                 }
 
+                // Model selector - only visible when models are loaded
                 PlasmaComponents.ComboBox {
                     id: modelsCombobox
+                    visible: root.hasLocalModel
                     enabled: root.isReady
                     hoverEnabled: root.isReady
 
@@ -653,10 +654,20 @@ PlasmoidItem {
                     Component.onCompleted: root.getModels()
                 }
 
+                // Placeholder text when no models loaded
+                PlasmaComponents.Label {
+                    visible: !root.hasLocalModel
+                    Layout.fillWidth: true
+                    text: root.translate("Configure server connection...")
+                    horizontalAlignment: Text.AlignHCenter
+                    opacity: 0.7
+                }
+
                 PlasmaComponents.Button {
                     icon.name: "edit-clear-symbolic"
                     text: root.translate("Clear chat")
                     display: PlasmaComponents.AbstractButton.IconOnly
+                    visible: root.hasLocalModel
                     enabled: root.isReady
                     hoverEnabled: root.isReady
 

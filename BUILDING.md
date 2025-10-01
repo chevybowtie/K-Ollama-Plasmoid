@@ -14,7 +14,7 @@ For development and testing, install to your user directory:
 ./install.sh dev
 ```
 
-This uses `kpackagetool6` to properly install the plasmoid and register it with Plasma.
+This automatically removes any existing installation and installs the updated version.
 
 ### System-Wide Installation
 
@@ -90,18 +90,13 @@ Shows completion status for each language.
 
 ## Development Workflow
 
-### Making Changes
+**Making changes:**
+```bash
+# Edit your code, then apply changes:
+./install.sh dev
+```
 
-1. **Edit your QML/JS files**
-2. **Apply changes:**
-   ```bash
-   ./install.sh dev
-   ```
-3. **Test the changes**
-4. **Run tests:**
-   ```bash
-   ./scripts/run-tests.sh
-   ```
+This command automatically handles removing the old version and installing the new one.
 
 ### Translation Updates
 
