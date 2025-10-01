@@ -28,7 +28,7 @@ Item {
     property int connectedPollInterval: 30000
     property int disconnectedPollInterval: 5000
     property int timeoutMs: 3000         // ms before aborting a single request
-    property string endpoint: "tags"
+    property string endpoint: "version"  // Lightweight connectivity check endpoint
     property bool running: true
     // Optional server base URL (e.g. "http://127.0.0.1:11434"). If empty, falls back to default.
     property string serverBase: ""
