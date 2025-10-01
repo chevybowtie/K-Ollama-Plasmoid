@@ -1,194 +1,215 @@
 # Development Guide
 
-## Build System Overview
+## Overview
 
-This project uses CMake as the build system with automatic translation support.
+This is a KDE Plasma 6 plasmoid written entirely in QML and JavaScript. There is no compilation step - QML is interpreted at runtime. The project uses simple scripts for installation and translation management.
 
-### Quick Start
+## Installation
+
+### Development Installation (Recommended)
+
+For development and testing, install to your user directory:
 
 ```bash
-# Complete build and install
-./build.sh all
-
-# Or step by step:
-./build.sh configure  # Configure CMake
-./build.sh build      # Build the project  
-./build.sh install    # Install system-wide
+./install.sh dev
 ```
 
-### Translation Workflow
+This uses `kpackagetool6` to properly install the plasmoid and register it with Plasma.
 
-#### Adding New Languages
+### System-Wide Installation
 
-1. **Extract strings** (automatic):
+For production use, install system-wide (requires root):
+
+```bash
+sudo ./install.sh system
+```
+
+This installs to `/usr/share/plasma/plasmoids/K-Ollama-Plasmoid/`.
+
+### Installation Management
+
+```bash
+./install.sh status     # Check what's installed
+./install.sh uninstall  # Remove installation
+```
+
+## Translation Management
+
+The plasmoid supports internationalization using KDE's i18n framework.
+
+### Complete Translation Workflow
+
+```bash
+./translate.sh all
+```
+
+This extracts strings from QML files, updates existing translations, and compiles them.
+
+### Step-by-Step Translation
+
+#### Extract Translatable Strings
+
+```bash
+./translate.sh extract
+```
+
+This scans all QML files in `contents/` for `i18n()` calls and creates `po/K-Ollama-Plasmoid.pot`.
+
+#### Add a New Language
+
+```bash
+./translate.sh create es  # For Spanish
+./translate.sh create fr  # For French
+```
+
+Edit the created `.po` file to add translations.
+
+#### Update Existing Translations
+
+```bash
+./translate.sh update
+```
+
+This merges new strings from the template into existing `.po` files.
+
+#### Compile Translations
+
+```bash
+./translate.sh compile
+```
+
+This creates `.mo` files from `.po` files for runtime use.
+
+### Translation Statistics
+
+```bash
+./translate.sh stats
+```
+
+Shows completion status for each language.
+
+## Development Workflow
+
+### Making Changes
+
+1. **Edit your QML/JS files**
+2. **Apply changes:**
    ```bash
-   ./build.sh translate
+   ./install.sh dev
+   ```
+3. **Test the changes**
+4. **Run tests:**
+   ```bash
+   ./scripts/run-tests.sh
    ```
 
-2. **Create new language file**:
+### Translation Updates
+
+When you add new `i18n()` calls:
+
+1. **Extract new strings:**
    ```bash
-   cp po/K-Ollama-Plasmoid.pot po/fr.po  # For French
+   ./translate.sh extract
+   ```
+2. **Update translations:**
+   ```bash
+   ./translate.sh update
+   ```
+3. **Reinstall:**
+   ```bash
+   ./install.sh dev
    ```
 
-3. **Edit translation**:
-   Edit `po/fr.po` and fill in `msgstr` entries
-
-4. **Build and install**:
-   ```bash
-   ./build.sh build install
-   ```
-
-#### Updating Existing Translations
-
-1. **Extract new strings**:
-   ```bash
-   cd build && make extract-messages
-   ```
-
-2. **Update translation files**:
-   ```bash
-   cd build && make update-translations
-   ```
-
-3. **Edit updated files** and rebuild
-
-### Build Targets
-
-| Target | Description |
-|--------|-------------|
-| `all` | Default target, builds everything |
-| `translations` | Compiles all .po files to .mo |
-| `extract-messages` | Extracts translatable strings to .pot |
-| `update-translations` | Updates .po files from .pot |
-
-### Directory Structure
+## Directory Structure
 
 ```
-├── CMakeLists.txt           # Main build configuration
-├── build.sh                 # Primary build automation script
 ├── contents/                # Plasmoid source files
 │   ├── config/             # Configuration UI
 │   └── ui/                 # Main UI components
 ├── po/                     # Translation files
-│   ├── CMakeLists.txt      # Translation build config
-│   ├── *.pot               # Translation template
+│   ├── *.pot               # Translation template (generated)
 │   ├── *.po                # Language-specific translations
 │   └── *.mo                # Compiled translations (generated)
-├── scripts/                # Utility and development scripts
-│   ├── run-tests.sh        # Test runner script
-│   └── install-translations.sh  # Translation installation utility
-└── build/                  # Build output (generated)
+├── scripts/                # Utility scripts
+│   ├── run-tests.sh        # Test runner
+│   └── install-translations.sh  # Legacy translation installer
+├── install.sh              # Installation script
+├── translate.sh            # Translation management script
+├── metadata.json           # Plasmoid metadata
+└── tests/                  # QML unit tests
 ```
 
-### Script Organization
+## Dependencies
 
-Following standard conventions:
+### Runtime Dependencies
+- KDE Plasma 6
+- Qt 6
+- Ollama (local or remote)
 
-**Root Level Scripts** (essential workflow):
-- `build.sh` - Primary build and development script
+### Development Dependencies
+- gettext tools (for translations)
+- QML testing framework (for tests)
 
-**Scripts Directory** (utilities and specialized tools):
-- `scripts/run-tests.sh` - Test suite runner
-- `scripts/install-translations.sh` - Direct translation installation
-
-### Dependencies
-
-#### Required
-- CMake (≥ 3.16)
-- Qt6 Core and Quick
-- KDE Frameworks 6 (Plasma, I18n, ConfigWidgets)
-- gettext tools
-
-#### Install Dependencies
-
-**Debian/Ubuntu (KF6 - preferred):**
+Install on Ubuntu/Debian:
 ```bash
-sudo apt install cmake extra-cmake-modules \
-    qt6-base-dev libkf6plasma-dev libkf6i18n-dev \
-    libkf6configwidgets-dev gettext
+sudo apt install gettext qml6-module-qttest
 ```
 
-**Debian/Ubuntu (KF5 - fallback):**
-```bash
-sudo apt install cmake extra-cmake-modules \
-    qtbase5-dev libkf5plasma-dev libkf5i18n-dev \
-    libkf5configwidgets-dev gettext
-```
+## Testing
 
-**Fedora:**
-```bash
-sudo dnf install cmake extra-cmake-modules \
-    qt6-qtbase-devel kf6-plasma-devel kf6-ki18n-devel \
-    kf6-kconfigwidgets-devel gettext
-```
+Run the comprehensive test suite:
 
-**Arch Linux:**
 ```bash
-sudo pacman -S cmake extra-cmake-modules \
-    qt6-base plasma-framework ki18n kconfigwidgets gettext
-```
-
-**openSUSE:**
-```bash
-sudo zypper install cmake extra-cmake-modules \
-    qt6-base-devel plasma6-framework-devel ki18n-devel \
-    kconfigwidgets-devel gettext-tools
-```
-
-### Advanced Usage
-
-#### Custom Install Prefix
-```bash
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-make install
-```
-
-#### Debug Build
-```bash
-cd build  
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-make
-```
-
-#### Packaging
-```bash
-cd build
-make package  # Creates .tar.gz
-cpack -G DEB  # Creates .deb package
+./scripts/run-tests.sh
 ```
 
 ## Troubleshooting
 
-### Missing KDE Framework Packages
+### Plasmoid Not Appearing
 
-**Problem**: `Package 'libkf6plasma-dev' has no installation candidate`
-
-**Solution**: Your distribution might not have KF6 packages yet. Try KF5 alternatives:
-
+**After installation:**
 ```bash
-# Instead of KF6 packages, use KF5:
-sudo apt install cmake extra-cmake-modules \
-    qtbase5-dev libkf5plasma-dev libkf5i18n-dev \
-    libkf5configwidgets-dev gettext
+# Restart Plasma
+plasmashell --replace &
 ```
 
-**Check what's available:**
+**Check installation:**
 ```bash
-# Search for available plasma packages
-apt search plasma.*dev | grep -i plasma
-
-# Search for available ki18n packages  
-apt search ki18n.*dev
+./install.sh status
+kpackagetool6 --list | grep K-Ollama
 ```
 
-### CMake Configuration Issues
+### Translation Issues
 
-**Problem**: CMake can't find Qt or KDE packages
+**Strings not translating:**
+- Ensure `i18n()` calls are in QML files
+- Run `./translate.sh all` to update translations
+- Reinstall with `./install.sh dev`
 
-**Solution**: Ensure pkg-config can find the packages:
-```bash
-# Test if packages are detectable
-pkg-config --exists Qt6Core && echo "Qt6 OK" || echo "Qt6 missing"
-pkg-config --exists KF6Plasma && echo "KF6 OK" || pkg-config --exists KF5Plasma && echo "KF5 OK" || echo "Plasma missing"
-```
+**New language not working:**
+- Check that `.po` and `.mo` files exist in `po/`
+- Verify language code is correct
+- Restart Plasma after installation
+
+## Contributing
+
+1. **Fork and clone the repository**
+2. **Set up development environment:**
+   ```bash
+   ./install.sh dev
+   ```
+3. **Make changes and test:**
+   ```bash
+   ./scripts/run-tests.sh
+   ./install.sh dev
+   ```
+4. **Update translations if needed:**
+   ```bash
+   ./translate.sh all
+   ```
+5. **Submit a pull request**
+
+### Code Style
+- Follow existing QML/JavaScript patterns
+- Use `i18n()` for user-visible strings
+- Test your changes thoroughly

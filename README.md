@@ -32,9 +32,9 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
    cd K-Ollama-Plasmoid
    ```
 
-2. **Install using kpackagetool6:**
+2. **Install using the development script:**
    ```bash
-   kpackagetool6 -i .
+   ./install.sh dev
    ```
 
 3. **Add to your panel:**
@@ -56,11 +56,7 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 
 2. **Install for development:**
    ```bash
-   # Create the plasmoid directory if it doesn't exist
-   mkdir -p ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid
-   
-   # Copy source and restart Plasma (this is the reliable method)
-   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+   ./install.sh dev
    ```
 
 ### Development Workflow
@@ -68,12 +64,18 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 **Making changes:**
 ```bash
 # Edit your code, then apply changes:
-cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+./install.sh dev
 ```
 
 **Running tests:**
 ```bash
 ./scripts/run-tests.sh
+```
+
+**Managing translations:**
+```bash
+./translate.sh all    # Extract, update, and compile translations
+./translate.sh stats  # Check translation completion
 ```
 
 ### Troubleshooting Development
@@ -137,7 +139,8 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 ### Widget doesn't appear in the add widgets menu
 - Try restarting Plasma: `plasmashell --replace &`
-- Check if the installation was successful: `kpackagetool6 -t Plasma/Applet -l  | grep K-Ollama`
+- Check if the installation was successful: `./install.sh status`
+- Reinstall if needed: `./install.sh uninstall && ./install.sh dev`
 
 ### Can't connect to Ollama
 - Ensure Ollama is running: `ollama serve`
@@ -202,8 +205,7 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
 
 3. **Set up development environment:**
    ```bash
-   # Install for local testing
-   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+   ./install.sh dev
    ```
 
 4. **Create a feature branch:**
@@ -214,43 +216,14 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
 5. **Make your changes and test:**
    ```bash
    # Apply changes during development
-   cp -rf * ~/.local/share/plasma/plasmoids/K-Ollama-Plasmoid/ && plasmashell --replace &
+   ./install.sh dev
    
    # Run tests
    ./scripts/run-tests.sh
    ```
 
-6. **Submit a pull request** with a clear description of your changes
-
-### Development Notes
-- Tests must pass: `./scripts/run-tests.sh`
-- Follow existing code style and patterns
-
-### Roadmap
-- [x] Stop generating button & connection status
-- [x] Temperature settings & message management  
-- [x] Debug logging & comprehensive UI tests
-- [x] Centralized request cleanup with finishRequest() helper
-- [x] Esc-to-abort in flight conversation
-- [ ] allow a system prompt
-    {
-      "role": "system",
-      "content": "You are a helpful assistant that answers questions in plain English."
-    }
-- [ ] add a request timeout
-- [ ] add retry/backoff for transient failures
-- [x] UI tests
-- [x] add support for rendering markdown
-- [x] add option to disable scroll in desktop mode
-- [ ] explore mic input
-
-## Contributors
-
-See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for a list of contributors and their contributions.
-
-## License
-
-This project is licensed under the LGPL-2.1+ License. See the [LICENSE](LICENSE) file for details.
-
-**Original Author:** Denys Madureira  
-**Enhanced by:** Paul Sturm (2025) - See CONTRIBUTORS.md for detailed contributions
+6. **Update translations if needed:**
+   ```bash
+   ./translate.sh all
+   ```
+```
