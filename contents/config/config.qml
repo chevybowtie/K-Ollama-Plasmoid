@@ -10,13 +10,13 @@ import org.kde.kirigami as Kirigami
 
 ConfigModel {
     ConfigCategory {
+         name: i18nc("@title", "Server")
+         icon: "computer"
+         source: "ConfigServer.qml"
+    }
+    ConfigCategory {
          name: i18nc("@title", "Appearance & Behavior")
          icon: "preferences-desktop-color"
          source: "ConfigAppearance.qml"
-    }
-    ConfigCategory {
-         name: i18nc("@title", "Server")
-         icon: "network-server"
-         source: "ConfigServer.qml"
     }
 }
