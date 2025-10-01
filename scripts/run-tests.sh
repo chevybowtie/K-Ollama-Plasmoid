@@ -20,7 +20,7 @@ if [[ "${SKIP_QML_LINT:-}" != "1" ]]; then
   elif command -v qmllint >/dev/null 2>&1; then
     QML_LINTER="$(command -v qmllint)"
   else
-    echo "Error: qmllint not found. Set QMLLINT_BIN or install Qt6 (qt6-declarative)." >&2
+    echo "Error: qmllint not found. Set QMLLINT_BIN or install `qt6-qmllint-plugins`" >&2
     echo "Set SKIP_QML_LINT=1 to bypass QML validation." >&2
     exit 2
   fi
