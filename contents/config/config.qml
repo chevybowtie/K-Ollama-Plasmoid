@@ -11,7 +11,7 @@ import org.kde.kirigami as Kirigami
 ConfigModel {
     ConfigCategory {
          name: i18nc("@title", "Server")
-         icon: "network-server"
+         icon: "computer"
          source: "ConfigServer.qml"
     }
     ConfigCategory {
