@@ -48,6 +48,9 @@ PlasmoidItem {
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
     
+    // Performance optimization: limit conversation history
+    readonly property int maxConversationHistory: 50
+    
     // Global JavaScript API reference to reduce qmllint warnings
     readonly property var httpRequestConstructor: XMLHttpRequest
     
@@ -186,6 +189,12 @@ PlasmoidItem {
      * @param prompt - The user's message text to send to Ollama
      */
     function request(messageField, listModel, scrollView, prompt) {
+        // Request deduplication: prevent multiple concurrent requests
+        if (root.currentXhr !== null) {
+            Utils.debugLog('warn', 'Request already in progress, ignoring duplicate request');
+            return;
+        }
+        
         // Message State Management
         // Store the last user message for Up-Arrow recall functionality
         // Only store non-empty messages to prevent recalling empty strings
@@ -206,6 +215,14 @@ PlasmoidItem {
         // Add user message to the API conversation array for context preservation
         // Ollama requires the full conversation history for context-aware responses
         promptArray.push({ "role": "user", "content": prompt, "images": [] });
+        
+        // Performance optimization: limit conversation history to prevent memory bloat
+        if (promptArray.length > root.maxConversationHistory * 2) { // *2 because each exchange has 2 messages
+            // Keep the most recent messages, remove older ones
+            const keepCount = root.maxConversationHistory * 2;
+            promptArray = promptArray.slice(-keepCount);
+            Utils.debugLog('debug', 'Trimmed conversation history to', keepCount, 'messages');
+        }
 
         // UI State Updates
         // Set loading state to show progress indicators and disable input
@@ -266,6 +283,8 @@ PlasmoidItem {
         // Track processed content length to avoid reprocessing the same data
         // Ollama streams responses as multiple JSON objects separated by newlines
         let lastProcessedLength = 0;
+        let accumulatedText = ''; // Performance optimization: maintain single accumulated string
+        let lastUiUpdate = 0; // Performance optimization: throttle UI updates
         
         /**
          * Real-time streaming response handler
@@ -293,16 +312,9 @@ PlasmoidItem {
             // Update processing checkpoint for next iteration
             lastProcessedLength = responseText.length;
             
-            // Response Accumulation: Build complete text from streaming chunks
-            let text = '';
+            // Performance optimization: accumulate new content chunks
+            let newContent = '';
             
-            // Retrieve existing accumulated text if this is a continuation update
-            // Assistant responses are appended at position oldLength in the conversation
-            if (listModel.count > oldLength) {
-                const lastValue = listModel.get(oldLength);
-                text = lastValue.number; // Start with previously accumulated content
-            }
-
             // JSON Stream Processing: Parse each line as a separate JSON object
             // Ollama's streaming format sends one JSON object per line, containing message chunks
             newObjects.forEach((object, index) => {
@@ -313,7 +325,7 @@ PlasmoidItem {
                     const parsedObject = JSON.parse(object);
                     // Ollama format: { "message": { "content": "text chunk" }, ... }
                     const messageContent = parsedObject && parsedObject.message && parsedObject.message.content ? parsedObject.message.content : '';
-                    text = text + messageContent; // Accumulate chunks into complete response
+                    newContent += messageContent; // Accumulate new chunks only
                 } catch (e) {
                     // Log malformed JSON but continue processing - don't break the stream
                     Utils.debugLog('warn', 'Failed to parse JSON object:', object, 'Error:', e.message);
@@ -322,25 +334,34 @@ PlasmoidItem {
             });
 
             // UI Update Strategy: Batch updates to minimize rendering overhead
-            // Only update the UI when we have actual content to display
-            if (text.length > 0) {
-                // Auto-scroll Management: Keep the latest content visible during generation
-                // Use ListView's built-in method for reliable scrolling to the end
-                if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
-                    scrollView.contentItem.positionViewAtEnd();
-                }
+            // Only update the UI when we have actual new content to display
+            if (newContent.length > 0) {
+                // Performance optimization: append to accumulated text
+                accumulatedText += newContent;
+                
+                // Performance optimization: throttle UI updates to reduce re-rendering
+                const now = Date.now();
+                if (now - lastUiUpdate > 100) { // Update UI at most every 100ms
+                    lastUiUpdate = now;
+                    
+                    // Auto-scroll Management: Keep the latest content visible during generation
+                    // Use ListView's built-in method for reliable scrolling to the end
+                    if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
+                        scrollView.contentItem.positionViewAtEnd();
+                    }
 
-                // Conversation Model Update: Create new entry or update existing one
-                if (listModel.count === oldLength) {
-                    // First chunk: Create new assistant message entry
-                    listModel.append({
-                        "name": "Assistant",
-                        "number": text // 'number' property holds the message content
-                    });
-                } else {
-                    // Subsequent chunks: Update the existing assistant message with accumulated text
-                    const lastValue = listModel.get(oldLength);
-                    lastValue.number = text; // Replace content with updated accumulated text
+                    // Conversation Model Update: Create new entry or update existing one
+                    if (listModel.count === oldLength) {
+                        // First chunk: Create new assistant message entry
+                        listModel.append({
+                            "name": "Assistant",
+                            "number": accumulatedText // Use accumulated text
+                        });
+                    } else {
+                        // Subsequent chunks: Update the existing assistant message with accumulated text
+                        const lastValue = listModel.get(oldLength);
+                        lastValue.number = accumulatedText; // Use accumulated text
+                    }
                 }
             }
         };
@@ -351,22 +372,20 @@ PlasmoidItem {
          * Handles final cleanup and conversation context management
          */
         xhr.onload = function() {
-            // Final Response Text Extraction
-            // Safely retrieve the complete assistant response from the conversation model
-            var assistantText = "";
-            try {
-                if (listModel.count > oldLength) {
-                    var lastValue = listModel.get(oldLength);
-                    if (lastValue && typeof lastValue.number !== 'undefined' && lastValue.number !== null) {
-                        assistantText = lastValue.number; // Complete accumulated response text
-                    }
-                }
-            } catch (e) {
-                // Defensive programming: Handle potential model access errors gracefully
-                // Leave assistantText empty rather than crash the application
-                Utils.debugLog('warn', 'Error extracting assistant text:', e.message);
+            // Ensure final UI update with complete accumulated text
+            if (listModel.count === oldLength) {
+                listModel.append({
+                    "name": "Assistant",
+                    "number": accumulatedText
+                });
+            } else {
+                const lastValue = listModel.get(oldLength);
+                lastValue.number = accumulatedText;
             }
-
+            
+            // Use the accumulated text from streaming processing
+            const assistantText = accumulatedText;
+            
             // Response Validation and Feedback
             if (!assistantText || assistantText.length === 0) {
                 // Log missing response for debugging - this shouldn't happen in normal operation
@@ -476,10 +495,21 @@ PlasmoidItem {
 
                         // UI Model Array Construction: Create display-friendly model list
                         // Maps internal model names to human-readable text for the ComboBox
-                        root.modelsArray = models.map(model => ({ 
+                        // Performance optimization: only update if models actually changed
+                        const newModelsArray = models.map(model => ({ 
                             text: parseTextToComboBox(model), // Format for display
                             value: model // Keep original name for API calls
                         }));
+                        
+                        // Only update if the array actually changed
+                        const arraysEqual = root.modelsArray.length === newModelsArray.length && 
+                                          root.modelsArray.every((item, index) => 
+                                              item.value === newModelsArray[index].value);
+                        
+                        if (!arraysEqual) {
+                            root.modelsArray = newModelsArray;
+                            Utils.debugLog('debug', 'Updated models array with', models.length, 'models');
+                        }
                         Utils.debugLog('info', "Successfully loaded", models.length, "models");
                     } else {
                         // Empty Response: Server has no models installed
