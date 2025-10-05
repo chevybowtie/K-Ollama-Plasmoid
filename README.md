@@ -76,8 +76,8 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 
 **Managing translations:**
 ```bash
-./translate.sh all    # Extract, update, and compile translations
-./translate.sh stats  # Check translation completion
+./scripts/translate.sh all    # Extract, update, and compile translations
+./scripts/translate.sh stats  # Check translation completion
 ```
 
 
@@ -217,5 +217,5 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
 
 6. **Update translations if needed:**
    ```bash
-   ./translate.sh all
+   ./scripts/translate.sh all
    ```
