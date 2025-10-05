@@ -52,7 +52,7 @@ jobs:
         unzip -l "$PACKAGE_NAME" | head -20
         
     - name: Upload to Release
-      if: github.event_name == 'release'
+      if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         files: ${{ steps.get_version.outputs.package_name }}
