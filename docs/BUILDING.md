@@ -2,7 +2,14 @@
 
 ## Overview
 
-This is a KDE Plasma 6 plasmoid written entirely in QML and JavaScript. There is no compilation step - QML is interpreted at runtime. The project uses simple scripts for installation and translation management.
+This is a KDE Plasma 6 plasmoid written entirely in QML and JavaScript1. **Extract new strings:**
+   ```bash
+   ./scripts/translate.sh extract
+   ```
+2. **Update translations:**
+   ```bash
+   ./scripts/translate.sh update
+   ```is no compilation step - QML is interpreted at runtime. The project uses simple scripts for installation and translation management.
 
 ## Installation
 
@@ -40,7 +47,7 @@ The plasmoid supports internationalization using KDE's i18n framework.
 ### Complete Translation Workflow
 
 ```bash
-./translate.sh all
+./scripts/translate.sh all
 ```
 
 This extracts strings from QML files, updates existing translations, and compiles them.
@@ -50,7 +57,7 @@ This extracts strings from QML files, updates existing translations, and compile
 #### Extract Translatable Strings
 
 ```bash
-./translate.sh extract
+./scripts/translate.sh extract
 ```
 
 This scans all QML files in `contents/` for `i18n()` calls and creates `po/K-Ollama-Plasmoid.pot`.
@@ -58,8 +65,8 @@ This scans all QML files in `contents/` for `i18n()` calls and creates `po/K-Oll
 #### Add a New Language
 
 ```bash
-./translate.sh create es  # For Spanish
-./translate.sh create fr  # For French
+./scripts/translate.sh create es  # For Spanish
+./scripts/translate.sh create fr  # For French
 ```
 
 Edit the created `.po` file to add translations.
@@ -67,7 +74,7 @@ Edit the created `.po` file to add translations.
 #### Update Existing Translations
 
 ```bash
-./translate.sh update
+./scripts/translate.sh update
 ```
 
 This merges new strings from the template into existing `.po` files.
@@ -75,7 +82,7 @@ This merges new strings from the template into existing `.po` files.
 #### Compile Translations
 
 ```bash
-./translate.sh compile
+./scripts/translate.sh compile
 ```
 
 This creates `.mo` files from `.po` files for runtime use.
@@ -83,7 +90,7 @@ This creates `.mo` files from `.po` files for runtime use.
 ### Translation Statistics
 
 ```bash
-./translate.sh stats
+./scripts/translate.sh stats
 ```
 
 Shows completion status for each language.
@@ -129,7 +136,7 @@ When you add new `i18n()` calls:
 │   ├── run-tests.sh        # Test runner
 │   └── install-translations.sh  # Legacy translation installer
 ├── install.sh              # Installation script
-├── translate.sh            # Translation management script
+├── scripts/translate.sh     # Translation management script
 ├── metadata.json           # Plasmoid metadata
 └── tests/                  # QML unit tests
 ```
@@ -178,7 +185,7 @@ kpackagetool6 --list | grep K-Ollama
 
 **Strings not translating:**
 - Ensure `i18n()` calls are in QML files
-- Run `./translate.sh all` to update translations
+- Run `./scripts/translate.sh all` to update translations
 - Reinstall with `./install.sh dev`
 
 **New language not working:**
@@ -200,7 +207,7 @@ kpackagetool6 --list | grep K-Ollama
    ```
 4. **Update translations if needed:**
    ```bash
-   ./translate.sh all
+   ./scripts/translate.sh all
    ```
 5. **Submit a pull request**
 
