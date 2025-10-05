@@ -1,0 +1,82 @@
+name: Create Release Package
+
+on:
+  release:
+    types: [created]
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-package:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Extract version from metadata.json
+      id: get_version
+      run: |
+        VERSION=$(grep '"Version"' metadata.json | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
+        PLUGIN_ID=$(grep '"Id"' metadata.json | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "plugin_id=$PLUGIN_ID" >> $GITHUB_OUTPUT
+        echo "package_name=${PLUGIN_ID}-${VERSION}.plasmoid" >> $GITHUB_OUTPUT
+        
+    - name: Create .plasmoid package
+      run: |
+        # Create the package using the same logic as our script
+        PACKAGE_NAME="${{ steps.get_version.outputs.package_name }}"
+        PROJECT_NAME="$(basename "$PWD")"
+        
+        # Move to parent directory for packaging
+        cd ..
+        
+        # Create package with only essential files
+        zip -r "$PACKAGE_NAME" \
+          "$PROJECT_NAME/metadata.json" \
+          "$PROJECT_NAME/LICENSE" \
+          "$PROJECT_NAME/README.md" \
+          "$PROJECT_NAME/contents/" \
+          "$PROJECT_NAME/po/"
+          
+        # Move package back to project directory
+        mv "$PACKAGE_NAME" "$PROJECT_NAME/"
+        cd "$PROJECT_NAME"
+        
+        # Verify package was created
+        ls -lh "$PACKAGE_NAME"
+        
+        # Show package contents for verification
+        unzip -l "$PACKAGE_NAME" | head -20
+        
+    - name: Upload to Release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ steps.get_version.outputs.package_name }}
+        body: |
+          ## K-Ollama Plasmoid v${{ steps.get_version.outputs.version }}
+          
+          ### Installation
+          Download the `.plasmoid` file and install with:
+          ```bash
+          kpackagetool6 --type Plasma/Applet --install ${{ steps.get_version.outputs.package_name }}
+          ```
+          
+          ### What's New
+          See the [changelog](https://github.com/chevybowtie/K-Ollama-Plasmoid/releases) for details.
+          
+          ### Requirements
+          - KDE Plasma 6
+          - Ollama running locally or remotely
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Store package as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: plasmoid-package-${{ steps.get_version.outputs.version }}
+        path: ${{ steps.get_version.outputs.package_name }}
+        retention-days: 90

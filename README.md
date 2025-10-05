@@ -26,6 +26,26 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 
 ### Installation (End Users)
 
+#### Option 1: KDE Store (Recommended)
+Once published, install directly from KDE:
+1. **Right-click on your KDE panel** → "Add Widgets..."
+2. **Click "Get New Widgets"** → "Download New Plasma Widgets"
+3. **Search for "K-Ollama"** → Click "Install"
+
+#### Option 2: Download .plasmoid Package
+1. **Download the latest release** from [GitHub Releases](https://github.com/chevybowtie/K-Ollama-Plasmoid/releases)
+   - Each release automatically includes a `.plasmoid` package file
+   - No need to build or compile anything
+2. **Install the package:**
+   ```bash
+   kpackagetool6 --type Plasma/Applet --install K-Ollama-Plasmoid-1.0.0.plasmoid
+   ```
+3. **Add to your panel:**
+   - Right-click on your KDE panel → "Add Widgets..."
+   - Search for "K-Ollama" → Drag to panel
+
+#### Option 3: Development Installation
+For testing or development:
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/chevybowtie/K-Ollama-Plasmoid.git
