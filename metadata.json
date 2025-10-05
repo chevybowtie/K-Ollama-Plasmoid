@@ -12,7 +12,7 @@
             }
         ],
         "Category": "Utilities",
-        "Description": "Enhanced Ollama client with persistent settings, configurable input, and modern Plasma 6 compatibility",
+        "Description": "Ollama client with modern Plasma 6 compatibility",
         "Icon": "org.kde.neochat.tray",
         "Id": "K-Ollama-Plasmoid",
         "License": "LGPL-2.1-or-later",
