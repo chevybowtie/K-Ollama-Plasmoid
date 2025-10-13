@@ -9,7 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_NAME="$(basename "$PROJECT_DIR")"
 PLUGIN_ID=$(grep '"Id"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
-APP_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+#APP_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+APP_NAME=$(jq -r '.KPlugin.Name' "$PROJECT_DIR/metadata.json" 2>/dev/null || grep -A 10 '"KPlugin"' "$PROJECT_DIR/metadata.json" | grep '"Name":' | grep -v '"Authors"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
 VERSION=$(grep '"Version"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
 PACKAGE_NAME="${APP_NAME}-${VERSION}.plasmoid"
 
@@ -47,14 +48,12 @@ zip -r "../$PACKAGE_NAME" \
     "LICENSE" \
     "README.md" \
     "contents/" \
-    "po/"
-
-# Move back to parent directory to check the package
-cd ".."
+    "po/" 
+    
 
 # Check if package was created successfully
-if [ -f "$PACKAGE_NAME" ]; then
-    PACKAGE_SIZE=$(du -h "$PACKAGE_NAME" | cut -f1)
+if [ -f "../$PACKAGE_NAME" ]; then
+    PACKAGE_SIZE=$(du -h "../$PACKAGE_NAME" | cut -f1)
     echo ""
     echo -e "${GREEN}✅ Package created successfully!${NC}"
     echo -e "File: ${YELLOW}$PACKAGE_NAME${NC}"
@@ -79,9 +78,12 @@ if [ -f "$PACKAGE_NAME" ]; then
     
     echo ""
     echo -e "${GREEN}🎯 Ready for KDE Store upload!${NC}"
-    echo -e "Location: ${YELLOW}$(pwd)/$PACKAGE_NAME${NC}"
+    echo -e "Location: ${YELLOW}$(dirname "$(pwd)")/$PACKAGE_NAME${NC}"
     
 else
     echo -e "${RED}❌ Package creation failed!${NC}"
+    echo -e "${PACKAGE_NAME} not found."
     exit 1
 fi
+
+cd $PROJECT_DIR
