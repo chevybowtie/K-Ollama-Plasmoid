@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_NAME="$(basename "$PROJECT_DIR")"
 PLUGIN_ID=$(grep '"Id"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
-APP_NAME=$(grep '"Name"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+APP_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
 VERSION=$(grep '"Version"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
 PACKAGE_NAME="${APP_NAME}-${VERSION}.plasmoid"
 
@@ -28,25 +28,29 @@ echo -e "Version: ${YELLOW}${VERSION}${NC}"
 echo -e "Package: ${YELLOW}${PACKAGE_NAME}${NC}"
 echo ""
 
-# Change to parent directory for packaging
-cd "$(dirname "$PROJECT_DIR")"
+# Change to project directory for packaging
+cd "$PROJECT_DIR"
 echo -e "${BLUE}Working directory:${NC} $(pwd)"
 
 # Remove existing package if it exists
-if [ -f "$PACKAGE_NAME" ]; then
+if [ -f "../$PACKAGE_NAME" ]; then
     echo -e "${YELLOW}Removing existing package:${NC} $PACKAGE_NAME"
-    rm -f "$PACKAGE_NAME"
+    rm -f "../$PACKAGE_NAME"
 fi
 
 echo -e "${BLUE}Creating package with essential files only...${NC}"
 
 # Create the package by explicitly including only what end users need
-zip -r "$PACKAGE_NAME" \
-    "$PROJECT_NAME/metadata.json" \
-    "$PROJECT_NAME/LICENSE" \
-    "$PROJECT_NAME/README.md" \
-    "$PROJECT_NAME/contents/" \
-    "$PROJECT_NAME/po/"
+# Working from project directory so files are at root level in zip
+zip -r "../$PACKAGE_NAME" \
+    "metadata.json" \
+    "LICENSE" \
+    "README.md" \
+    "contents/" \
+    "po/"
+
+# Move back to parent directory to check the package
+cd ".."
 
 # Check if package was created successfully
 if [ -f "$PACKAGE_NAME" ]; then
