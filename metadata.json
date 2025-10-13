@@ -1,10 +1,12 @@
 {
   "KPackageStructure": "Plasma/Applet",
+  "X-Plasma-API": "declarativeappletscript",
+  "X-Plasma-MainScript": "ui/main.qml",
   "KPlugin": {
     "Id": "io.github.chevybowtie.k-ollama",
     "Name": "K-Ollama",
     "Description": "Ollama client with modern Plasma 6 compatibility",
-    "Version": "1.0.0",
+    "Version": "1.0.1",
     "License": "LGPL-2.1-or-later",
     "Icon": "icon",
     "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid",
