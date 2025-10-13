@@ -14,8 +14,14 @@ fi
 
 echo "✓ Spanish locale is available"
 
+# Dynamically determine the plasmoid names from metadata.json
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PLASMOID_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+PLASMOID_ID=$(grep '"Id"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+
 # Check if translations are installed
-if [ ! -f "/usr/share/locale/es/LC_MESSAGES/K-Ollama-Plasmoid.mo" ]; then
+if [ ! -f "/usr/share/locale/es/LC_MESSAGES/${PLASMOID_NAME}.mo" ]; then
     echo "❌ Spanish translations not installed. Run:"
     echo "   ./build.sh install"
     exit 1
@@ -38,7 +44,7 @@ echo "2. Test KDE system settings with Spanish:"
 echo "   LANG=es_ES.UTF-8 systemsettings5"
 echo
 echo "3. Test configuration dialog with Spanish:"
-echo "   LANG=es_ES.UTF-8 plasmawindowed org.kde.K-Ollama-Plasmoid"
+echo "   LANG=es_ES.UTF-8 plasmawindowed ${PLASMOID_ID}"
 echo
 echo "4. Check what translations you have:"
 echo "   msgcat po/es.po | grep -A1 'msgstr \"[^\"]\'"

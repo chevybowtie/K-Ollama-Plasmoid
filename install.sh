@@ -5,8 +5,10 @@
 
 set -e  # Exit on any error
 
-PROJECT_NAME="K-Ollama-Plasmoid"
-PLASMOID_ID="K-Ollama-Plasmoid"
+# Dynamically determine the plasmoid ID from metadata.json
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PLASMOID_ID=$(grep '"Id"' "$SCRIPT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+PROJECT_NAME="$(basename "$SCRIPT_DIR")"
 
 # Colors for output
 RED='\033[0;31m'

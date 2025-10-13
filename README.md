@@ -48,8 +48,8 @@ Once published, install directly from KDE:
 For testing or development:
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/chevybowtie/K-Ollama-Plasmoid.git
-   cd K-Ollama-Plasmoid
+   git clone https://github.com/chevybowtie/K-Ollama-Plasmoid.git .
+   cd K-Ollama-Plasmoid  # or whatever folder name you choose
    ```
 
 2. **Install using the development script:**
@@ -72,8 +72,8 @@ For testing or development:
 
 1. **Clone and setup:**
    ```bash
-   git clone https://github.com/chevybowtie/K-Ollama-Plasmoid.git
-   cd K-Ollama-Plasmoid
+   git clone https://github.com/chevybowtie/K-Ollama-Plasmoid.git .
+   cd K-Ollama-Plasmoid  # or whatever folder name you choose
    ```
 
 2. **Install for development:**
@@ -213,7 +213,7 @@ QMLTEST_RUNNER=/opt/qt6/bin/qmltestrunner ./scripts/run-tests.sh
 2. **Clone your fork:**
    ```bash
    git clone https://github.com/YOUR_USERNAME/K-Ollama-Plasmoid.git
-   cd K-Ollama-Plasmoid
+   cd K-Ollama-Plasmoid  # or whatever folder name you choose
    ```
 
 3. **Set up development environment:**

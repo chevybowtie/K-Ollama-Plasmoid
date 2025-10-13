@@ -31,7 +31,7 @@ For production use, install system-wide (requires root):
 sudo ./install.sh system
 ```
 
-This installs to `/usr/share/plasma/plasmoids/K-Ollama-Plasmoid/`.
+This installs to `/usr/share/plasma/plasmoids/{PLASMOID_ID}/` where `{PLASMOID_ID}` is determined from your metadata.json file.
 
 ### Installation Management
 
@@ -60,7 +60,7 @@ This extracts strings from QML files, updates existing translations, and compile
 ./scripts/translate.sh extract
 ```
 
-This scans all QML files in `contents/` for `i18n()` calls and creates `po/K-Ollama-Plasmoid.pot`.
+This scans all QML files in `contents/` for `i18n()` calls and creates `po/{PLASMOID_ID}.pot` where `{PLASMOID_ID}` is determined from your metadata.json file.
 
 #### Add a New Language
 

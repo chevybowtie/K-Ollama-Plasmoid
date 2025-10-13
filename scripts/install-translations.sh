@@ -3,7 +3,10 @@
 # Install translations for K-Ollama-Plasmoid
 # Usage: sudo ./install-translations.sh
 
-PLASMOID_NAME="K-Ollama-Plasmoid"
+# Dynamically determine the plasmoid name from metadata.json
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PLASMOID_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
 LOCALE_DIR="/usr/share/locale"
 
 # Create locale directories and install translations
