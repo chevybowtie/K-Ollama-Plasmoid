@@ -1,20 +1,18 @@
 {
-    "KPackageStructure": "Plasma/Applet",
-    "KPlugin": {
-        "Authors": [
-            {
-                "Email": "denysmb@zoho.com",
-                "Name": "Denys Madureira"
-            }
-        ],
-        "Category": "Utilities",
-        "Description": "Quickly ask questions to your local LLVM with Ollama",
-        "Icon": "org.kde.neochat.tray",
-        "Id": "ChatQT-Plasmoid",
-        "License": "LGPL-2.1+",
-        "Name": "ChatQT",
-        "Version": "1.0",
-        "Website": "https://github.com/DenysMb/ChatQT-Plasmoid"
-    },
-    "X-Plasma-API-Minimum-Version": "6.0"
+  "KPackageStructure": "Plasma/Applet",
+  "KPlugin": {
+    "Id": "io.github.chevybowtie.k-ollama",
+    "Name": "K-Ollama",
+    "Description": "Ollama client with modern Plasma 6 compatibility",
+    "Version": "1.0.0",
+    "License": "LGPL-2.1-or-later",
+    "Icon": "icon",
+    "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid",
+    "Category": "Utility",
+    "Authors": [
+      { "Name": "Denys Madureira", "Email": "denysmb@zoho.com" },
+      { "Name": "Paul Sturm", "Email": "paul.sturm@cotton-software.com" }
+    ]
+  },
+  "X-Plasma-API-Minimum-Version": "6.0"
 }
