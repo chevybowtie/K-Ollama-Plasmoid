@@ -9,8 +9,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 PROJECT_NAME="$(basename "$PROJECT_DIR")"
 PLUGIN_ID=$(grep '"Id"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+APP_NAME=$(grep '"Name"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
 VERSION=$(grep '"Version"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
-PACKAGE_NAME="${PLUGIN_ID}-${VERSION}.plasmoid"
+PACKAGE_NAME="${APP_NAME}-${VERSION}.plasmoid"
 
 # Colors for output
 RED='\033[0;31m'
@@ -22,6 +23,7 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}📦 K-Ollama Plasmoid Packaging Script${NC}"
 echo -e "Project Dir: ${PROJECT_NAME}"
 echo -e "Plugin ID: ${PLUGIN_ID}"
+echo -e "App Name: ${APP_NAME}"
 echo -e "Version: ${YELLOW}${VERSION}${NC}"
 echo -e "Package: ${YELLOW}${PACKAGE_NAME}${NC}"
 echo ""
