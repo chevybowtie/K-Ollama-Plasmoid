@@ -38,7 +38,7 @@ Once published, install directly from KDE:
    - No need to build or compile anything
 2. **Install the package:**
    ```bash
-   kpackagetool6 --type Plasma/Applet --install K-Ollama-Plasmoid-1.0.0.plasmoid
+   kpackagetool6 --type Plasma/Applet --install K-Ollama-1.0.0.plasmoid
    ```
 3. **Add to your panel:**
    - Right-click on your KDE panel → "Add Widgets..."
