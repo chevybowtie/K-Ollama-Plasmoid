@@ -185,11 +185,73 @@ TestCase {
         messageField.text = "First line"
         messageField.cursorPosition = messageField.text.length
         messageField.forceActiveFocus()
-        
+
         // Ctrl+Enter should add newline in modern mode
         keyPress(Qt.Key_Return, Qt.ControlModifier)
-        
+
         verify(messageField.text.indexOf("\n") !== -1)
         compare(messageField.text, "First line\n")
+    }
+
+    // After overflow, trimming promptArray and listModel must stay in sync.
+    // This test encodes the Phase C invariant: both collections are trimmed together.
+    function test_history_trim_keeps_arrays_in_sync() {
+        var maxHistory = 50
+        var trimThreshold = maxHistory * 2
+        var promptArray = []
+        var model = listModelComponent.createObject(testCase)
+
+        for (var i = 0; i < 60; i++) {
+            promptArray.push({ role: "user", content: "User " + i })
+            promptArray.push({ role: "assistant", content: "Assistant " + i })
+            model.append({ name: "User", number: "User " + i })
+            model.append({ name: "Assistant", number: "Assistant " + i })
+
+            if (promptArray.length > trimThreshold) {
+                promptArray = promptArray.slice(-trimThreshold)
+                while (model.count > trimThreshold)
+                    model.remove(0)
+            }
+        }
+
+        compare(promptArray.length, trimThreshold)
+        compare(model.count, trimThreshold)
+        compare(model.count, promptArray.length)
+
+        model.destroy()
+    }
+
+    // After a trim, deleting by listModel index must still map correctly into promptArray.
+    // Both must remain the same length after the delete.
+    function test_delete_index_alignment_after_trim() {
+        var trimThreshold = 20
+        var promptArray = []
+        var model = listModelComponent.createObject(testCase)
+
+        // Add 15 pairs (30 total), then trim both to 20
+        for (var i = 0; i < 15; i++) {
+            promptArray.push({ role: "user", content: "User " + i })
+            promptArray.push({ role: "assistant", content: "Assistant " + i })
+            model.append({ name: "User", number: "User " + i })
+            model.append({ name: "Assistant", number: "Assistant " + i })
+        }
+        while (promptArray.length > trimThreshold)
+            promptArray = promptArray.slice(-trimThreshold)
+        while (model.count > trimThreshold)
+            model.remove(0)
+
+        compare(model.count, promptArray.length)
+
+        // Delete the first entry from both
+        model.remove(0)
+        promptArray.splice(0, 1)
+
+        compare(model.count, promptArray.length)
+
+        // Spot-check: a mid-list entry should agree between both collections
+        var checkIdx = 5
+        compare(model.get(checkIdx).number, promptArray[checkIdx].content)
+
+        model.destroy()
     }
 }

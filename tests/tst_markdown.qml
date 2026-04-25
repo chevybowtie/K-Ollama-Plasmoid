@@ -72,30 +72,85 @@ TestCase {
     
     // Test markdown rendering vs plain text
     function test_markdown_vs_plain_text_content() {
-        // Test with markdown content
         var markdownContent = "# Heading 1\n\n**Bold text** and *italic text*\n\n- List item 1\n- List item 2\n\n`code snippet`";
-        
-        // Create plain text loader
+
         var plainLoader = createTemporaryObject(loaderComponent, testCase, {
             enableMarkdown: false,
             messageText: markdownContent
         });
-        
-        // Create markdown loader
+
         var markdownLoader = createTemporaryObject(loaderComponent, testCase, {
             enableMarkdown: true,
             messageText: markdownContent
         });
-        
+
         verify(plainLoader);
         verify(plainLoader.item);
         verify(markdownLoader);
         verify(markdownLoader.item);
-        
-        // Both should display the content
-        verify(plainLoader.item.text === markdownContent);
-        // For markdown component, just verify it loaded correctly
-        verify(markdownLoader.item !== null);
+
+        compare(plainLoader.item.text, markdownContent);
+        // After structure fix: item is a bare TextArea with .text property
+        compare(markdownLoader.item.text, markdownContent);
+    }
+
+    // Full message text must be accessible for copy — copy reads .text, not rendered output
+    function test_full_message_text_accessible_for_copy() {
+        var fullMessage = "# Header\n\nThis is a **full** message with *formatting* and:\n\n```python\nprint('hello')\n```\n\nA final paragraph.";
+
+        var loader = createTemporaryObject(loaderComponent, testCase, {
+            enableMarkdown: true,
+            messageText: fullMessage
+        });
+
+        verify(loader);
+        verify(loader.item);
+        compare(loader.item.text, fullMessage);
+
+        // selectAll/copy/deselect must be callable without error
+        loader.item.selectAll();
+        loader.item.copy();
+        loader.item.deselect();
+        verify(true);
+    }
+
+    // Code fence content (including fence markers) must survive round-trip through the text property
+    function test_code_fence_content_preserved() {
+        var codeMessage = "Here is some code:\n\n```python\nimport os\nprint(os.getcwd())\n```\n\nAnd another block:\n\n```bash\necho hello\n```";
+
+        var loader = createTemporaryObject(loaderComponent, testCase, {
+            enableMarkdown: true,
+            messageText: codeMessage
+        });
+
+        verify(loader);
+        verify(loader.item);
+        verify(loader.item.text.indexOf("import os") !== -1);
+        verify(loader.item.text.indexOf("echo hello") !== -1);
+        verify(loader.item.text.indexOf("```python") !== -1);
+        verify(loader.item.text.indexOf("```bash") !== -1);
+    }
+
+    // Toggling markdown on/off must not lose the underlying message text
+    function test_markdown_toggle_preserves_content() {
+        var message = "**Bold** and `code` content";
+
+        var loader = createTemporaryObject(loaderComponent, testCase, {
+            enableMarkdown: false,
+            messageText: message
+        });
+
+        verify(loader);
+        verify(loader.item);
+        compare(loader.item.text, message);
+
+        loader.enableMarkdown = true;
+        verify(loader.item);
+        compare(loader.item.text, message);
+
+        loader.enableMarkdown = false;
+        verify(loader.item);
+        compare(loader.item.text, message);
     }
     
     // Test copy functionality for both components
@@ -220,25 +275,14 @@ TestCase {
             
             Component {
                 id: markdownComponent
-                ScrollView {
-                    implicitHeight: markdownTextArea.implicitHeight
-                    clip: false
-                    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-                    
-                    function selectAll() { markdownTextArea.selectAll() }
-                    function copy() { markdownTextArea.copy() }
-                    function deselect() { markdownTextArea.deselect() }
-                    
-                    TextArea {
-                        id: markdownTextArea
-                        readOnly: true
-                        wrapMode: TextArea.Wrap
-                        text: number
-                        textFormat: TextArea.MarkdownText
-                        selectByMouse: true
-                        background: null
-                    }
+                TextArea {
+                    id: markdownTextArea
+                    readOnly: true
+                    wrapMode: TextArea.Wrap
+                    text: number
+                    textFormat: TextArea.MarkdownText
+                    selectByMouse: true
+                    background: null
                 }
             }
         }
