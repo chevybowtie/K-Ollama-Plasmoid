@@ -814,7 +814,9 @@ PlasmoidItem {
                     Layout.fillWidth: true
 
                     contentItem: Item {
-                        implicitHeight: textMessageLoader.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
+                        implicitHeight: textMessageLoader.implicitHeight
+                            + (codeBlockButtons.visible ? codeBlockButtons.implicitHeight + Kirigami.Units.smallSpacing : 0)
+                            + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
                         /**
                          * Dynamic Component Loading System for Message Rendering
@@ -872,6 +874,68 @@ PlasmoidItem {
                             }
                         }
 
+                        // Clipboard intermediary for code-only copies (never visible)
+                        TextEdit {
+                            id: clipboardHelper
+                            visible: false
+                            function copyText(t) {
+                                text = t
+                                selectAll()
+                                copy()
+                                text = ""
+                            }
+                        }
+
+                        // Per-code-block copy buttons — always visible when code blocks are present
+                        Flow {
+                            id: codeBlockButtons
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: textMessageLoader.bottom
+                            anchors.topMargin: Kirigami.Units.smallSpacing
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            spacing: Kirigami.Units.smallSpacing
+                            visible: Plasmoid.configuration.enableMarkdown && codeBlockRepeater.count > 0
+
+                            Repeater {
+                                id: codeBlockRepeater
+                                model: Plasmoid.configuration.enableMarkdown ? Utils.extractCodeBlocks(number) : []
+
+                                delegate: PlasmaComponents.Button {
+                                    id: blockCopyButton
+                                    property bool justCopied: false
+
+                                    icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                    text: {
+                                        if (justCopied) return root.translate("Copied!")
+                                        if (modelData.language) return root.translate("Copy %1").arg(modelData.language)
+                                        return codeBlockRepeater.count > 1
+                                            ? root.translate("Copy block %1").arg(index + 1)
+                                            : root.translate("Copy code")
+                                    }
+                                    display: PlasmaComponents.AbstractButton.TextBesideIcon
+
+                                    onClicked: {
+                                        clipboardHelper.copyText(modelData.code)
+                                        justCopied = true
+                                        blockCopyTimer.restart()
+                                    }
+
+                                    Timer {
+                                        id: blockCopyTimer
+                                        interval: 1500
+                                        repeat: false
+                                        onTriggered: blockCopyButton.justCopied = false
+                                    }
+
+                                    PlasmaComponents.ToolTip.text: root.translate("Copy code without fence markers")
+                                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                    PlasmaComponents.ToolTip.visible: hovered
+                                }
+                            }
+                        }
+
                         RowLayout {
                             id: cardButtonsLayout
                             anchors.right: parent.right
@@ -881,16 +945,28 @@ PlasmoidItem {
                             visible: cardHoverHandler.hovered
 
                             PlasmaComponents.Button {
-                                icon.name: "edit-copy-symbolic"
-                                text: root.translate("Copy")
+                                id: msgCopyButton
+                                property bool justCopied: false
+
+                                icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                text: root.translate(justCopied ? "Copied!" : "Copy")
                                 display: PlasmaComponents.AbstractButton.IconOnly
-                                
+
                                 onClicked: {
                                     if (textMessageLoader.item) {
-                                        textMessageLoader.item.selectAll();
-                                        textMessageLoader.item.copy();
-                                        textMessageLoader.item.deselect();
+                                        textMessageLoader.item.selectAll()
+                                        textMessageLoader.item.copy()
+                                        textMessageLoader.item.deselect()
+                                        justCopied = true
+                                        msgCopyFeedbackTimer.restart()
                                     }
+                                }
+
+                                Timer {
+                                    id: msgCopyFeedbackTimer
+                                    interval: 1500
+                                    repeat: false
+                                    onTriggered: msgCopyButton.justCopied = false
                                 }
 
                                 PlasmaComponents.ToolTip.text: text

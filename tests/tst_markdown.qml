@@ -240,17 +240,64 @@ TestCase {
     // Test with special markdown characters
     function test_special_markdown_characters() {
         var specialContent = "# Header\n\n> Quote\n\n```\ncode block\n```\n\n| Table | Header |\n|-------|--------|\n| Cell  | Value  |";
-        
+
         var loader = createTemporaryObject(loaderComponent, testCase, {
             enableMarkdown: true,
             messageText: specialContent
         });
-        
+
         verify(loader);
         verify(loader.item);
         verify(loader.item !== null);
     }
-    
+
+    // --- extractCodeBlocks unit tests ---
+
+    function test_extract_no_blocks_returns_empty() {
+        var result = Utils.extractCodeBlocks("No code here, just plain text.");
+        compare(result.length, 0);
+    }
+
+    function test_extract_null_returns_empty() {
+        compare(Utils.extractCodeBlocks(null).length, 0);
+        compare(Utils.extractCodeBlocks("").length, 0);
+    }
+
+    function test_extract_single_block_no_language() {
+        var text = "Some text\n\n```\necho hello\n```\n\nMore text";
+        var result = Utils.extractCodeBlocks(text);
+        compare(result.length, 1);
+        compare(result[0].language, "");
+        compare(result[0].code, "echo hello");
+    }
+
+    function test_extract_single_block_with_language() {
+        var text = "```python\nimport os\nprint(os.getcwd())\n```";
+        var result = Utils.extractCodeBlocks(text);
+        compare(result.length, 1);
+        compare(result[0].language, "python");
+        compare(result[0].code, "import os\nprint(os.getcwd())");
+    }
+
+    function test_extract_multiple_blocks() {
+        var text = "First:\n\n```bash\necho hi\n```\n\nSecond:\n\n```python\nprint('hello')\n```";
+        var result = Utils.extractCodeBlocks(text);
+        compare(result.length, 2);
+        compare(result[0].language, "bash");
+        compare(result[0].code, "echo hi");
+        compare(result[1].language, "python");
+        compare(result[1].code, "print('hello')");
+    }
+
+    function test_extract_strips_fence_markers() {
+        var text = "```js\nconsole.log('test')\n```";
+        var result = Utils.extractCodeBlocks(text);
+        compare(result.length, 1);
+        verify(result[0].code.indexOf("```") === -1);
+        verify(result[0].code.indexOf("js") === -1 || result[0].code.indexOf("console") !== -1);
+        compare(result[0].code, "console.log('test')");
+    }
+
     Component {
         id: loaderComponent
         
