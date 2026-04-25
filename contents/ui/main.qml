@@ -47,7 +47,8 @@ PlasmoidItem {
     property bool isLoading: false
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
-    
+    property string requestError: ""
+
     // Performance optimization: limit conversation history
     readonly property int maxConversationHistory: 50
     
@@ -218,11 +219,17 @@ PlasmoidItem {
         
         // Performance optimization: limit conversation history to prevent memory bloat
         if (promptArray.length > root.maxConversationHistory * 2) { // *2 because each exchange has 2 messages
-            // Keep the most recent messages, remove older ones
             const keepCount = root.maxConversationHistory * 2;
             promptArray = promptArray.slice(-keepCount);
+            // Trim listModel to match so deleteMessage indices stay aligned
+            while (listModel.count > keepCount) {
+                listModel.remove(0);
+            }
             Utils.debugLog('debug', 'Trimmed conversation history to', keepCount, 'messages');
         }
+
+        // Clear any error banner left over from a previous request
+        root.requestError = "";
 
         // UI State Updates
         // Set loading state to show progress indicators and disable input
@@ -420,6 +427,7 @@ PlasmoidItem {
          */
         xhr.onerror = function() {
             Utils.debugLog('error', 'Network error during chat request');
+            root.requestError = i18n("Network error — could not reach the Ollama server. Check that Ollama is running and the server URL is correct.");
             finishRequest('network-error');
         };
 
@@ -429,6 +437,7 @@ PlasmoidItem {
          */
         xhr.ontimeout = function() {
             Utils.debugLog('warn', 'Chat request timeout');
+            root.requestError = i18n("Request timed out. For slow models, increase the response timeout in Settings → Behavior, or set it to 0 to disable.");
             finishRequest('timeout');
         };
 
@@ -437,12 +446,16 @@ PlasmoidItem {
     }
 
     function deleteMessage(index) {
-        // Remove from visual list model
+        // Compute promptArray index before removing from listModel.
+        // The two collections can drift if a trim hasn't run yet; drift
+        // is always non-negative (listModel >= promptArray after a trim).
+        var drift = root.listModelController.count - promptArray.length;
+        var promptIndex = index - drift;
+
         root.listModelController.remove(index);
-        
-        // Remove from prompt array (conversation history)
-        if (index < promptArray.length) {
-            promptArray.splice(index, 1);
+
+        if (promptIndex >= 0 && promptIndex < promptArray.length) {
+            promptArray.splice(promptIndex, 1);
         }
     }
 
@@ -825,16 +838,17 @@ PlasmoidItem {
                          */
                         Loader {
                             id: textMessageLoader
-                            
+                            asynchronous: true
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
                             anchors.margins: 8
-                            
+
                             // Height calculation delegation to the loaded component
                             // This ensures proper layout regardless of which component is active
                             readonly property real implicitHeight: textMessageLoader.item ? textMessageLoader.item.implicitHeight : 0
-                            
+
                             // Dynamic Component Selection: Load appropriate renderer based on markdown setting
                             // Configuration changes trigger automatic component reloading
                             sourceComponent: Plasmoid.configuration.enableMarkdown ? markdownComponent : plainTextComponent
@@ -995,6 +1009,15 @@ PlasmoidItem {
                     }
                 }
             }
+        }
+
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: root.requestError.length > 0
+            text: root.requestError
+            type: Kirigami.MessageType.Error
+            showCloseButton: true
+            onVisibleChanged: if (!visible) root.requestError = ""
         }
 
         ScrollView {
