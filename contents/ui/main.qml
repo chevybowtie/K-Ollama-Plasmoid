@@ -432,7 +432,7 @@ PlasmoidItem {
             finishRequest('timeout');
         };
 
-        xhr.timeout = 30000; // 30 seconds timeout
+        xhr.timeout = (Plasmoid.configuration.streamingTimeoutSecs || 0) * 1000; // 0 = no timeout
         xhr.send(data);
     }
 
