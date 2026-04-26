@@ -1,4 +1,4 @@
-# Spanish translation for K-Ollama.
+# Korean translation for K-Ollama.
 # Copyright (C) 2025 Paul Sturm
 # This file is distributed under the same license as the K-Ollama package.
 # Paul Sturm <paul.sturm@cotton-software.com>, 2025.
@@ -10,8 +10,8 @@ msgstr ""
 "POT-Creation-Date: 2026-04-25 19:03-0500\n"
 "PO-Revision-Date: 2026-04-25 19:10-0500\n"
 "Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
-"Language-Team: Spanish\n"
-"Language: es\n"
+"Language-Team: Korean\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,62 +19,62 @@ msgstr ""
 #: contents/config/config.qml:13
 msgctxt "@title"
 msgid "Server"
-msgstr "Servidor"
+msgstr "서버"
 
 #: contents/config/config.qml:18
 msgctxt "@title"
 msgid "Appearance"
-msgstr "Apariencia"
+msgstr "외관"
 
 #: contents/config/config.qml:23
 msgctxt "@title"
 msgid "Behavior"
-msgstr "Comportamiento"
+msgstr "동작"
 
 #: contents/ui/ConfigAppearance.qml:52
 msgctxt "@title:group"
 msgid "Icon:"
-msgstr "Icono:"
+msgstr "아이콘:"
 
 #: contents/ui/ConfigAppearance.qml:53
 msgctxt "@option:radio"
 msgid "Filled adaptive icon"
-msgstr "Icono adaptativo relleno"
+msgstr "채워진 적응형 아이콘"
 
 #: contents/ui/ConfigAppearance.qml:61
 msgctxt "@option:radio"
 msgid "Outlined adaptive icon"
-msgstr "Icono adaptativo contorneado"
+msgstr "윤곽선 적응형 아이콘"
 
 #: contents/ui/ConfigAppearance.qml:69
 msgctxt "@option:radio"
 msgid "Filled dark icon"
-msgstr "Icono oscuro relleno"
+msgstr "채워진 어두운 아이콘"
 
 #: contents/ui/ConfigAppearance.qml:77
 msgctxt "@option:radio"
 msgid "Filled light icon"
-msgstr "Icono claro relleno"
+msgstr "채워진 밝은 아이콘"
 
 #: contents/ui/ConfigAppearance.qml:85
 msgctxt "@option:radio"
 msgid "Outlined dark icon"
-msgstr "Icono oscuro contorneado"
+msgstr "윤곽선 어두운 아이콘"
 
 #: contents/ui/ConfigAppearance.qml:93
 msgctxt "@option:radio"
 msgid "Outlined light icon"
-msgstr "Icono claro contorneado"
+msgstr "윤곽선 밝은 아이콘"
 
 #: contents/ui/ConfigBehavior.qml:59
 msgctxt "@label:checkbox"
 msgid "Input:"
-msgstr "Entrada:"
+msgstr "입력:"
 
 #: contents/ui/ConfigBehavior.qml:60
 msgctxt "@option:check"
 msgid "Use Enter to send message"
-msgstr "Usar Enter para enviar mensaje"
+msgstr "Enter 키로 메시지 전송"
 
 #: contents/ui/ConfigBehavior.qml:62
 msgctxt "@info:tooltip"
@@ -82,33 +82,33 @@ msgid ""
 "When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
 "When disabled: Enter adds new line, use 'send' button to submit."
 msgstr ""
-"Activado: Enter envía el mensaje, Ctrl+Enter añade nueva línea.\n"
-"Desactivado: Enter añade nueva línea, usar el botón 'enviar' para mandar."
+"활성화: Enter로 메시지 전송, Ctrl+Enter로 줄 바꿈.\n"
+"비활성화: Enter로 줄 바꿈, '전송' 버튼으로 제출."
 
 #: contents/ui/ConfigBehavior.qml:70
 msgctxt "@label:checkbox"
 msgid "Sound:"
-msgstr "Sonido:"
+msgstr "소리:"
 
 #: contents/ui/ConfigBehavior.qml:71
 msgctxt "@option:check"
 msgid "Play sound when AI response is complete"
-msgstr "Reproducir sonido cuando la respuesta de IA esté completa"
+msgstr "AI 응답 완료 시 소리 재생"
 
 #: contents/ui/ConfigBehavior.qml:73
 msgctxt "@info:tooltip"
 msgid "Play a slight beep sound effect after the response is completed."
-msgstr "Reproduce un ligero pitido después de que la respuesta esté completada."
+msgstr "응답 완료 후 짧은 알림음을 재생합니다."
 
 #: contents/ui/ConfigBehavior.qml:81
 msgctxt "@label:checkbox"
 msgid "Text rendering:"
-msgstr "Renderizado de texto:"
+msgstr "텍스트 렌더링:"
 
 #: contents/ui/ConfigBehavior.qml:82
 msgctxt "@option:check"
 msgid "Enable markdown rendering in AI responses"
-msgstr "Habilitar renderizado de markdown en respuestas de IA"
+msgstr "AI 응답에서 Markdown 렌더링 활성화"
 
 #: contents/ui/ConfigBehavior.qml:84
 msgctxt "@info:tooltip"
@@ -116,24 +116,23 @@ msgid ""
 "Render markdown formatting (bold, italics, code blocks, etc.) in AI "
 "responses. When disabled, responses are shown as plain text."
 msgstr ""
-"Renderiza el formato markdown (negrita, cursiva, bloques de código, etc.) en "
-"las respuestas de IA. Cuando está desactivado, las respuestas se muestran "
-"como texto plano."
+"AI 응답에서 Markdown 서식(굵게, 기울임, 코드 블록 등)을 표시합니다. "
+"비활성화 시 응답은 일반 텍스트로 표시됩니다."
 
 #: contents/ui/ConfigBehavior.qml:113
 msgctxt "@label:spinbox"
 msgid "Response timeout:"
-msgstr "Tiempo de espera:"
+msgstr "응답 시간 제한:"
 
 #: contents/ui/ConfigBehavior.qml:126
 msgctxt "@info"
 msgid "s  (no limit)"
-msgstr "s  (sin límite)"
+msgstr "초  (제한 없음)"
 
 #: contents/ui/ConfigBehavior.qml:127
 msgctxt "@info"
 msgid "s"
-msgstr "s"
+msgstr "초"
 
 #: contents/ui/ConfigBehavior.qml:131
 msgctxt "@info:tooltip"
@@ -141,18 +140,18 @@ msgid ""
 "Maximum time to wait for a streaming response. Set to 0 to disable the "
 "timeout. Increase this for slow models that generate long responses."
 msgstr ""
-"Tiempo máximo de espera para una respuesta en streaming. Poner 0 para "
-"deshabilitar. Aumentar para modelos lentos que generan respuestas largas."
+"스트리밍 응답을 기다리는 최대 시간. 0으로 설정하면 시간 제한이 비활성화됩니다. "
+"긴 응답을 생성하는 느린 모델의 경우 값을 늘리세요."
 
 #: contents/ui/ConfigBehavior.qml:139
 msgctxt "@label:checkbox"
 msgid "Debug logging:"
-msgstr "Registro de depuración:"
+msgstr "디버그 로깅:"
 
 #: contents/ui/ConfigBehavior.qml:140
 msgctxt "@option:check"
 msgid "Enable debug console logs"
-msgstr "Habilitar registros de consola de depuración"
+msgstr "디버그 콘솔 로그 활성화"
 
 #: contents/ui/ConfigBehavior.qml:142
 msgctxt "@info:tooltip"
@@ -160,13 +159,13 @@ msgid ""
 "Show debug console.log messages for troubleshooting. This setting is "
 "persisted."
 msgstr ""
-"Muestra mensajes de console.log de depuración para solución de problemas. "
-"Esta configuración se mantiene persistente."
+"문제 해결을 위한 디버그 console.log 메시지를 표시합니다. "
+"이 설정은 저장됩니다."
 
 #: contents/ui/ConfigServer.qml:41
 msgctxt "@label:textbox"
 msgid "Ollama Server URL:"
-msgstr "URL del servidor Ollama:"
+msgstr "Ollama 서버 URL:"
 
 #: contents/ui/ConfigServer.qml:42
 msgctxt "@info:placeholder"
@@ -179,8 +178,8 @@ msgid ""
 "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
 "IP for remote server"
 msgstr ""
-"URL del servidor Ollama. Use localhost (127.0.0.1) para servidor local o IP "
-"de LAN para servidor remoto"
+"Ollama 서버의 URL. 로컬 서버에는 localhost (127.0.0.1)를, "
+"원격 서버에는 LAN IP를 사용하세요"
 
 #: contents/ui/ConfigServer.qml:54
 msgctxt "@info"
@@ -189,57 +188,57 @@ msgid ""
 "• Local server: http://127.0.0.1:11434\n"
 "• Remote server: http://192.168.1.100:11434"
 msgstr ""
-"Ejemplos:\n"
-"• Servidor local: http://127.0.0.1:11434\n"
-"• Servidor remoto: http://192.168.1.100:11434"
+"예시:\n"
+"• 로컬 서버: http://127.0.0.1:11434\n"
+"• 원격 서버: http://192.168.1.100:11434"
 
 #: contents/ui/ConfigServer.qml:67
 msgctxt "@label"
 msgid "Temperature"
-msgstr "Temperatura"
+msgstr "온도"
 
 #: contents/ui/ConfigServer.qml:89
 msgctxt "@info"
 msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
-msgstr "Menor = más determinista, mayor = más creativo (0.0–2.0)"
+msgstr "낮을수록 결정적, 높을수록 창의적 (0.0–2.0)"
 
 #: contents/ui/ConfigServer.qml:96
 msgctxt "@label:checkbox"
 msgid "System prompt"
-msgstr "Indicación del sistema"
+msgstr "시스템 프롬프트"
 
 #: contents/ui/ConfigServer.qml:97
 msgctxt "@option"
 msgid "Enable system prompt"
-msgstr "Habilitar indicación del sistema"
+msgstr "시스템 프롬프트 활성화"
 
 #: contents/ui/ConfigServer.qml:101
 msgctxt "@info"
 msgid "Prepend a system message to every API request. Do not include secrets."
-msgstr "Antepone un mensaje del sistema a cada solicitud. No incluya secretos."
+msgstr "모든 API 요청에 시스템 메시지를 앞에 추가합니다. 비밀 정보는 포함하지 마세요."
 
 #: contents/ui/ConfigServer.qml:110
 msgctxt "@info:placeholder"
 msgid "You are a helpful assistant that answers questions in plain English."
-msgstr "Eres un asistente útil que responde preguntas en español sencillo."
+msgstr "당신은 간단한 한국어로 질문에 답하는 도움이 되는 어시스턴트입니다."
 
 #: contents/ui/ConfigServer.qml:138
 msgctxt "@info"
 msgid "Long prompts may increase request size."
-msgstr "Las indicaciones largas pueden aumentar el tamaño de la solicitud."
+msgstr "긴 프롬프트는 요청 크기를 증가시킬 수 있습니다."
 
 #: contents/ui/main.qml:430
 msgid ""
 "Network error — could not reach the Ollama server. Check that Ollama is "
 "running and the server URL is correct."
 msgstr ""
-"Error de red — no se pudo alcanzar el servidor Ollama. Verifique que Ollama "
-"esté en ejecución y que la URL del servidor sea correcta."
+"네트워크 오류 — Ollama 서버에 연결할 수 없습니다. Ollama가 실행 중인지, "
+"서버 URL이 올바른지 확인하세요."
 
 #: contents/ui/main.qml:440
 msgid ""
 "Request timed out. For slow models, increase the response timeout in "
 "Settings → Behavior, or set it to 0 to disable."
 msgstr ""
-"La solicitud expiró. Para modelos lentos, aumente el tiempo de espera en "
-"Configuración → Comportamiento, o póngalo en 0 para desactivarlo."
+"요청 시간 초과. 느린 모델의 경우 설정 → 동작에서 응답 시간 제한을 늘리거나 "
+"0으로 설정하여 비활성화하세요."

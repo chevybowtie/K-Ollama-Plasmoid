@@ -10,11 +10,15 @@ A modern KDE Plasma widget for chatting with your local or remote Ollama AI mode
 - **Persistent Settings** - Remembers your configuration across sessions  
 - **Configurable Input** - Enter-to-send or Ctrl+Enter-to-send modes
 - **Markdown Rendering** - Optional markdown formatting in AI responses (disabled by default)
+- **Per-Code-Block Copy** - Copy individual code blocks from AI responses with one click
 - **Pin Widget** - Keep chat open while working (panel mode only)
 - **Multiple Themes** - Adaptive, filled, outlined icons (light/dark)
 - **Remote Servers** - Connect to Ollama on other machines
-- **Copy Messages** - One-click copying of AI responses
+- **Copy Messages** - One-click copying of full AI responses
+- **Configurable Timeout** - Set a custom response timeout (or disable it) for slow models
+- **Error Banners** - Clear inline error messages for network and timeout failures
 - **Optimized Streaming** - Real-time responses without UI blocking
+- **Localization** - Available in English, Spanish, German, French, Italian, Portuguese (BR), Russian, Chinese (Simplified), Japanese, Korean, and Arabic
 
 ## Quick Start
 
@@ -38,7 +42,7 @@ Once published, install directly from KDE:
    - No need to build or compile anything
 2. **Install the package:**
    ```bash
-   kpackagetool6 --type Plasma/Applet --install K-Ollama-Plasmoid-1.0.0.plasmoid
+   kpackagetool6 --type Plasma/Applet --install K-Ollama-Plasmoid-1.1.0.plasmoid
    ```
 3. **Add to your panel:**
    - Right-click on your KDE panel → "Add Widgets..."
@@ -108,23 +112,29 @@ For testing or development:
 
 After installation, right-click the K-Ollama widget and select "Configure..." to access these options:
 
-### Appearance & Behavior Tab
+### Appearance Tab
 - **Icon Themes**: Choose between filled or outlined icons with light/dark/adaptive variants
+
+### Behavior Tab
 - **Input Behavior**: Configure how Enter key works:
-  - **Modern Mode**: Enter sends message, Ctrl+Enter adds new line 
-  - **Classic Mode**: Enter adds new line, Ctrl+Enter sends message (default)
+  - **Classic Mode** (default): Enter adds new line, Ctrl+Enter sends message
+  - **Modern Mode**: Enter sends message, Ctrl+Enter adds new line
+- **Sound**: Play a completion sound when the AI finishes responding
 - **Text Rendering**: Enable markdown formatting in AI responses:
   - **Disabled** (default): Responses shown as plain text
-  - **Enabled**: Supports bold, italics, code blocks, lists, headers, and other markdown formatting
+  - **Enabled**: Supports bold, italics, code blocks, lists, headers, and other markdown formatting. Per-code-block copy buttons appear below each message containing code.
+- **Response Timeout**: Maximum seconds to wait for a streaming response (0 = no limit). Increase this for large models that generate long responses.
+- **Debug Logging**: Show console.log debug messages for troubleshooting
 
 ### Server Tab
 - **Ollama Server URL**: Set your server location (default: `http://127.0.0.1:11434`)
 - **Remote Server Support**: Connect to Ollama on other machines (e.g., `http://192.168.1.100:11434`)
- - **System Prompt** (optional): An optional system message that will be prepended to every request sent to the model. Default:
+- **Temperature**: Controls response creativity (0.0–2.0, lower = more deterministic)
+- **System Prompt** (optional): An optional system message that will be prepended to every request sent to the model. Default:
 
     > You are a helpful assistant that answers questions in plain English.
 
-    Enable it in the Server tab using "Enable system prompt" and edit the prompt text. Do not include secrets or other sensitive data. Max length: 2048 characters.
+    Enable it in the Server tab using "Enable system prompt" and edit the prompt text. Do not include secrets or other sensitive data.
 
 ### Automatic Settings
 - **Model Persistence**: Your selected model is automatically remembered
@@ -142,11 +152,13 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 
 4. **Pin the widget** (optional, panel mode only) using the pin button to keep it open while working
 
-5. **Enable markdown rendering** (optional) in Appearance & Behavior settings to see formatted AI responses with bold text, code blocks, lists, etc.
+5. **Enable markdown rendering** (optional) in Behavior settings to see formatted AI responses with bold text, code blocks, lists, etc.
 
 6. **Start chatting** with your AI models! The input field is automatically focused and ready for typing
 
-7. **Copy responses** using the copy button that appears when hovering over messages
+7. **Copy responses** using the copy button that appears on messages. When markdown rendering is enabled, individual code blocks also have their own copy buttons.
+
+8. **Network and timeout errors** appear as a dismissible inline banner — no need to dig through logs.
 
 ## Troubleshooting
 
@@ -169,8 +181,12 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - Restart the widget after downloading new models
 
 ### Input behavior not working as expected
-- Check your configuration in "Appearance & Behavior" → "Input behavior"
+- Check your configuration in "Behavior" → "Input behavior"
 - Remember: Default mode uses Ctrl+Enter to send, Modern mode uses Enter to send
+
+### Request keeps timing out
+- Open "Configure..." → "Behavior" and increase "Response timeout" or set it to 0 to disable it entirely
+- Larger models (70B+) may need 120 seconds or more for long responses
 
 
 ## Testing

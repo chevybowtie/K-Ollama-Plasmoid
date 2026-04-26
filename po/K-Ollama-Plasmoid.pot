@@ -1,14 +1,15 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the K-Ollama-Plasmoid package.
+# This file is distributed under the same license as the K-Ollama package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: K-Ollama-Plasmoid 1.0.0\n"
-"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid\n"
-"POT-Creation-Date: 2025-09-30 21:03-0500\n"
+"Project-Id-Version: K-Ollama 1.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/"
+"issues\n"
+"POT-Creation-Date: 2026-04-25 19:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,101 +18,138 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: contents/ui/ConfigAppearance.qml:92
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Server"
+msgstr ""
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Appearance"
+msgstr ""
+
+#: contents/config/config.qml:23
+msgctxt "@title"
+msgid "Behavior"
+msgstr ""
+
+#: contents/ui/ConfigAppearance.qml:52
 msgctxt "@title:group"
 msgid "Icon:"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:93
+#: contents/ui/ConfigAppearance.qml:53
 msgctxt "@option:radio"
 msgid "Filled adaptive icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:101
+#: contents/ui/ConfigAppearance.qml:61
 msgctxt "@option:radio"
 msgid "Outlined adaptive icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:109
+#: contents/ui/ConfigAppearance.qml:69
 msgctxt "@option:radio"
 msgid "Filled dark icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:117
+#: contents/ui/ConfigAppearance.qml:77
 msgctxt "@option:radio"
 msgid "Filled light icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:125
+#: contents/ui/ConfigAppearance.qml:85
 msgctxt "@option:radio"
 msgid "Outlined dark icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:133
+#: contents/ui/ConfigAppearance.qml:93
 msgctxt "@option:radio"
 msgid "Outlined light icon"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:141
+#: contents/ui/ConfigBehavior.qml:59
 msgctxt "@label:checkbox"
-msgid "Input behavior:"
+msgid "Input:"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:142
+#: contents/ui/ConfigBehavior.qml:60
 msgctxt "@option:check"
 msgid "Use Enter to send message"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:144
+#: contents/ui/ConfigBehavior.qml:62
 msgctxt "@info:tooltip"
 msgid ""
 "When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
-"When disabled: Enter adds new line, use `send` button to submit."
+"When disabled: Enter adds new line, use 'send' button to submit."
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:152
+#: contents/ui/ConfigBehavior.qml:70
 msgctxt "@label:checkbox"
-msgid "Sound effects:"
+msgid "Sound:"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:153
+#: contents/ui/ConfigBehavior.qml:71
 msgctxt "@option:check"
 msgid "Play sound when AI response is complete"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:155
+#: contents/ui/ConfigBehavior.qml:73
 msgctxt "@info:tooltip"
 msgid "Play a slight beep sound effect after the response is completed."
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:163
+#: contents/ui/ConfigBehavior.qml:81
 msgctxt "@label:checkbox"
 msgid "Text rendering:"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:164
+#: contents/ui/ConfigBehavior.qml:82
 msgctxt "@option:check"
 msgid "Enable markdown rendering in AI responses"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:166
+#: contents/ui/ConfigBehavior.qml:84
 msgctxt "@info:tooltip"
 msgid ""
 "Render markdown formatting (bold, italics, code blocks, etc.) in AI "
 "responses. When disabled, responses are shown as plain text."
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:222
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr ""
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr ""
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr ""
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+
+#: contents/ui/ConfigBehavior.qml:139
 msgctxt "@label:checkbox"
 msgid "Debug logging:"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:223
+#: contents/ui/ConfigBehavior.qml:140
 msgctxt "@option:check"
 msgid "Enable debug console logs"
 msgstr ""
 
-#: contents/ui/ConfigAppearance.qml:225
+#: contents/ui/ConfigBehavior.qml:142
 msgctxt "@info:tooltip"
 msgid ""
 "Show debug console.log messages for troubleshooting. This setting is "
@@ -178,12 +216,14 @@ msgctxt "@info"
 msgid "Long prompts may increase request size."
 msgstr ""
 
-#: contents/config/config.qml:13
-msgctxt "@title"
-msgid "Appearance & Behavior"
+#: contents/ui/main.qml:430
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
 msgstr ""
 
-#: contents/config/config.qml:18
-msgctxt "@title"
-msgid "Server"
+#: contents/ui/main.qml:440
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
 msgstr ""
