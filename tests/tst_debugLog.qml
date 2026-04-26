@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtTest 1.3
+import QtQuick
+import QtTest
 import "../contents/js/utils.js" as Utils
 
 TestCase {

@@ -18,11 +18,10 @@ jobs:
     - name: Extract version from metadata.json
       id: get_version
       run: |
-        VERSION=$(grep '"Version"' metadata.json | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
-        PLUGIN_ID=$(grep '"Id"' metadata.json | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+        VERSION=$(jq -r '.KPlugin.Version' metadata.json)
+        APP_NAME=$(jq -r '.KPlugin.Name' metadata.json)
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "plugin_id=$PLUGIN_ID" >> $GITHUB_OUTPUT
-        echo "package_name=${PLUGIN_ID}-${VERSION}.plasmoid" >> $GITHUB_OUTPUT
+        echo "package_name=${APP_NAME}-${VERSION}.plasmoid" >> $GITHUB_OUTPUT
         
     - name: Create .plasmoid package
       run: |
@@ -75,7 +74,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Store package as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: plasmoid-package-${{ steps.get_version.outputs.version }}
         path: ${{ steps.get_version.outputs.package_name }}

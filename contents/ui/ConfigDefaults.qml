@@ -41,6 +41,7 @@ KCM.SimpleKCM {
     property bool cfg_completionSound: false
     property bool cfg_debugLogs: false
     property bool cfg_enableMarkdown: false
+    property int cfg_streamingTimeoutSecs: 0
     // === SYSTEM PROMPT CONFIG ===
     property bool cfg_systemPromptEnabled: false
     property string cfg_systemPrompt: "You are a helpful assistant that answers questions in plain English."
@@ -63,6 +64,7 @@ KCM.SimpleKCM {
     property bool cfg_completionSoundDefault: false
     property bool cfg_debugLogsDefault: false
     property bool cfg_enableMarkdownDefault: false
+    property int cfg_streamingTimeoutSecsDefault: 0
     // === SYSTEM PROMPT DEFAULT VARIANTS ===
     property bool cfg_systemPromptEnabledDefault: false
     property string cfg_systemPromptDefault: "You are a helpful assistant that answers questions in plain English."

@@ -5,7 +5,10 @@
 
 set -e  # Exit on any error
 
-PROJECT_NAME="K-Ollama-Plasmoid"
+# Dynamically determine the project name from metadata.json
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
 POT_FILE="po/${PROJECT_NAME}.pot"
 
 # Colors for output

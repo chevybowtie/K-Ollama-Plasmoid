@@ -1,4 +1,4 @@
-# Spanish translation for K-Ollama.
+# French translation for K-Ollama.
 # Copyright (C) 2025 Paul Sturm
 # This file is distributed under the same license as the K-Ollama package.
 # Paul Sturm <paul.sturm@cotton-software.com>, 2025.
@@ -10,8 +10,8 @@ msgstr ""
 "POT-Creation-Date: 2026-04-25 19:03-0500\n"
 "PO-Revision-Date: 2026-04-25 19:10-0500\n"
 "Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
-"Language-Team: Spanish\n"
-"Language: es\n"
+"Language-Team: French\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,62 +19,62 @@ msgstr ""
 #: contents/config/config.qml:13
 msgctxt "@title"
 msgid "Server"
-msgstr "Servidor"
+msgstr "Serveur"
 
 #: contents/config/config.qml:18
 msgctxt "@title"
 msgid "Appearance"
-msgstr "Apariencia"
+msgstr "Apparence"
 
 #: contents/config/config.qml:23
 msgctxt "@title"
 msgid "Behavior"
-msgstr "Comportamiento"
+msgstr "Comportement"
 
 #: contents/ui/ConfigAppearance.qml:52
 msgctxt "@title:group"
 msgid "Icon:"
-msgstr "Icono:"
+msgstr "Icône :"
 
 #: contents/ui/ConfigAppearance.qml:53
 msgctxt "@option:radio"
 msgid "Filled adaptive icon"
-msgstr "Icono adaptativo relleno"
+msgstr "Icône adaptative pleine"
 
 #: contents/ui/ConfigAppearance.qml:61
 msgctxt "@option:radio"
 msgid "Outlined adaptive icon"
-msgstr "Icono adaptativo contorneado"
+msgstr "Icône adaptative en contour"
 
 #: contents/ui/ConfigAppearance.qml:69
 msgctxt "@option:radio"
 msgid "Filled dark icon"
-msgstr "Icono oscuro relleno"
+msgstr "Icône sombre pleine"
 
 #: contents/ui/ConfigAppearance.qml:77
 msgctxt "@option:radio"
 msgid "Filled light icon"
-msgstr "Icono claro relleno"
+msgstr "Icône claire pleine"
 
 #: contents/ui/ConfigAppearance.qml:85
 msgctxt "@option:radio"
 msgid "Outlined dark icon"
-msgstr "Icono oscuro contorneado"
+msgstr "Icône sombre en contour"
 
 #: contents/ui/ConfigAppearance.qml:93
 msgctxt "@option:radio"
 msgid "Outlined light icon"
-msgstr "Icono claro contorneado"
+msgstr "Icône claire en contour"
 
 #: contents/ui/ConfigBehavior.qml:59
 msgctxt "@label:checkbox"
 msgid "Input:"
-msgstr "Entrada:"
+msgstr "Saisie :"
 
 #: contents/ui/ConfigBehavior.qml:60
 msgctxt "@option:check"
 msgid "Use Enter to send message"
-msgstr "Usar Enter para enviar mensaje"
+msgstr "Utiliser Entrée pour envoyer le message"
 
 #: contents/ui/ConfigBehavior.qml:62
 msgctxt "@info:tooltip"
@@ -82,33 +82,33 @@ msgid ""
 "When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
 "When disabled: Enter adds new line, use 'send' button to submit."
 msgstr ""
-"Activado: Enter envía el mensaje, Ctrl+Enter añade nueva línea.\n"
-"Desactivado: Enter añade nueva línea, usar el botón 'enviar' para mandar."
+"Activé : Entrée envoie le message, Ctrl+Entrée ajoute une nouvelle ligne.\n"
+"Désactivé : Entrée ajoute une nouvelle ligne, utiliser le bouton « envoyer »."
 
 #: contents/ui/ConfigBehavior.qml:70
 msgctxt "@label:checkbox"
 msgid "Sound:"
-msgstr "Sonido:"
+msgstr "Son :"
 
 #: contents/ui/ConfigBehavior.qml:71
 msgctxt "@option:check"
 msgid "Play sound when AI response is complete"
-msgstr "Reproducir sonido cuando la respuesta de IA esté completa"
+msgstr "Jouer un son quand la réponse de l'IA est complète"
 
 #: contents/ui/ConfigBehavior.qml:73
 msgctxt "@info:tooltip"
 msgid "Play a slight beep sound effect after the response is completed."
-msgstr "Reproduce un ligero pitido después de que la respuesta esté completada."
+msgstr "Jouer un léger bip sonore une fois la réponse terminée."
 
 #: contents/ui/ConfigBehavior.qml:81
 msgctxt "@label:checkbox"
 msgid "Text rendering:"
-msgstr "Renderizado de texto:"
+msgstr "Rendu du texte :"
 
 #: contents/ui/ConfigBehavior.qml:82
 msgctxt "@option:check"
 msgid "Enable markdown rendering in AI responses"
-msgstr "Habilitar renderizado de markdown en respuestas de IA"
+msgstr "Activer le rendu Markdown dans les réponses IA"
 
 #: contents/ui/ConfigBehavior.qml:84
 msgctxt "@info:tooltip"
@@ -116,19 +116,18 @@ msgid ""
 "Render markdown formatting (bold, italics, code blocks, etc.) in AI "
 "responses. When disabled, responses are shown as plain text."
 msgstr ""
-"Renderiza el formato markdown (negrita, cursiva, bloques de código, etc.) en "
-"las respuestas de IA. Cuando está desactivado, las respuestas se muestran "
-"como texto plano."
+"Afficher la mise en forme Markdown (gras, italique, blocs de code, etc.) "
+"dans les réponses IA. Désactivé, les réponses s'affichent en texte brut."
 
 #: contents/ui/ConfigBehavior.qml:113
 msgctxt "@label:spinbox"
 msgid "Response timeout:"
-msgstr "Tiempo de espera:"
+msgstr "Délai d'attente :"
 
 #: contents/ui/ConfigBehavior.qml:126
 msgctxt "@info"
 msgid "s  (no limit)"
-msgstr "s  (sin límite)"
+msgstr "s  (sans limite)"
 
 #: contents/ui/ConfigBehavior.qml:127
 msgctxt "@info"
@@ -141,18 +140,18 @@ msgid ""
 "Maximum time to wait for a streaming response. Set to 0 to disable the "
 "timeout. Increase this for slow models that generate long responses."
 msgstr ""
-"Tiempo máximo de espera para una respuesta en streaming. Poner 0 para "
-"deshabilitar. Aumentar para modelos lentos que generan respuestas largas."
+"Temps d'attente maximal pour une réponse en streaming. Mettre 0 pour "
+"désactiver. Augmenter pour les modèles lents générant de longues réponses."
 
 #: contents/ui/ConfigBehavior.qml:139
 msgctxt "@label:checkbox"
 msgid "Debug logging:"
-msgstr "Registro de depuración:"
+msgstr "Journal de débogage :"
 
 #: contents/ui/ConfigBehavior.qml:140
 msgctxt "@option:check"
 msgid "Enable debug console logs"
-msgstr "Habilitar registros de consola de depuración"
+msgstr "Activer les journaux de console de débogage"
 
 #: contents/ui/ConfigBehavior.qml:142
 msgctxt "@info:tooltip"
@@ -160,13 +159,13 @@ msgid ""
 "Show debug console.log messages for troubleshooting. This setting is "
 "persisted."
 msgstr ""
-"Muestra mensajes de console.log de depuración para solución de problemas. "
-"Esta configuración se mantiene persistente."
+"Afficher les messages console.log de débogage pour le dépannage. "
+"Ce paramètre est persistant."
 
 #: contents/ui/ConfigServer.qml:41
 msgctxt "@label:textbox"
 msgid "Ollama Server URL:"
-msgstr "URL del servidor Ollama:"
+msgstr "URL du serveur Ollama :"
 
 #: contents/ui/ConfigServer.qml:42
 msgctxt "@info:placeholder"
@@ -179,8 +178,8 @@ msgid ""
 "URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
 "IP for remote server"
 msgstr ""
-"URL del servidor Ollama. Use localhost (127.0.0.1) para servidor local o IP "
-"de LAN para servidor remoto"
+"URL du serveur Ollama. Utiliser localhost (127.0.0.1) pour un serveur local "
+"ou l'IP du réseau local pour un serveur distant"
 
 #: contents/ui/ConfigServer.qml:54
 msgctxt "@info"
@@ -189,68 +188,68 @@ msgid ""
 "• Local server: http://127.0.0.1:11434\n"
 "• Remote server: http://192.168.1.100:11434"
 msgstr ""
-"Ejemplos:\n"
-"• Servidor local: http://127.0.0.1:11434\n"
-"• Servidor remoto: http://192.168.1.100:11434"
+"Exemples :\n"
+"• Serveur local : http://127.0.0.1:11434\n"
+"• Serveur distant : http://192.168.1.100:11434"
 
 #: contents/ui/ConfigServer.qml:67
 msgctxt "@label"
 msgid "Temperature"
-msgstr "Temperatura"
+msgstr "Température"
 
 #: contents/ui/ConfigServer.qml:89
 msgctxt "@info"
 msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
-msgstr "Menor = más determinista, mayor = más creativo (0.0–2.0)"
+msgstr "Bas = plus déterministe, haut = plus créatif (0,0–2,0)"
 
 #: contents/ui/ConfigServer.qml:96
 msgctxt "@label:checkbox"
 msgid "System prompt"
-msgstr "Indicación del sistema"
+msgstr "Invite système"
 
 #: contents/ui/ConfigServer.qml:97
 msgctxt "@option"
 msgid "Enable system prompt"
-msgstr "Habilitar indicación del sistema"
+msgstr "Activer l'invite système"
 
 #: contents/ui/ConfigServer.qml:101
 msgctxt "@info"
 msgid "Prepend a system message to every API request. Do not include secrets."
-msgstr "Antepone un mensaje del sistema a cada solicitud. No incluya secretos."
+msgstr "Ajouter un message système à chaque requête API. Ne pas inclure de secrets."
 
 #: contents/ui/ConfigServer.qml:110
 msgctxt "@info:placeholder"
 msgid "You are a helpful assistant that answers questions in plain English."
-msgstr "Eres un asistente útil que responde preguntas en español sencillo."
+msgstr "Vous êtes un assistant utile qui répond aux questions en français courant."
 
 #: contents/ui/ConfigServer.qml:138
 msgctxt "@info"
 msgid "Long prompts may increase request size."
-msgstr "Las indicaciones largas pueden aumentar el tamaño de la solicitud."
+msgstr "Les invites longues peuvent augmenter la taille des requêtes."
 
 #: contents/ui/main.qml:430
 msgid ""
 "Network error — could not reach the Ollama server. Check that Ollama is "
 "running and the server URL is correct."
 msgstr ""
-"Error de red — no se pudo alcanzar el servidor Ollama. Verifique que Ollama "
-"esté en ejecución y que la URL del servidor sea correcta."
+"Erreur réseau — impossible d'atteindre le serveur Ollama. Vérifiez qu'Ollama "
+"est en cours d'exécution et que l'URL du serveur est correcte."
 
 #: contents/ui/main.qml:440
 msgid ""
 "Request timed out. For slow models, increase the response timeout in "
 "Settings → Behavior, or set it to 0 to disable."
 msgstr ""
-"La solicitud expiró. Para modelos lentos, aumente el tiempo de espera en "
-"Configuración → Comportamiento, o póngalo en 0 para desactivarlo."
+"La requête a expiré. Pour les modèles lents, augmentez le délai d'attente "
+"dans Paramètres → Comportement, ou mettez 0 pour désactiver."
 
 
 #: contents/ui/main.qml:926
 msgctxt "@action:button"
 msgid "Copy %1"
-msgstr "Copiar %1"
+msgstr "Copier %1"
 
 #: contents/ui/main.qml:928
 msgctxt "@action:button"
 msgid "Copy block %1"
-msgstr "Copiar bloque %1"
+msgstr "Copier le bloc %1"

@@ -47,7 +47,8 @@ PlasmoidItem {
     property bool isLoading: false
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
-    
+    property string requestError: ""
+
     // Performance optimization: limit conversation history
     readonly property int maxConversationHistory: 50
     
@@ -218,11 +219,17 @@ PlasmoidItem {
         
         // Performance optimization: limit conversation history to prevent memory bloat
         if (promptArray.length > root.maxConversationHistory * 2) { // *2 because each exchange has 2 messages
-            // Keep the most recent messages, remove older ones
             const keepCount = root.maxConversationHistory * 2;
             promptArray = promptArray.slice(-keepCount);
+            // Trim listModel to match so deleteMessage indices stay aligned
+            while (listModel.count > keepCount) {
+                listModel.remove(0);
+            }
             Utils.debugLog('debug', 'Trimmed conversation history to', keepCount, 'messages');
         }
+
+        // Clear any error banner left over from a previous request
+        root.requestError = "";
 
         // UI State Updates
         // Set loading state to show progress indicators and disable input
@@ -420,6 +427,7 @@ PlasmoidItem {
          */
         xhr.onerror = function() {
             Utils.debugLog('error', 'Network error during chat request');
+            root.requestError = i18n("Network error — could not reach the Ollama server. Check that Ollama is running and the server URL is correct.");
             finishRequest('network-error');
         };
 
@@ -429,20 +437,25 @@ PlasmoidItem {
          */
         xhr.ontimeout = function() {
             Utils.debugLog('warn', 'Chat request timeout');
+            root.requestError = i18n("Request timed out. For slow models, increase the response timeout in Settings → Behavior, or set it to 0 to disable.");
             finishRequest('timeout');
         };
 
-        xhr.timeout = 30000; // 30 seconds timeout
+        xhr.timeout = (Plasmoid.configuration.streamingTimeoutSecs || 0) * 1000; // 0 = no timeout
         xhr.send(data);
     }
 
     function deleteMessage(index) {
-        // Remove from visual list model
+        // Compute promptArray index before removing from listModel.
+        // The two collections can drift if a trim hasn't run yet; drift
+        // is always non-negative (listModel >= promptArray after a trim).
+        var drift = root.listModelController.count - promptArray.length;
+        var promptIndex = index - drift;
+
         root.listModelController.remove(index);
-        
-        // Remove from prompt array (conversation history)
-        if (index < promptArray.length) {
-            promptArray.splice(index, 1);
+
+        if (promptIndex >= 0 && promptIndex < promptArray.length) {
+            promptArray.splice(promptIndex, 1);
         }
     }
 
@@ -814,7 +827,8 @@ PlasmoidItem {
                     Layout.fillWidth: true
 
                     contentItem: Item {
-                        implicitHeight: textMessageLoader.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
+                        implicitHeight: textMessageLoader.implicitHeight
+                            + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
                         /**
                          * Dynamic Component Loading System for Message Rendering
@@ -823,16 +837,17 @@ PlasmoidItem {
                          */
                         Loader {
                             id: textMessageLoader
-                            
+                            asynchronous: true
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
                             anchors.margins: 8
-                            
+
                             // Height calculation delegation to the loaded component
                             // This ensures proper layout regardless of which component is active
                             readonly property real implicitHeight: textMessageLoader.item ? textMessageLoader.item.implicitHeight : 0
-                            
+
                             // Dynamic Component Selection: Load appropriate renderer based on markdown setting
                             // Configuration changes trigger automatic component reloading
                             sourceComponent: Plasmoid.configuration.enableMarkdown ? markdownComponent : plainTextComponent
@@ -855,20 +870,111 @@ PlasmoidItem {
                             
                             Component {
                                 id: markdownComponent
-                                TextArea {
-                                    id: markdownTextArea
-                                    readOnly: true
-                                    wrapMode: TextArea.Wrap
-                                    text: number
-                                    textFormat: TextArea.MarkdownText
-                                    color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                                    selectByMouse: true
-                                    background: null
-                                    
-                                    function selectAll() { markdownTextArea.selectAll() }
-                                    function copy() { markdownTextArea.copy() }
-                                    function deselect() { markdownTextArea.deselect() }
+                                Column {
+                                    id: segmentedColumn
+                                    spacing: 4
+
+                                    function selectAll() { clipboardHelper.copyText(number) }
+                                    function copy() {}
+                                    function deselect() {}
+
+                                    Repeater {
+                                        model: Utils.splitIntoSegments(number)
+
+                                        delegate: Item {
+                                            width: parent.width
+                                            implicitHeight: modelData.type === "code"
+                                                ? codeRect.implicitHeight
+                                                : mdText.implicitHeight
+
+                                            TextArea {
+                                                id: mdText
+                                                visible: modelData.type === "text"
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                readOnly: true
+                                                wrapMode: TextArea.Wrap
+                                                text: modelData.type === "text" ? modelData.content : ""
+                                                textFormat: TextArea.MarkdownText
+                                                color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                                selectByMouse: true
+                                                background: null
+                                            }
+
+                                            Rectangle {
+                                                id: codeRect
+                                                visible: modelData.type === "code"
+                                                width: parent.width
+                                                implicitHeight: modelData.type === "code"
+                                                    ? codeEditCol.implicitHeight + 8
+                                                    : 0
+                                                color: Qt.darker(Kirigami.Theme.backgroundColor, 1.15)
+                                                radius: 4
+                                                border.width: 1
+                                                border.color: Qt.alpha(Kirigami.Theme.textColor, 0.15)
+
+                                                Column {
+                                                    id: codeEditCol
+                                                    anchors.left: parent.left
+                                                    anchors.right: parent.right
+                                                    anchors.top: parent.top
+                                                    anchors.topMargin: 4
+                                                    spacing: 0
+
+                                                    TextEdit {
+                                                        id: codeEdit
+                                                        width: parent.width
+                                                        leftPadding: 8
+                                                        rightPadding: 8
+                                                        readOnly: true
+                                                        wrapMode: Text.WrapAnywhere
+                                                        text: modelData.type === "code" ? modelData.content : ""
+                                                        font.family: "monospace"
+                                                        font.pointSize: Kirigami.Theme.defaultFont.pointSize - 1
+                                                        color: Kirigami.Theme.textColor
+                                                        selectByMouse: true
+                                                    }
+
+                                                    PlasmaComponents.ToolButton {
+                                                        id: codeCopyBtn
+                                                        property bool justCopied: false
+                                                        icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                                        display: PlasmaComponents.AbstractButton.IconOnly
+
+                                                        onClicked: {
+                                                            clipboardHelper.copyText(modelData.content)
+                                                            justCopied = true
+                                                            codeCopyTimer.restart()
+                                                        }
+
+                                                        Timer {
+                                                            id: codeCopyTimer
+                                                            interval: 1500
+                                                            repeat: false
+                                                            onTriggered: codeCopyBtn.justCopied = false
+                                                        }
+
+                                                        PlasmaComponents.ToolTip.text: root.translate("Copy code")
+                                                        PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                                        PlasmaComponents.ToolTip.visible: hovered
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
+                            }
+                        }
+
+                        // Clipboard intermediary for code-only copies (never visible)
+                        TextEdit {
+                            id: clipboardHelper
+                            visible: false
+                            function copyText(t) {
+                                text = t
+                                selectAll()
+                                copy()
+                                text = ""
                             }
                         }
 
@@ -881,16 +987,28 @@ PlasmoidItem {
                             visible: cardHoverHandler.hovered
 
                             PlasmaComponents.Button {
-                                icon.name: "edit-copy-symbolic"
-                                text: root.translate("Copy")
+                                id: msgCopyButton
+                                property bool justCopied: false
+
+                                icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                text: root.translate(justCopied ? "Copied!" : "Copy")
                                 display: PlasmaComponents.AbstractButton.IconOnly
-                                
+
                                 onClicked: {
                                     if (textMessageLoader.item) {
-                                        textMessageLoader.item.selectAll();
-                                        textMessageLoader.item.copy();
-                                        textMessageLoader.item.deselect();
+                                        textMessageLoader.item.selectAll()
+                                        textMessageLoader.item.copy()
+                                        textMessageLoader.item.deselect()
+                                        justCopied = true
+                                        msgCopyFeedbackTimer.restart()
                                     }
+                                }
+
+                                Timer {
+                                    id: msgCopyFeedbackTimer
+                                    interval: 1500
+                                    repeat: false
+                                    onTriggered: msgCopyButton.justCopied = false
                                 }
 
                                 PlasmaComponents.ToolTip.text: text
@@ -921,6 +1039,15 @@ PlasmoidItem {
             }
         }
 
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: root.requestError.length > 0
+            text: root.requestError
+            type: Kirigami.MessageType.Error
+            showCloseButton: true
+            onVisibleChanged: if (!visible) root.requestError = ""
+        }
+
         ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
@@ -935,6 +1062,7 @@ PlasmoidItem {
 
                 enabled: root.isReady
                 hoverEnabled: root.isReady
+                selectByMouse: true
                 placeholderText: root.translate("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 

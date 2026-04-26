@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtTest 1.3
+import QtQuick
+import QtQuick.Controls
+import QtTest
 
 TestCase {
     name: "SystemPromptTests"
@@ -37,7 +37,7 @@ TestCase {
     function test_payload_builder_includes_system_prompt() {
         // Simulate enabling and setting the prompt, then call the builder from main.qml via import
         try {
-            plasmoid = Qt.createQmlObject('import QtQuick 2.0; QtObject {}', testCase)
+            plasmoid = Qt.createQmlObject('import QtQuick; QtObject {}', testCase)
         } catch (e) {}
 
         // Call the global build logic by importing the main UI file code

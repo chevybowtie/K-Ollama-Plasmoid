@@ -15,8 +15,13 @@ ConfigModel {
          source: "ConfigServer.qml"
     }
     ConfigCategory {
-         name: i18nc("@title", "Appearance & Behavior")
+         name: i18nc("@title", "Appearance")
          icon: "preferences-desktop-color"
          source: "ConfigAppearance.qml"
+    }
+    ConfigCategory {
+         name: i18nc("@title", "Behavior")
+         icon: "preferences-system"
+         source: "ConfigBehavior.qml"
     }
 }

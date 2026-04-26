@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtTest 1.3
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtTest
+import QtQuick.Controls
+import QtQuick.Layouts
 import org.kde.plasma.components as PlasmaComponents
 
 TestCase {
@@ -141,7 +141,7 @@ TestCase {
     }
     
     function test_clearButton_emits_signal() {
-        var signalSpy = createTemporaryQmlObject('import QtTest 1.3; SignalSpy {}', testCase)
+        var signalSpy = createTemporaryQmlObject('import QtTest; SignalSpy {}', testCase)
         signalSpy.target = toolbar.clearButton
         signalSpy.signalName = "clearTriggered"
         

@@ -78,5 +78,11 @@
       <default>You are a helpful assistant that answers questions in plain English.</default>
       <maxlength>2048</maxlength>
     </entry>
+    <entry name="streamingTimeoutSecs" type="Int">
+      <label>Streaming response timeout in seconds (0 = no limit)</label>
+      <default>0</default>
+      <min>0</min>
+      <max>600</max>
+    </entry>
   </group>
 </kcfg>

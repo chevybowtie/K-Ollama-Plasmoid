@@ -4,7 +4,7 @@
   `connected`, `status`, and `error` properties for UI binding.
 */
 // Qt modules
-import QtQuick 2.15
+import QtQuick
 
 // Local imports
 import "../js/utils.js" as Utils
