@@ -42,7 +42,7 @@ Once published, install directly from KDE:
    - No need to build or compile anything
 2. **Install the package:**
    ```bash
-   kpackagetool6 --type Plasma/Applet --install K-Ollama-Plasmoid-1.1.0.plasmoid
+   kpackagetool6 --type Plasma/Applet --install K-Ollama-1.1.0.plasmoid
    ```
 3. **Add to your panel:**
    - Right-click on your KDE panel → "Add Widgets..."
@@ -122,7 +122,7 @@ After installation, right-click the K-Ollama widget and select "Configure..." to
 - **Sound**: Play a completion sound when the AI finishes responding
 - **Text Rendering**: Enable markdown formatting in AI responses:
   - **Disabled** (default): Responses shown as plain text
-  - **Enabled**: Supports bold, italics, code blocks, lists, headers, and other markdown formatting. Per-code-block copy buttons appear below each message containing code.
+  - **Enabled**: Supports bold, italics, code blocks, lists, headers, and other markdown formatting. Each code block gets an icon-only copy button at its lower-left corner.
 - **Response Timeout**: Maximum seconds to wait for a streaming response (0 = no limit). Increase this for large models that generate long responses.
 - **Debug Logging**: Show console.log debug messages for troubleshooting
 

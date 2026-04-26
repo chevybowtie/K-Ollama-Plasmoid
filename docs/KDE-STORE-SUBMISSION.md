@@ -118,7 +118,7 @@ Add a changelog entry for the version being uploaded. This is shown on the produ
 
 ```
 v1.1.0
-- Per-code-block copy buttons with visual feedback
+- Per-code-block copy: icon-only button at the lower-left corner of each rendered code block
 - Configurable response timeout (Settings → Behavior)
 - Separate Appearance and Behavior config tabs
 - Inline error banners for network/timeout failures
