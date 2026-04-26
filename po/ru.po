@@ -243,3 +243,14 @@ msgid ""
 msgstr ""
 "Время ожидания запроса истекло. Для медленных моделей увеличьте тайм-аут "
 "в Настройках → Поведение или установите 0 для отключения."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Копировать %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Копировать блок %1"

@@ -240,3 +240,14 @@ msgid ""
 "Settings → Behavior, or set it to 0 to disable."
 msgstr ""
 "请求超时。对于慢速模型，请在设置 → 行为中增大响应超时，或设为 0 以禁用超时。"
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "复制 %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "复制第 %1 块"

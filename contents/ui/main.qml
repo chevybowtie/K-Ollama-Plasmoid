@@ -923,9 +923,9 @@ PlasmoidItem {
                                     icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
                                     text: {
                                         if (justCopied) return root.translate("Copied!")
-                                        if (modelData.language) return root.translate("Copy %1").arg(modelData.language)
+                                        if (modelData.language) return i18n("Copy %1", modelData.language)
                                         return codeBlockRepeater.count > 1
-                                            ? root.translate("Copy block %1").arg(index + 1)
+                                            ? i18n("Copy block %1", index + 1)
                                             : root.translate("Copy code")
                                     }
                                     display: PlasmaComponents.AbstractButton.TextBesideIcon

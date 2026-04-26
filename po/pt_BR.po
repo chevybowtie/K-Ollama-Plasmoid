@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "A requisição expirou. Para modelos lentos, aumente o tempo limite em "
 "Configurações → Comportamento, ou defina como 0 para desativar."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Copiar %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Copiar bloco %1"

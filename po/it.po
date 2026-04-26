@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "Richiesta scaduta. Per modelli lenti, aumentare il timeout di risposta in "
 "Impostazioni → Comportamento, oppure impostarlo a 0 per disabilitarlo."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Copia %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Copia blocco %1"

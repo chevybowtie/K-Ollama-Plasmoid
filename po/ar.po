@@ -243,3 +243,14 @@ msgid ""
 msgstr ""
 "انتهت مهلة الطلب. للنماذج البطيئة، زِد مهلة الاستجابة في "
 "الإعدادات ← السلوك، أو اضبطها على 0 للتعطيل."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "نسخ %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "نسخ الكتلة %1"

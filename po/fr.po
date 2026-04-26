@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "La requête a expiré. Pour les modèles lents, augmentez le délai d'attente "
 "dans Paramètres → Comportement, ou mettez 0 pour désactiver."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Copier %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Copier le bloc %1"

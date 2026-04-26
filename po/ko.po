@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "요청 시간 초과. 느린 모델의 경우 설정 → 동작에서 응답 시간 제한을 늘리거나 "
 "0으로 설정하여 비활성화하세요."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "%1 복사"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "블록 %1 복사"

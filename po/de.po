@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "Anfrage-Timeout. Für langsame Modelle den Antwort-Timeout unter "
 "Einstellungen → Verhalten erhöhen oder auf 0 setzen zum Deaktivieren."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "%1 kopieren"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Block %1 kopieren"

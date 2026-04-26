@@ -242,3 +242,14 @@ msgid ""
 msgstr ""
 "リクエストがタイムアウトしました。低速モデルの場合は設定 → 動作でタイムアウトを"
 "増やすか、0 に設定して無効にしてください。"
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "%1 をコピー"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "ブロック %1 をコピー"
