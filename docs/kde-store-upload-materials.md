@@ -2,7 +2,7 @@
 
 ## Basic Information ✅
 - **Title**: K-Ollama
-- **Version**: 1.0.0 (matches metadata.json)
+- **Version**: 1.1.0 (matches metadata.json)
 - **License**: LGPL-2.1-or-later
 - **Website**: https://github.com/chevybowtie/K-Ollama-Plasmoid
 - **Authors**: Denys Madureira, Paul Sturm
