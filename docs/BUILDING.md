@@ -1,5 +1,25 @@
 # Development Guide
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+  - [Development Installation](#development-installation-recommended)
+  - [System-Wide Installation](#system-wide-installation)
+  - [Installation Management](#installation-management)
+- [Development Workflow](#development-workflow)
+  - [Adding New i18n Strings](#adding-new-i18n-strings)
+- [Translation Management](#translation-management)
+  - [Complete Translation Workflow](#complete-translation-workflow)
+  - [Step-by-Step Translation](#step-by-step-translation)
+  - [Translation Troubleshooting](#translation-troubleshooting)
+- [Packaging](#packaging)
+- [Directory Structure](#directory-structure)
+- [Dependencies](#dependencies)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+
 ## Overview
 
 This is a KDE Plasma 6 plasmoid written entirely in QML and JavaScript. There is no compilation step — QML is interpreted at runtime by Plasma. The project uses simple shell scripts for installation, translation management, packaging, and testing.
