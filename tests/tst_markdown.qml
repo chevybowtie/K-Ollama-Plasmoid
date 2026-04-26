@@ -3,9 +3,9 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
-import QtQuick 2.15
-import QtTest 1.3
-import QtQuick.Controls 2.15
+import QtQuick
+import QtTest
+import QtQuick.Controls
 import "../contents/ui" as UI
 import "../contents/js/utils.js" as Utils
 

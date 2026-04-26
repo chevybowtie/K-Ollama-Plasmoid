@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtTest 1.3
-import QtQuick.Controls 2.15
+import QtQuick
+import QtTest
+import QtQuick.Controls
 import "../contents/js/utils.js" as Utils
 
 TestCase {
@@ -137,7 +137,7 @@ TestCase {
         messageField.text = "Test message"
         messageField.forceActiveFocus()
         
-        var sendSpy = createTemporaryQmlObject('import QtTest 1.3; SignalSpy {}', testCase)
+        var sendSpy = createTemporaryQmlObject('import QtTest; SignalSpy {}', testCase)
         sendSpy.target = messageField
         sendSpy.signalName = "sendTriggered"
         
@@ -156,7 +156,7 @@ TestCase {
         messageField.text = "Test message"
         messageField.forceActiveFocus()
         
-        var sendSpy = createTemporaryQmlObject('import QtTest 1.3; SignalSpy {}', testCase)
+        var sendSpy = createTemporaryQmlObject('import QtTest; SignalSpy {}', testCase)
         sendSpy.target = messageField
         sendSpy.signalName = "sendTriggered"
         
@@ -171,7 +171,7 @@ TestCase {
         messageField.text = "   " // Only whitespace
         messageField.forceActiveFocus()
         
-        var sendSpy = createTemporaryQmlObject('import QtTest 1.3; SignalSpy {}', testCase)
+        var sendSpy = createTemporaryQmlObject('import QtTest; SignalSpy {}', testCase)
         sendSpy.target = messageField
         sendSpy.signalName = "sendTriggered"
         

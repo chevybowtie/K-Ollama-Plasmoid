@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtTest 1.3
-import QtQuick.Controls 2.15
+import QtQuick
+import QtTest
+import QtQuick.Controls
 
 TestCase {
     id: testCase

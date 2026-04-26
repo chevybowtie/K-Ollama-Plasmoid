@@ -1,5 +1,5 @@
-import QtTest 1.2
-import QtQuick 2.15
+import QtTest
+import QtQuick
 
 import "../contents/js/utils.js" as Utils
 
