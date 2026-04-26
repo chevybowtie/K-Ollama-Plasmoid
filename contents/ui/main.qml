@@ -828,7 +828,6 @@ PlasmoidItem {
 
                     contentItem: Item {
                         implicitHeight: textMessageLoader.implicitHeight
-                            + (codeBlockButtons.visible ? codeBlockButtons.implicitHeight + Kirigami.Units.smallSpacing : 0)
                             + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
                         /**
@@ -871,19 +870,98 @@ PlasmoidItem {
                             
                             Component {
                                 id: markdownComponent
-                                TextArea {
-                                    id: markdownTextArea
-                                    readOnly: true
-                                    wrapMode: TextArea.Wrap
-                                    text: number
-                                    textFormat: TextArea.MarkdownText
-                                    color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                                    selectByMouse: true
-                                    background: null
-                                    
-                                    function selectAll() { markdownTextArea.selectAll() }
-                                    function copy() { markdownTextArea.copy() }
-                                    function deselect() { markdownTextArea.deselect() }
+                                Column {
+                                    id: segmentedColumn
+                                    spacing: 4
+
+                                    function selectAll() { clipboardHelper.copyText(number) }
+                                    function copy() {}
+                                    function deselect() {}
+
+                                    Repeater {
+                                        model: Utils.splitIntoSegments(number)
+
+                                        delegate: Item {
+                                            width: parent.width
+                                            implicitHeight: modelData.type === "code"
+                                                ? codeRect.implicitHeight
+                                                : mdText.implicitHeight
+
+                                            TextArea {
+                                                id: mdText
+                                                visible: modelData.type === "text"
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                readOnly: true
+                                                wrapMode: TextArea.Wrap
+                                                text: modelData.type === "text" ? modelData.content : ""
+                                                textFormat: TextArea.MarkdownText
+                                                color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                                selectByMouse: true
+                                                background: null
+                                            }
+
+                                            Rectangle {
+                                                id: codeRect
+                                                visible: modelData.type === "code"
+                                                width: parent.width
+                                                implicitHeight: modelData.type === "code"
+                                                    ? codeEditCol.implicitHeight + 8
+                                                    : 0
+                                                color: Qt.darker(Kirigami.Theme.backgroundColor, 1.15)
+                                                radius: 4
+                                                border.width: 1
+                                                border.color: Qt.alpha(Kirigami.Theme.textColor, 0.15)
+
+                                                Column {
+                                                    id: codeEditCol
+                                                    anchors.left: parent.left
+                                                    anchors.right: parent.right
+                                                    anchors.top: parent.top
+                                                    anchors.topMargin: 4
+                                                    spacing: 0
+
+                                                    TextEdit {
+                                                        id: codeEdit
+                                                        width: parent.width
+                                                        leftPadding: 8
+                                                        rightPadding: 8
+                                                        readOnly: true
+                                                        wrapMode: Text.WrapAnywhere
+                                                        text: modelData.type === "code" ? modelData.content : ""
+                                                        font.family: "monospace"
+                                                        font.pointSize: Kirigami.Theme.defaultFont.pointSize - 1
+                                                        color: Kirigami.Theme.textColor
+                                                        selectByMouse: true
+                                                    }
+
+                                                    PlasmaComponents.ToolButton {
+                                                        id: codeCopyBtn
+                                                        property bool justCopied: false
+                                                        icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                                        display: PlasmaComponents.AbstractButton.IconOnly
+
+                                                        onClicked: {
+                                                            clipboardHelper.copyText(modelData.content)
+                                                            justCopied = true
+                                                            codeCopyTimer.restart()
+                                                        }
+
+                                                        Timer {
+                                                            id: codeCopyTimer
+                                                            interval: 1500
+                                                            repeat: false
+                                                            onTriggered: codeCopyBtn.justCopied = false
+                                                        }
+
+                                                        PlasmaComponents.ToolTip.text: root.translate("Copy code")
+                                                        PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                                        PlasmaComponents.ToolTip.visible: hovered
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -897,56 +975,6 @@ PlasmoidItem {
                                 selectAll()
                                 copy()
                                 text = ""
-                            }
-                        }
-
-                        // Per-code-block copy buttons — always visible when code blocks are present
-                        Flow {
-                            id: codeBlockButtons
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.top: textMessageLoader.bottom
-                            anchors.topMargin: Kirigami.Units.smallSpacing
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
-                            spacing: Kirigami.Units.smallSpacing
-                            visible: Plasmoid.configuration.enableMarkdown && codeBlockRepeater.count > 0
-
-                            Repeater {
-                                id: codeBlockRepeater
-                                model: Plasmoid.configuration.enableMarkdown ? Utils.extractCodeBlocks(number) : []
-
-                                delegate: PlasmaComponents.Button {
-                                    id: blockCopyButton
-                                    property bool justCopied: false
-
-                                    icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
-                                    text: {
-                                        if (justCopied) return root.translate("Copied!")
-                                        if (modelData.language) return i18n("Copy %1", modelData.language)
-                                        return codeBlockRepeater.count > 1
-                                            ? i18n("Copy block %1", index + 1)
-                                            : root.translate("Copy code")
-                                    }
-                                    display: PlasmaComponents.AbstractButton.TextBesideIcon
-
-                                    onClicked: {
-                                        clipboardHelper.copyText(modelData.code)
-                                        justCopied = true
-                                        blockCopyTimer.restart()
-                                    }
-
-                                    Timer {
-                                        id: blockCopyTimer
-                                        interval: 1500
-                                        repeat: false
-                                        onTriggered: blockCopyButton.justCopied = false
-                                    }
-
-                                    PlasmaComponents.ToolTip.text: root.translate("Copy code without fence markers")
-                                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                                    PlasmaComponents.ToolTip.visible: hovered
-                                }
                             }
                         }
 
@@ -1034,6 +1062,7 @@ PlasmoidItem {
 
                 enabled: root.isReady
                 hoverEnabled: root.isReady
+                selectByMouse: true
                 placeholderText: root.translate("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 

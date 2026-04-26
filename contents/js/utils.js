@@ -171,3 +171,36 @@ function extractCodeBlocks(text) {
     }
     return blocks
 }
+
+/**
+ * Split markdown text into alternating text and code segments for segmented rendering.
+ *
+ * @param {string} text - Raw markdown text.
+ * @returns {Array<{type: string, content: string, language: string}>}
+ *   type is "text" or "code"; code entries also carry a language field.
+ */
+function splitIntoSegments(text) {
+    if (!text) return [{type: "text", content: "", language: ""}]
+    var segments = []
+    var re = /```(\w*)[ \t]*\n([\s\S]*?)```/g
+    var lastIndex = 0
+    var match
+    while ((match = re.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+            segments.push({type: "text", content: text.substring(lastIndex, match.index), language: ""})
+        }
+        var code = match[2]
+        if (code.length > 0 && code[code.length - 1] === '\n') {
+            code = code.slice(0, -1)
+        }
+        segments.push({type: "code", content: code, language: match[1] || ""})
+        lastIndex = match.index + match[0].length
+    }
+    if (lastIndex < text.length) {
+        segments.push({type: "text", content: text.substring(lastIndex), language: ""})
+    }
+    if (segments.length === 0) {
+        segments.push({type: "text", content: text, language: ""})
+    }
+    return segments
+}
