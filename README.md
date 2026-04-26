@@ -2,7 +2,7 @@
 
 A modern KDE Plasma widget for chatting with your local or remote Ollama AI models. Features a clean interface, persistent settings, configurable input behavior, and robust error handling.
 
-> Based on Denys Madureira's original code, modernized for KDE Plasma 6. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for details.
+> Based on Denys Madureira's original code, modernized for KDE Plasma 6. See [CONTRIBUTORS.md](./docs/CONTRIBUTORS.md) for details.
 
 ## Features
 

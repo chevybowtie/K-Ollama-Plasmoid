@@ -123,7 +123,7 @@ You'll need to take screenshots showing:
 1. Update version in `metadata.json`
 2. Run `./scripts/package-up.sh` to create new package
 3. Upload new version on KDE Store product page
-4. Add changelog describing changes
+4. Update changelog describing changes
 5. Keep same plugin ID for automatic update notifications
 
 ## Troubleshooting 🔧
