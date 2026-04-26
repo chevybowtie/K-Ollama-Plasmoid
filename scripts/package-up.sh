@@ -62,7 +62,7 @@ if [ -f "../$PACKAGE_NAME" ]; then
     
     # Show what's included (first few items)
     echo -e "${BLUE}Package contents (sample):${NC}"
-    unzip -l "$PACKAGE_NAME" | head -15
+    unzip -l "../$PACKAGE_NAME" | head -15
     
     echo ""
     echo -e "${BLUE}Included files (end-user essentials only):${NC}"
