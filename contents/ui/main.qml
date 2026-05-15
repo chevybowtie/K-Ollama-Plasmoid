@@ -48,6 +48,8 @@ PlasmoidItem {
     property bool disableAutoScroll: false
     property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
     property string requestError: ""
+    property var infoShowXhr: null  // Track in-flight /api/show request from getPs()
+    property var infoPsXhr: null    // Track in-flight /api/ps request from getPs()
 
     // Performance optimization: limit conversation history
     readonly property int maxConversationHistory: 50
@@ -555,6 +557,127 @@ PlasmoidItem {
         xhr.send();
     }
 
+    /**
+     * Fetches current model info (/api/show) and running models (/api/ps)
+     * and appends a combined summary as a System message in the conversation
+     */
+    function getPs() {
+        const results = { show: null, ps: null };
+
+        function tryAppend() {
+            if (results.show === null || results.ps === null) return;
+
+            const lines = [];
+
+            // Current model info section
+            lines.push(i18n("━━━ Selected Model Info") + ": " + modelsComboboxCurrentValue + " ━━━");
+            if (results.show.error) {
+                lines.push("  " + results.show.error);
+            } else {
+                const d = results.show.details || {};
+                lines.push("\n" + i18n("Details:"));
+                if (d.format)             lines.push(i18n("Format: %1", d.format));
+                if (d.family)             lines.push(i18n("Family: %1", d.family));
+                if (d.parameter_size)     lines.push(i18n("Parameters: %1", d.parameter_size));
+                if (d.quantization_level) lines.push(i18n("Quantization: %1", d.quantization_level));
+
+                const mi = results.show.model_info || {};
+                lines.push("\n" + i18n("Architecture:"));
+                if (mi["llama.context_length"])          lines.push(i18n("Context length: %1", mi["llama.context_length"]));
+                if (mi["llama.embedding_length"])        lines.push(i18n("Embedding length: %1", mi["llama.embedding_length"]));
+                if (mi["llama.attention.head_count"])    lines.push(i18n("Attention heads: %1", mi["llama.attention.head_count"]));
+                if (mi["llama.attention.head_count_kv"]) lines.push(i18n("Attention heads (KV): %1", mi["llama.attention.head_count_kv"]));
+                if (mi["llama.block_count"])             lines.push(i18n("Block count: %1", mi["llama.block_count"]));
+                if (mi["llama.feed_forward_length"])     lines.push(i18n("Feed forward: %1", mi["llama.feed_forward_length"]));
+                if (mi["llama.rope.dimension_count"])    lines.push(i18n("RoPE dimension: %1", mi["llama.rope.dimension_count"]));
+                if (mi["llama.vocab_size"])              lines.push(i18n("Vocab size: %1", mi["llama.vocab_size"]));
+
+                const caps = results.show.capabilities || [];
+                if (caps.length > 0) lines.push(i18n("Capabilities: %1", caps.join(", ")));
+                if (results.show.modified_at) lines.push(i18n("Modified: %1", results.show.modified_at));
+            }
+
+            // Running models section
+            lines.push("\n" + i18n("━━━ Active in Memory ━━━"));
+            if (results.ps.error) {
+                lines.push("  " + results.ps.error);
+            } else if (results.ps.models.length === 0) {
+                lines.push("  " + i18n("No models currently running."));
+            } else {
+                results.ps.models.forEach(function(m) {
+                    const sizeGb = (m.size / 1073741824).toFixed(1) + " GiB";
+                    let processor;
+                    if (m.size_vram === m.size) processor = "100% GPU";
+                    else if (!m.size_vram) processor = "100% CPU";
+                    else processor = Math.round(m.size_vram / m.size * 100) + "% GPU";
+                    lines.push("  " + m.name);
+                    lines.push("    " + i18n("Size: %1 | Processor: %2 | Context: %3", sizeGb, processor, m.context_length));
+                    lines.push("    " + i18n("Unloads at: %1", m.expires_at));
+                });
+            }
+
+            root.listModelController.append({ "name": "System", "number": lines.join("\n") });
+            Utils.debugLog('debug', 'Model info appended to conversation');
+        }
+
+        // Fetch /api/show for current model
+        const showXhr = new httpRequestConstructor();
+        root.infoShowXhr = showXhr;
+        showXhr.open('POST', getServerUrl('show'));
+        showXhr.setRequestHeader('Content-Type', 'application/json');
+        showXhr.onreadystatechange = function() {
+            if (showXhr.readyState === httpRequestConstructor.DONE) {
+                root.infoShowXhr = null;
+                if (showXhr.status === 200) {
+                    try {
+                        results.show = JSON.parse(showXhr.responseText);
+                    } catch (e) {
+                        results.show = { error: i18n("Failed to parse model info response.") };
+                    }
+                } else {
+                    results.show = { error: i18n("Failed to fetch model info.") };
+                }
+                tryAppend();
+            }
+        };
+        showXhr.onerror = function() {
+            root.infoShowXhr = null;
+            results.show = { error: i18n("Network error fetching model info.") };
+            tryAppend();
+        };
+        showXhr.timeout = 5000;
+        showXhr.send(JSON.stringify({ model: modelsComboboxCurrentValue }));
+
+        // Fetch /api/ps for running models
+        const psXhr = new httpRequestConstructor();
+        root.infoPsXhr = psXhr;
+        psXhr.open('GET', getServerUrl('ps'));
+        psXhr.setRequestHeader('Content-Type', 'application/json');
+        psXhr.onreadystatechange = function() {
+            if (psXhr.readyState === httpRequestConstructor.DONE) {
+                root.infoPsXhr = null;
+                if (psXhr.status === 200) {
+                    try {
+                        const parsed = JSON.parse(psXhr.responseText);
+                        results.ps = { models: Array.isArray(parsed.models) ? parsed.models : [] };
+                    } catch (e) {
+                        results.ps = { error: i18n("Failed to parse running models response."), models: [] };
+                    }
+                } else {
+                    results.ps = { error: i18n("Failed to fetch running models."), models: [] };
+                }
+                tryAppend();
+            }
+        };
+        psXhr.onerror = function() {
+            root.infoPsXhr = null;
+            results.ps = { error: i18n("Network error fetching running models."), models: [] };
+            tryAppend();
+        };
+        psXhr.timeout = 5000;
+        psXhr.send();
+    }
+
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
             text: root.translate("Keep Open")
@@ -610,6 +733,14 @@ PlasmoidItem {
                 Utils.debugLog('debug', 'Error aborting XHR during destruction:', e.message);
             }
             currentXhr = null;
+        }
+        if (infoShowXhr) {
+            try { infoShowXhr.abort(); } catch(e) {}
+            infoShowXhr = null;
+        }
+        if (infoPsXhr) {
+            try { infoPsXhr.abort(); } catch(e) {}
+            infoPsXhr = null;
         }
         
         // Clear arrays to prevent memory leaks
@@ -743,6 +874,20 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.visible: hovered
                 }
 
+    PlasmaComponents.Button {
+                    icon.name: "info"
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    visible: connMgr.connected
+                    enabled: connMgr.connected
+                    hoverEnabled: true
+
+                    onClicked: root.getPs()
+
+                    PlasmaComponents.ToolTip.text: root.translate("Selected Model Info & Active in Memory")
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
                 PlasmaComponents.Button {
                     icon.name: "configure"
                     text: root.translate("Configure")
@@ -825,6 +970,10 @@ PlasmoidItem {
 
                 delegate: Kirigami.AbstractCard {
                     Layout.fillWidth: true
+                    background: Rectangle {
+                        color: name === "System" ? Qt.darker(Kirigami.Theme.backgroundColor, 1.15) : Kirigami.Theme.backgroundColor
+                        radius: Kirigami.Units.smallSpacing
+                    }
 
                     contentItem: Item {
                         implicitHeight: textMessageLoader.implicitHeight
