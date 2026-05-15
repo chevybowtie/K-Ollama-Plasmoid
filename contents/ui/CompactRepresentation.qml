@@ -30,6 +30,6 @@ Loader {
 
     Kirigami.Icon {
         anchors.fill: parent
-        source: Qt.resolvedUrl(Utils.chooseIconPath(Plasmoid.configuration, Utils.getBackgroundColorContrastFromHex(PlasmaCore.Theme.backgroundColor)))
+        source: Qt.resolvedUrl(Utils.chooseIconPath(Plasmoid.configuration, Utils.getBackgroundColorContrastFromHex(Kirigami.Theme.backgroundColor)))
     }
 }
