@@ -6,6 +6,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.2.0] - 2026-05-27
+
+### Added
+
+- **Model info button** — new info button in the toolbar (visible when connected) fetches `/api/show` and `/api/ps` in parallel and appends a System message showing the selected model's architecture, quantization, capabilities, and all models currently loaded in memory with size, processor split, and unload time.
+
+### Fixed
+
+- **Polling pauses when widget is collapsed** — the connection status timer now stops while the widget is minimized to the taskbar, eliminating continuous background network requests. An immediate connectivity check fires when the widget is re-opened. Desktop widgets (always expanded) are unaffected.
+
+---
+
 ## [1.1.0] - 2026-04-25
 
 ### Added

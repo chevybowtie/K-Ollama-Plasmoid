@@ -56,6 +56,7 @@ This installs to `/usr/share/plasma/plasmoids/{PLASMOID_ID}/` where `{PLASMOID_I
 ## Development Workflow
 
 **Making changes:**
+
 ```bash
 # Edit your code, then apply changes:
 ./install.sh dev
@@ -64,6 +65,7 @@ This installs to `/usr/share/plasma/plasmoids/{PLASMOID_ID}/` where `{PLASMOID_I
 This removes the old installation and installs the updated version in one step.
 
 **Running tests:**
+
 ```bash
 ./scripts/run-tests.sh
 ```
@@ -73,20 +75,26 @@ This removes the old installation and installs the updated version in one step.
 When you add new `i18n()` calls to QML files:
 
 1. **Extract new strings:**
+
    ```bash
    ./scripts/translate.sh extract
    ```
+
 2. **Merge into existing translations:**
+
    ```bash
    ./scripts/translate.sh update
    ```
+
 3. **Compile and reinstall:**
+
    ```bash
    ./scripts/translate.sh compile
    ./install.sh dev
    ```
 
 Or run all three steps at once:
+
 ```bash
 ./scripts/translate.sh all
 ```
@@ -151,11 +159,13 @@ Shows per-language completion percentage (translated / total strings).
 ### Translation Troubleshooting
 
 **Strings not translating at runtime:**
+
 - Ensure the string uses `i18n()` in the QML source.
 - Run `./scripts/translate.sh all` to regenerate and compile.
 - Reinstall with `./install.sh dev` and restart Plasma (`plasmashell --replace &`).
 
 **New language not appearing:**
+
 - Confirm both a `.po` and a compiled `.mo` file exist in `po/`.
 - Verify the language code matches what your system locale expects (e.g. `pt_BR`, not `pt-BR`).
 
@@ -170,13 +180,14 @@ To build a `.plasmoid` file for distribution (e.g. KDE Store upload):
 This reads the version from `metadata.json`, creates `K-Ollama-{VERSION}.plasmoid` in the **parent** directory of the project, and prints a contents summary. The package includes only end-user files (`metadata.json`, `LICENSE`, `README.md`, `contents/`, `po/`) — development files, tests, and scripts are excluded.
 
 Before packaging:
+
 1. Bump `"Version"` in `metadata.json`.
 2. Run `./scripts/translate.sh all` to ensure compiled `.mo` files are up to date.
 3. Run `./scripts/package-up.sh`.
 
 ## Directory Structure
 
-```
+```txt
 ├── contents/                    # Plasmoid source files
 │   ├── config/                  # KCM configuration pages
 │   │   ├── config.qml           # Declares config tabs (Server, Appearance, Behavior)
@@ -210,11 +221,13 @@ Before packaging:
 ## Dependencies
 
 ### Runtime Dependencies
+
 - KDE Plasma 6
 - Qt 6
 - Ollama running locally or remotely
 
 ### Development Dependencies
+
 - `gettext` — for `xgettext`, `msgmerge`, `msgfmt` (translation toolchain)
 - `jq` — used by `package-up.sh` to read `metadata.json`
 - Qt6 QML test framework — for running unit tests
@@ -234,6 +247,7 @@ Run the full test suite:
 ```
 
 **Options:**
+
 ```bash
 ./scripts/run-tests.sh -v2           # Verbose output (shows individual test names)
 SKIP_QML_LINT=1 ./scripts/run-tests.sh   # Skip QML linting for faster iteration
@@ -266,6 +280,7 @@ KDE caches plasmoid packages. After `./install.sh dev`, remove and re-add the wi
 6. Submit a pull request.
 
 ### Code Style
+
 - Use `i18n()` for all user-visible strings; `i18nc()` when context is needed for disambiguation.
 - Follow existing QML/JavaScript patterns — no version numbers on Qt imports (`import QtQuick`, not `import QtQuick 2.15`).
 - Default to no comments; add one only when the *why* is non-obvious.
