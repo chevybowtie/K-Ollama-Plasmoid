@@ -6,7 +6,7 @@
     "Id": "io.github.chevybowtie.k-ollama",
     "Name": "K-Ollama",
     "Description": "Ollama client with modern Plasma 6 compatibility",
-    "Version": "1.1.0",
+    "Version": "1.2.0",
     "License": "LGPL-2.1-or-later",
     "Icon": "icon",
     "Website": "https://github.com/chevybowtie/K-Ollama-Plasmoid",
