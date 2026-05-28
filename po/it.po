@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: K-Ollama 1.1.0\n"
-"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
-"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid\n"
+"POT-Creation-Date: 2026-05-27 19:28-0500\n"
 "PO-Revision-Date: 2026-04-25 19:10-0500\n"
 "Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
 "Language-Team: Italian\n"
@@ -30,137 +30,6 @@ msgstr "Aspetto"
 msgctxt "@title"
 msgid "Behavior"
 msgstr "Comportamento"
-
-#: contents/ui/ConfigAppearance.qml:52
-msgctxt "@title:group"
-msgid "Icon:"
-msgstr "Icona:"
-
-#: contents/ui/ConfigAppearance.qml:53
-msgctxt "@option:radio"
-msgid "Filled adaptive icon"
-msgstr "Icona adattiva piena"
-
-#: contents/ui/ConfigAppearance.qml:61
-msgctxt "@option:radio"
-msgid "Outlined adaptive icon"
-msgstr "Icona adattiva con contorno"
-
-#: contents/ui/ConfigAppearance.qml:69
-msgctxt "@option:radio"
-msgid "Filled dark icon"
-msgstr "Icona scura piena"
-
-#: contents/ui/ConfigAppearance.qml:77
-msgctxt "@option:radio"
-msgid "Filled light icon"
-msgstr "Icona chiara piena"
-
-#: contents/ui/ConfigAppearance.qml:85
-msgctxt "@option:radio"
-msgid "Outlined dark icon"
-msgstr "Icona scura con contorno"
-
-#: contents/ui/ConfigAppearance.qml:93
-msgctxt "@option:radio"
-msgid "Outlined light icon"
-msgstr "Icona chiara con contorno"
-
-#: contents/ui/ConfigBehavior.qml:59
-msgctxt "@label:checkbox"
-msgid "Input:"
-msgstr "Input:"
-
-#: contents/ui/ConfigBehavior.qml:60
-msgctxt "@option:check"
-msgid "Use Enter to send message"
-msgstr "Usa Invio per inviare il messaggio"
-
-#: contents/ui/ConfigBehavior.qml:62
-msgctxt "@info:tooltip"
-msgid ""
-"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
-"When disabled: Enter adds new line, use 'send' button to submit."
-msgstr ""
-"Abilitato: Invio invia il messaggio, Ctrl+Invio aggiunge una nuova riga.\n"
-"Disabilitato: Invio aggiunge una nuova riga, usare il pulsante 'invia'."
-
-#: contents/ui/ConfigBehavior.qml:70
-msgctxt "@label:checkbox"
-msgid "Sound:"
-msgstr "Suono:"
-
-#: contents/ui/ConfigBehavior.qml:71
-msgctxt "@option:check"
-msgid "Play sound when AI response is complete"
-msgstr "Riproduci suono al completamento della risposta IA"
-
-#: contents/ui/ConfigBehavior.qml:73
-msgctxt "@info:tooltip"
-msgid "Play a slight beep sound effect after the response is completed."
-msgstr "Riproduce un leggero bip sonoro al completamento della risposta."
-
-#: contents/ui/ConfigBehavior.qml:81
-msgctxt "@label:checkbox"
-msgid "Text rendering:"
-msgstr "Rendering testo:"
-
-#: contents/ui/ConfigBehavior.qml:82
-msgctxt "@option:check"
-msgid "Enable markdown rendering in AI responses"
-msgstr "Abilita rendering Markdown nelle risposte IA"
-
-#: contents/ui/ConfigBehavior.qml:84
-msgctxt "@info:tooltip"
-msgid ""
-"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
-"responses. When disabled, responses are shown as plain text."
-msgstr ""
-"Visualizza la formattazione Markdown (grassetto, corsivo, blocchi di codice, "
-"ecc.) nelle risposte IA. Se disabilitato, le risposte appaiono come testo normale."
-
-#: contents/ui/ConfigBehavior.qml:113
-msgctxt "@label:spinbox"
-msgid "Response timeout:"
-msgstr "Timeout risposta:"
-
-#: contents/ui/ConfigBehavior.qml:126
-msgctxt "@info"
-msgid "s  (no limit)"
-msgstr "s  (nessun limite)"
-
-#: contents/ui/ConfigBehavior.qml:127
-msgctxt "@info"
-msgid "s"
-msgstr "s"
-
-#: contents/ui/ConfigBehavior.qml:131
-msgctxt "@info:tooltip"
-msgid ""
-"Maximum time to wait for a streaming response. Set to 0 to disable the "
-"timeout. Increase this for slow models that generate long responses."
-msgstr ""
-"Tempo massimo di attesa per una risposta in streaming. Impostare 0 per "
-"disabilitare. Aumentare per modelli lenti che generano risposte lunghe."
-
-#: contents/ui/ConfigBehavior.qml:139
-msgctxt "@label:checkbox"
-msgid "Debug logging:"
-msgstr "Log di debug:"
-
-#: contents/ui/ConfigBehavior.qml:140
-msgctxt "@option:check"
-msgid "Enable debug console logs"
-msgstr "Abilita i log di console di debug"
-
-#: contents/ui/ConfigBehavior.qml:142
-msgctxt "@info:tooltip"
-msgid ""
-"Show debug console.log messages for troubleshooting. This setting is "
-"persisted."
-msgstr ""
-"Mostra i messaggi console.log di debug per la risoluzione dei problemi. "
-"Questa impostazione viene salvata."
 
 #: contents/ui/ConfigServer.qml:41
 msgctxt "@label:textbox"
@@ -215,19 +84,21 @@ msgstr "Abilita prompt di sistema"
 #: contents/ui/ConfigServer.qml:101
 msgctxt "@info"
 msgid "Prepend a system message to every API request. Do not include secrets."
-msgstr "Antepone un messaggio di sistema a ogni richiesta API. Non includere segreti."
+msgstr ""
+"Antepone un messaggio di sistema a ogni richiesta API. Non includere segreti."
 
 #: contents/ui/ConfigServer.qml:110
 msgctxt "@info:placeholder"
 msgid "You are a helpful assistant that answers questions in plain English."
-msgstr "Sei un assistente utile che risponde alle domande in italiano semplice."
+msgstr ""
+"Sei un assistente utile che risponde alle domande in italiano semplice."
 
 #: contents/ui/ConfigServer.qml:138
 msgctxt "@info"
 msgid "Long prompts may increase request size."
 msgstr "I prompt lunghi possono aumentare la dimensione della richiesta."
 
-#: contents/ui/main.qml:430
+#: contents/ui/main.qml:436
 msgid ""
 "Network error — could not reach the Ollama server. Check that Ollama is "
 "running and the server URL is correct."
@@ -235,7 +106,7 @@ msgstr ""
 "Errore di rete — impossibile raggiungere il server Ollama. Verificare che "
 "Ollama sia in esecuzione e che l'URL del server sia corretto."
 
-#: contents/ui/main.qml:440
+#: contents/ui/main.qml:446
 msgid ""
 "Request timed out. For slow models, increase the response timeout in "
 "Settings → Behavior, or set it to 0 to disable."
@@ -243,13 +114,254 @@ msgstr ""
 "Richiesta scaduta. Per modelli lenti, aumentare il timeout di risposta in "
 "Impostazioni → Comportamento, oppure impostarlo a 0 per disabilitarlo."
 
+#: contents/ui/main.qml:578
+msgid "━━━ Selected Model"
+msgstr "━━━ Modello selezionato"
 
-#: contents/ui/main.qml:926
-msgctxt "@action:button"
-msgid "Copy %1"
-msgstr "Copia %1"
+#: contents/ui/main.qml:583
+msgid "Details:"
+msgstr "Dettagli:"
 
-#: contents/ui/main.qml:928
-msgctxt "@action:button"
-msgid "Copy block %1"
-msgstr "Copia blocco %1"
+#: contents/ui/main.qml:584
+msgid "Format: %1"
+msgstr "Formato: %1"
+
+#: contents/ui/main.qml:585
+msgid "Family: %1"
+msgstr "Famiglia: %1"
+
+#: contents/ui/main.qml:586
+msgid "Parameters: %1"
+msgstr "Parametri: %1"
+
+#: contents/ui/main.qml:587
+msgid "Quantization: %1"
+msgstr "Quantizzazione: %1"
+
+#: contents/ui/main.qml:591
+msgid "Context length: %1"
+msgstr "Lunghezza del contesto: %1"
+
+#: contents/ui/main.qml:592
+msgid "Embedding length: %1"
+msgstr "Lunghezza dell'embedding: %1"
+
+#: contents/ui/main.qml:593
+msgid "Attention heads: %1"
+msgstr "Teste di attenzione: %1"
+
+#: contents/ui/main.qml:594
+msgid "Attention heads (KV): %1"
+msgstr "Teste di attenzione (KV): %1"
+
+#: contents/ui/main.qml:595
+msgid "Block count: %1"
+msgstr "Numero di blocchi: %1"
+
+#: contents/ui/main.qml:596
+msgid "Feed forward: %1"
+msgstr "Rete feed-forward: %1"
+
+#: contents/ui/main.qml:597
+msgid "RoPE dimension: %1"
+msgstr "Dimensione RoPE: %1"
+
+#: contents/ui/main.qml:598
+msgid "Vocab size: %1"
+msgstr "Dimensione del vocabolario: %1"
+
+#: contents/ui/main.qml:599
+msgid "Architecture:"
+msgstr "Architettura:"
+
+#: contents/ui/main.qml:603
+msgid "(Not available for this model family)"
+msgstr "(Non disponibile per questa famiglia di modelli)"
+
+#: contents/ui/main.qml:607
+msgid "Capabilities: %1"
+msgstr "Funzionalità: %1"
+
+#: contents/ui/main.qml:608
+msgid "Modified: %1"
+msgstr "Modificato: %1"
+
+#: contents/ui/main.qml:612
+msgid "━━━ Active in Memory ━━━"
+msgstr "━━━ Attivo in memoria ━━━"
+
+#: contents/ui/main.qml:616
+msgid "No models currently running."
+msgstr "Nessun modello in esecuzione."
+
+#: contents/ui/main.qml:625
+msgid "Size: %1 | Processor: %2 | Context: %3"
+msgstr "Dimensione: %1 | Processore: %2 | Contesto: %3"
+
+#: contents/ui/main.qml:626
+msgid "Unloads at: %1"
+msgstr "Scaricamento alle: %1"
+
+#: contents/ui/main.qml:646
+msgid "Failed to parse model info response."
+msgstr "Impossibile analizzare la risposta con le informazioni del modello."
+
+#: contents/ui/main.qml:649
+msgid "Failed to fetch model info."
+msgstr "Impossibile recuperare le informazioni del modello."
+
+#: contents/ui/main.qml:656
+msgid "Network error fetching model info."
+msgstr "Errore di rete durante il recupero delle informazioni del modello."
+
+#: contents/ui/main.qml:675
+msgid "Failed to parse running models response."
+msgstr "Impossibile analizzare la risposta dei modelli in esecuzione."
+
+#: contents/ui/main.qml:678
+msgid "Failed to fetch running models."
+msgstr "Impossibile recuperare i modelli in esecuzione."
+
+#: contents/ui/main.qml:685
+msgid "Network error fetching running models."
+msgstr "Errore di rete durante il recupero dei modelli in esecuzione."
+
+#: contents/ui/ConfigBehavior.qml:59
+msgctxt "@label:checkbox"
+msgid "Input:"
+msgstr "Input:"
+
+#: contents/ui/ConfigBehavior.qml:60
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "Usa Invio per inviare il messaggio"
+
+#: contents/ui/ConfigBehavior.qml:62
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use 'send' button to submit."
+msgstr ""
+"Abilitato: Invio invia il messaggio, Ctrl+Invio aggiunge una nuova riga.\n"
+"Disabilitato: Invio aggiunge una nuova riga, usare il pulsante 'invia'."
+
+#: contents/ui/ConfigBehavior.qml:70
+msgctxt "@label:checkbox"
+msgid "Sound:"
+msgstr "Suono:"
+
+#: contents/ui/ConfigBehavior.qml:71
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "Riproduci suono al completamento della risposta IA"
+
+#: contents/ui/ConfigBehavior.qml:73
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "Riproduce un leggero bip sonoro al completamento della risposta."
+
+#: contents/ui/ConfigBehavior.qml:81
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "Rendering testo:"
+
+#: contents/ui/ConfigBehavior.qml:82
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "Abilita rendering Markdown nelle risposte IA"
+
+#: contents/ui/ConfigBehavior.qml:84
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"Visualizza la formattazione Markdown (grassetto, corsivo, blocchi di codice, "
+"ecc.) nelle risposte IA. Se disabilitato, le risposte appaiono come testo "
+"normale."
+
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr "Timeout risposta:"
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr "s  (nessun limite)"
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr "s"
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+"Tempo massimo di attesa per una risposta in streaming. Impostare 0 per "
+"disabilitare. Aumentare per modelli lenti che generano risposte lunghe."
+
+#: contents/ui/ConfigBehavior.qml:139
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "Log di debug:"
+
+#: contents/ui/ConfigBehavior.qml:140
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "Abilita i log di console di debug"
+
+#: contents/ui/ConfigBehavior.qml:142
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"Mostra i messaggi console.log di debug per la risoluzione dei problemi. "
+"Questa impostazione viene salvata."
+
+#: contents/ui/ConfigAppearance.qml:51
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "Icona:"
+
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "Icona adattiva piena"
+
+#: contents/ui/ConfigAppearance.qml:60
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "Icona adattiva con contorno"
+
+#: contents/ui/ConfigAppearance.qml:68
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "Icona scura piena"
+
+#: contents/ui/ConfigAppearance.qml:76
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "Icona chiara piena"
+
+#: contents/ui/ConfigAppearance.qml:84
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "Icona scura con contorno"
+
+#: contents/ui/ConfigAppearance.qml:92
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "Icona chiara con contorno"
+
+#~ msgctxt "@action:button"
+#~ msgid "Copy %1"
+#~ msgstr "Copia %1"
+
+#~ msgctxt "@action:button"
+#~ msgid "Copy block %1"
+#~ msgstr "Copia blocco %1"

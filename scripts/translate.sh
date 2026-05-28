@@ -128,7 +128,7 @@ update_translations() {
 
             if [ $? -eq 0 ]; then
                 print_success "Updated ${lang}.po"
-                ((updated_count++))
+                updated_count=$((updated_count + 1))
             else
                 print_error "Failed to update ${lang}.po"
             fi
@@ -162,7 +162,7 @@ compile_translations() {
 
             if [ $? -eq 0 ]; then
                 print_success "Compiled ${lang}.mo"
-                ((compiled_count++))
+                compiled_count=$((compiled_count + 1))
             else
                 print_error "Failed to compile ${lang}.po"
             fi
