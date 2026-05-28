@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: K-Ollama 1.1.0\n"
-"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
-"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid\n"
+"POT-Creation-Date: 2026-05-27 19:28-0500\n"
 "PO-Revision-Date: 2026-04-25 19:10-0500\n"
 "Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
 "Language-Team: Russian\n"
@@ -15,7 +15,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: contents/config/config.qml:13
 msgctxt "@title"
@@ -32,40 +33,201 @@ msgctxt "@title"
 msgid "Behavior"
 msgstr "Поведение"
 
-#: contents/ui/ConfigAppearance.qml:52
-msgctxt "@title:group"
-msgid "Icon:"
-msgstr "Значок:"
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "URL сервера Ollama:"
 
-#: contents/ui/ConfigAppearance.qml:53
-msgctxt "@option:radio"
-msgid "Filled adaptive icon"
-msgstr "Заполненный адаптивный значок"
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
 
-#: contents/ui/ConfigAppearance.qml:61
-msgctxt "@option:radio"
-msgid "Outlined adaptive icon"
-msgstr "Контурный адаптивный значок"
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"URL сервера Ollama. Используйте localhost (127.0.0.1) для локального сервера "
+"или IP-адрес в локальной сети для удалённого сервера"
 
-#: contents/ui/ConfigAppearance.qml:69
-msgctxt "@option:radio"
-msgid "Filled dark icon"
-msgstr "Заполненный тёмный значок"
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"Примеры:\n"
+"• Локальный сервер: http://127.0.0.1:11434\n"
+"• Удалённый сервер: http://192.168.1.100:11434"
 
-#: contents/ui/ConfigAppearance.qml:77
-msgctxt "@option:radio"
-msgid "Filled light icon"
-msgstr "Заполненный светлый значок"
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "Температура"
 
-#: contents/ui/ConfigAppearance.qml:85
-msgctxt "@option:radio"
-msgid "Outlined dark icon"
-msgstr "Контурный тёмный значок"
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "Ниже = более предсказуемо, выше = более творчески (0,0–2,0)"
 
-#: contents/ui/ConfigAppearance.qml:93
-msgctxt "@option:radio"
-msgid "Outlined light icon"
-msgstr "Контурный светлый значок"
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "Системный запрос"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "Включить системный запрос"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr ""
+"Добавляет системное сообщение к каждому запросу API. Не включайте секретные "
+"данные."
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr ""
+"Ты полезный ассистент, отвечающий на вопросы простым и понятным языком."
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "Длинные запросы могут увеличить размер запроса к API."
+
+#: contents/ui/main.qml:436
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
+msgstr ""
+"Ошибка сети — не удаётся подключиться к серверу Ollama. Убедитесь, что "
+"Ollama запущен и URL сервера указан верно."
+
+#: contents/ui/main.qml:446
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
+msgstr ""
+"Время ожидания запроса истекло. Для медленных моделей увеличьте тайм-аут в "
+"Настройках → Поведение или установите 0 для отключения."
+
+#: contents/ui/main.qml:578
+msgid "━━━ Selected Model"
+msgstr ""
+
+#: contents/ui/main.qml:583
+msgid "Details:"
+msgstr ""
+
+#: contents/ui/main.qml:584
+msgid "Format: %1"
+msgstr ""
+
+#: contents/ui/main.qml:585
+msgid "Family: %1"
+msgstr ""
+
+#: contents/ui/main.qml:586
+msgid "Parameters: %1"
+msgstr ""
+
+#: contents/ui/main.qml:587
+msgid "Quantization: %1"
+msgstr ""
+
+#: contents/ui/main.qml:591
+msgid "Context length: %1"
+msgstr ""
+
+#: contents/ui/main.qml:592
+msgid "Embedding length: %1"
+msgstr ""
+
+#: contents/ui/main.qml:593
+msgid "Attention heads: %1"
+msgstr ""
+
+#: contents/ui/main.qml:594
+msgid "Attention heads (KV): %1"
+msgstr ""
+
+#: contents/ui/main.qml:595
+msgid "Block count: %1"
+msgstr ""
+
+#: contents/ui/main.qml:596
+msgid "Feed forward: %1"
+msgstr ""
+
+#: contents/ui/main.qml:597
+msgid "RoPE dimension: %1"
+msgstr ""
+
+#: contents/ui/main.qml:598
+msgid "Vocab size: %1"
+msgstr ""
+
+#: contents/ui/main.qml:599
+msgid "Architecture:"
+msgstr ""
+
+#: contents/ui/main.qml:603
+msgid "(Not available for this model family)"
+msgstr ""
+
+#: contents/ui/main.qml:607
+msgid "Capabilities: %1"
+msgstr ""
+
+#: contents/ui/main.qml:608
+msgid "Modified: %1"
+msgstr ""
+
+#: contents/ui/main.qml:612
+msgid "━━━ Active in Memory ━━━"
+msgstr ""
+
+#: contents/ui/main.qml:616
+msgid "No models currently running."
+msgstr ""
+
+#: contents/ui/main.qml:625
+msgid "Size: %1 | Processor: %2 | Context: %3"
+msgstr ""
+
+#: contents/ui/main.qml:626
+msgid "Unloads at: %1"
+msgstr ""
+
+#: contents/ui/main.qml:646
+msgid "Failed to parse model info response."
+msgstr ""
+
+#: contents/ui/main.qml:649
+msgid "Failed to fetch model info."
+msgstr ""
+
+#: contents/ui/main.qml:656
+msgid "Network error fetching model info."
+msgstr ""
+
+#: contents/ui/main.qml:675
+msgid "Failed to parse running models response."
+msgstr ""
+
+#: contents/ui/main.qml:678
+msgid "Failed to fetch running models."
+msgstr ""
+
+#: contents/ui/main.qml:685
+msgid "Network error fetching running models."
+msgstr ""
 
 #: contents/ui/ConfigBehavior.qml:59
 msgctxt "@label:checkbox"
@@ -84,7 +246,8 @@ msgid ""
 "When disabled: Enter adds new line, use 'send' button to submit."
 msgstr ""
 "Включено: Enter отправляет сообщение, Ctrl+Enter добавляет новую строку.\n"
-"Отключено: Enter добавляет новую строку, для отправки использовать кнопку «Отправить»."
+"Отключено: Enter добавляет новую строку, для отправки использовать кнопку "
+"«Отправить»."
 
 #: contents/ui/ConfigBehavior.qml:70
 msgctxt "@label:checkbox"
@@ -160,97 +323,48 @@ msgid ""
 "Show debug console.log messages for troubleshooting. This setting is "
 "persisted."
 msgstr ""
-"Показывать отладочные сообщения console.log для диагностики. "
-"Этот параметр сохраняется."
+"Показывать отладочные сообщения console.log для диагностики. Этот параметр "
+"сохраняется."
 
-#: contents/ui/ConfigServer.qml:41
-msgctxt "@label:textbox"
-msgid "Ollama Server URL:"
-msgstr "URL сервера Ollama:"
+#: contents/ui/ConfigAppearance.qml:51
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "Значок:"
 
-#: contents/ui/ConfigServer.qml:42
-msgctxt "@info:placeholder"
-msgid "http://127.0.0.1:11434"
-msgstr "http://127.0.0.1:11434"
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "Заполненный адаптивный значок"
 
-#: contents/ui/ConfigServer.qml:48
-msgctxt "@info:tooltip"
-msgid ""
-"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
-"IP for remote server"
-msgstr ""
-"URL сервера Ollama. Используйте localhost (127.0.0.1) для локального сервера "
-"или IP-адрес в локальной сети для удалённого сервера"
+#: contents/ui/ConfigAppearance.qml:60
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "Контурный адаптивный значок"
 
-#: contents/ui/ConfigServer.qml:54
-msgctxt "@info"
-msgid ""
-"Examples:\n"
-"• Local server: http://127.0.0.1:11434\n"
-"• Remote server: http://192.168.1.100:11434"
-msgstr ""
-"Примеры:\n"
-"• Локальный сервер: http://127.0.0.1:11434\n"
-"• Удалённый сервер: http://192.168.1.100:11434"
+#: contents/ui/ConfigAppearance.qml:68
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "Заполненный тёмный значок"
 
-#: contents/ui/ConfigServer.qml:67
-msgctxt "@label"
-msgid "Temperature"
-msgstr "Температура"
+#: contents/ui/ConfigAppearance.qml:76
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "Заполненный светлый значок"
 
-#: contents/ui/ConfigServer.qml:89
-msgctxt "@info"
-msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
-msgstr "Ниже = более предсказуемо, выше = более творчески (0,0–2,0)"
+#: contents/ui/ConfigAppearance.qml:84
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "Контурный тёмный значок"
 
-#: contents/ui/ConfigServer.qml:96
-msgctxt "@label:checkbox"
-msgid "System prompt"
-msgstr "Системный запрос"
+#: contents/ui/ConfigAppearance.qml:92
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "Контурный светлый значок"
 
-#: contents/ui/ConfigServer.qml:97
-msgctxt "@option"
-msgid "Enable system prompt"
-msgstr "Включить системный запрос"
+#~ msgctxt "@action:button"
+#~ msgid "Copy %1"
+#~ msgstr "Копировать %1"
 
-#: contents/ui/ConfigServer.qml:101
-msgctxt "@info"
-msgid "Prepend a system message to every API request. Do not include secrets."
-msgstr "Добавляет системное сообщение к каждому запросу API. Не включайте секретные данные."
-
-#: contents/ui/ConfigServer.qml:110
-msgctxt "@info:placeholder"
-msgid "You are a helpful assistant that answers questions in plain English."
-msgstr "Ты полезный ассистент, отвечающий на вопросы простым и понятным языком."
-
-#: contents/ui/ConfigServer.qml:138
-msgctxt "@info"
-msgid "Long prompts may increase request size."
-msgstr "Длинные запросы могут увеличить размер запроса к API."
-
-#: contents/ui/main.qml:430
-msgid ""
-"Network error — could not reach the Ollama server. Check that Ollama is "
-"running and the server URL is correct."
-msgstr ""
-"Ошибка сети — не удаётся подключиться к серверу Ollama. Убедитесь, что "
-"Ollama запущен и URL сервера указан верно."
-
-#: contents/ui/main.qml:440
-msgid ""
-"Request timed out. For slow models, increase the response timeout in "
-"Settings → Behavior, or set it to 0 to disable."
-msgstr ""
-"Время ожидания запроса истекло. Для медленных моделей увеличьте тайм-аут "
-"в Настройках → Поведение или установите 0 для отключения."
-
-
-#: contents/ui/main.qml:926
-msgctxt "@action:button"
-msgid "Copy %1"
-msgstr "Копировать %1"
-
-#: contents/ui/main.qml:928
-msgctxt "@action:button"
-msgid "Copy block %1"
-msgstr "Копировать блок %1"
+#~ msgctxt "@action:button"
+#~ msgid "Copy block %1"
+#~ msgstr "Копировать блок %1"
