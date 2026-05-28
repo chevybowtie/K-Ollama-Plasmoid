@@ -33,6 +33,9 @@ echo ""
 cd "$PROJECT_DIR"
 echo -e "${BLUE}Working directory:${NC} $(pwd)"
 
+echo -e "${BLUE}Compiling translations...${NC}"
+"$SCRIPT_DIR/translate.sh" all
+
 # Remove existing package if it exists
 if [ -f "../$PACKAGE_NAME" ]; then
     echo -e "${YELLOW}Removing existing package:${NC} $PACKAGE_NAME"
