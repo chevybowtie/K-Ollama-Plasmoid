@@ -114,6 +114,10 @@ PlasmoidItem {
         }
     }
 
+    onExpandedChanged: {
+        if (root.expanded) connMgr.check()
+    }
+
     // Use Utils.getServerUrl(baseUrl, endpoint) to avoid coupling to Plasmoid internals
     function getServerUrl(endpoint) {
         return Utils.getServerUrl(Plasmoid.configuration.ollamaServerUrl, endpoint);
@@ -718,6 +722,7 @@ PlasmoidItem {
         interval: 5000
         timeoutMs: 2500
         serverBase: Plasmoid.configuration.ollamaServerUrl || ''
+        running: root.expanded
     }
 
     Component.onCompleted: {

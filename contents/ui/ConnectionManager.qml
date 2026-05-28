@@ -29,7 +29,7 @@ Item {
     property int disconnectedPollInterval: 5000
     property int timeoutMs: 3000         // ms before aborting a single request
     property string endpoint: "version"  // Lightweight connectivity check endpoint
-    property bool running: true
+    property bool running: false
     // Optional server base URL (e.g. "http://127.0.0.1:11434"). If empty, falls back to default.
     property string serverBase: ""
 
@@ -37,8 +37,19 @@ Item {
         id: pollTimer
         interval: root.interval
         repeat: true
-        running: root.running
+        running: false
         onTriggered: root.check()
+    }
+
+    // Manage timer start/stop imperatively to avoid breaking QML bindings.
+    // Any imperative stop()/start() call on a declaratively bound property
+    // permanently replaces the binding with a static value.
+    onRunningChanged: {
+        if (root.running) {
+            pollTimer.start();
+        } else {
+            pollTimer.stop();
+        }
     }
 
     // react to status changes: adjust poll interval
@@ -47,7 +58,7 @@ Item {
         pollTimer.interval = (status === "connected") ? root.connectedPollInterval : root.disconnectedPollInterval;
 
         // restart the timer so the new interval takes effect immediately
-        if (pollTimer.running) {
+        if (root.running) {
             pollTimer.stop();
             pollTimer.start();
         }
@@ -135,9 +146,7 @@ Item {
     }
 
     Component.onCompleted: {
-        // start polling immediately
-    Utils.debugLog('debug', "ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
-        if (root.running) pollTimer.start();
+        Utils.debugLog('debug', "ConnectionManager: Component.onCompleted, running=", root.running, "interval=", pollTimer.interval);
     }
 
     Component.onDestruction: {
