@@ -4,33 +4,64 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
+import QtCore
+import QtMultimedia
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia
+
+// KDE modules
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.extras as PlasmaExtras
-import Qt.labs.settings 1.0
+import "../js/utils.js" as Utils
 
 PlasmoidItem {
     id: root
 
-    // Control popup behavior based on pin state
-    hideOnWindowDeactivate: !Plasmoid.configuration.pin
+    // 1. Layout properties
+    // Desktop widgets stay visible by default; panel applets use pin setting
+    hideOnWindowDeactivate: (Plasmoid.location === PlasmaCore.Types.LeftEdge || 
+                             Plasmoid.location === PlasmaCore.Types.RightEdge || 
+                             Plasmoid.location === PlasmaCore.Types.TopEdge || 
+                             Plasmoid.location === PlasmaCore.Types.BottomEdge) && !Plasmoid.configuration.pin
 
+    // 2. Public API properties (for component reuse)
+    property string modelsComboboxCurrentValue: ''
+    property var modelsArray: []
+    property bool hasLocalModel: false
+    
+    // Translation function for delegate access
+    function translate(text) {
+        return i18n(text);
+    }
+
+    // 3. Internal state properties
     property string parentMessageId: ''
-    property string modelsComboboxCurrentValue: '';    
-    property var listModelController;
-    property var promptArray: [];
-    property var modelsArray: [];
+    property var listModelController
+    property var promptArray: []
+    property string lastUserMessage: '' // Store the last user-entered prompt for quick recall with Up-Arrow
     property bool isLoading: false
-    property bool hasLocalModel: false;
-    property bool disableAutoScroll: false;
+    property bool disableAutoScroll: false
+    property var currentXhr: null // Track the in-flight XMLHttpRequest so we can abort long-running responses
+    property string requestError: ""
+    property var infoShowXhr: null  // Track in-flight /api/show request from getPs()
+    property var infoPsXhr: null    // Track in-flight /api/ps request from getPs()
 
-    // Typing sound effect for AI responses
+    // Performance optimization: limit conversation history
+    readonly property int maxConversationHistory: 50
+    
+    // Global JavaScript API reference to reduce qmllint warnings
+    readonly property var httpRequestConstructor: XMLHttpRequest
+    
+    // 4. Computed state properties for UI binding
+    readonly property bool isReady: hasLocalModel && !isLoading  // UI elements that need both conditions
+    readonly property bool canSend: isReady && currentXhr === null  // Additional condition for send button
+
+    // Completion sound effect for AI responses
     SoundEffect {
         id: typingSound
         source: "assets/beep.wav"
@@ -44,230 +75,630 @@ PlasmoidItem {
         property real ollamaTemperature: 0.7
     }
 
-    // Watch for server URL configuration changes
+    // Configuration Change Handlers
+    // These Connections objects listen for configuration changes and update the UI state accordingly
+    
+    // Monitor server URL changes and reset model state when the server changes
     Connections {
         target: Plasmoid.configuration
         function onOllamaServerUrlChanged() {
-            console.log("Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
-            hasLocalModel = false;
+            Utils.debugLog('info', "Server URL changed to:", Plasmoid.configuration.ollamaServerUrl);
+            // Reset model-related state since we're connecting to a different server
+            // This prevents stale model data and forces a fresh model list fetch
+            root.hasLocalModel = false;
             modelsArray = [];
             modelsComboboxCurrentValue = '';
-            getModels();
+            getModels(); // Fetch available models from the new server
         }
     }
 
-    // Persist temperature changes from the settings UI into local Settings
+    // Synchronize temperature changes from KCM configuration to persistent settings
+    // The KCM system provides ollamaTemperature as a configuration property,
+    // but we need to persist it in Settings for runtime use across sessions
     Connections {
         target: Plasmoid.configuration
         function onOllamaTemperatureChanged() {
-            if (Plasmoid.configuration.ollamaTemperature !== undefined && Plasmoid.configuration.ollamaTemperature !== null) {
-                appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
-            }
+            // Use helper function for consistent temperature validation
+            appSettings.ollamaTemperature = getValidTemperature(Plasmoid.configuration.ollamaTemperature);
         }
     }
 
-    // Auto-focus textarea when plasmoid becomes visible
+    // UI Focus Management
+    // Automatically focus the message input field when the plasmoid becomes visible
+    // This provides immediate keyboard access for user interaction without requiring a click
     onVisibleChanged: {
-        if (visible && hasLocalModel && !isLoading && messageField) {
+        if (visible && root.hasLocalModel && !root.isLoading && messageField) {
+            // Only auto-focus if we have a model available and aren't in a loading state
+            // messageField is defined in the CompactRepresentation component
             messageField.forceActiveFocus();
         }
     }
 
+    onExpandedChanged: {
+        if (root.expanded) connMgr.check()
+    }
+
+    // Use Utils.getServerUrl(baseUrl, endpoint) to avoid coupling to Plasmoid internals
     function getServerUrl(endpoint) {
-        const baseUrl = Plasmoid.configuration.ollamaServerUrl || 'http://127.0.0.1:11434';
-        return baseUrl + '/api/' + endpoint;
+        return Utils.getServerUrl(Plasmoid.configuration.ollamaServerUrl, endpoint);
     }
 
     function parseTextToComboBox(text) {
-        return text
-            .replace(/-/g, ' ')
-            .replace(/:(.+)/, ' ($1)')
-            .split(' ')
-            .map(word => {
-                if (word.startsWith('(')) {
-                    return word.charAt(0) + word.charAt(1).toUpperCase() + word.slice(2);
-                }
-                return word.charAt(0).toUpperCase() + word.slice(1);
-            })
-            .join(' ');
+        return Utils.parseTextToComboBox(text);
     }
 
+    /**
+     * Centralized connection manager status update helper
+     * Handles safe status updates with error protection
+     * @param status - The status to set ("connected" | "disconnected" | "connecting")
+     */
+    function setConnectionStatus(status) {
+        try { 
+            connMgr.status = status; 
+        } catch (e) { 
+            Utils.debugLog('warn', 'Failed to update connection status:', e.message);
+        }
+    }
+
+    /**
+     * Centralized request cleanup helper function
+     * Handles consistent cleanup of XHR state, loading indicators, and logging
+     * @param reason - A descriptive reason for the request completion (e.g., "completed", "error", "aborted", "timeout")
+     */
+    function finishRequest(reason) {
+        // State cleanup
+        root.isLoading = false;
+        
+        // XHR cleanup with error protection
+        try { 
+            root.currentXhr = null; 
+        } catch(e) {
+            Utils.debugLog('warn', 'Error clearing currentXhr during finishRequest:', e.message);
+        }
+        
+        // Consistent logging for debugging and monitoring
+        Utils.debugLog('debug', 'Request finished:', reason);
+    }
+
+    // Global Escape shortcut: abort in-flight request and run the standard cleanup
+    Shortcut {
+        id: escAbortShortcut
+        sequences: [ StandardKey.Cancel ]    // Escape key
+        context: Qt.ApplicationShortcut      // works regardless of focus
+        onActivated: {
+            if (root.currentXhr) {
+                try {
+                    root.currentXhr.abort(); // will trigger xhr.onabort -> finishRequest(...)
+                } catch (e) {
+                    // If abort fails, still run cleanup
+                    finishRequest('aborted-by-esc-abort-failed');
+                }
+            }
+        }
+    }
+
+    /**
+     * Temperature configuration validation and conversion helper
+     * Handles the null/undefined check pattern used throughout the component
+     * @param configValue - The raw configuration value to validate
+     * @param fallback - The fallback value to use if configValue is invalid
+     * @returns A valid number for temperature
+     */
+    function getValidTemperature(configValue, fallback = 0.7) {
+        return (configValue !== undefined && configValue !== null) ? Number(configValue) : fallback;
+    }
+
+    /**
+     * Core chat request function that handles the complete conversation flow
+     * @param messageField - The input text field to clear after sending
+     * @param listModel - The conversation history model to append messages to
+     * @param scrollView - The scroll view containing the conversation for auto-scroll behavior
+     * @param prompt - The user's message text to send to Ollama
+     */
     function request(messageField, listModel, scrollView, prompt) {
-        messageField.text = '';
-
-        listModel.append({
-            "name": "User",
-            "number": prompt
-        });
-
-        promptArray.push({ "role": "user", "content": prompt, "images": [] });
-
-        isLoading = true;
-
-        if (!disableAutoScroll && scrollView.ScrollBar) {
-            scrollView.ScrollBar.vertical.position = 1;
+        // Request deduplication: prevent multiple concurrent requests
+        if (root.currentXhr !== null) {
+            Utils.debugLog('warn', 'Request already in progress, ignoring duplicate request');
+            return;
+        }
+        
+        // Message State Management
+        // Store the last user message for Up-Arrow recall functionality
+        // Only store non-empty messages to prevent recalling empty strings
+        if (prompt && prompt.toString().trim().length > 0) {
+            root.lastUserMessage = prompt.toString();
         }
 
+        // Clear the input field immediately to provide visual feedback that the message was sent
+        messageField.text = '';
+
+        // Update Conversation History
+        // Add user message to the visual conversation list (listModel)
+        listModel.append({
+            "name": "User",
+            "number": prompt // 'number' is legacy naming for message content
+        });
+
+        // Add user message to the API conversation array for context preservation
+        // Ollama requires the full conversation history for context-aware responses
+        promptArray.push({ "role": "user", "content": prompt, "images": [] });
+        
+        // Performance optimization: limit conversation history to prevent memory bloat
+        if (promptArray.length > root.maxConversationHistory * 2) { // *2 because each exchange has 2 messages
+            const keepCount = root.maxConversationHistory * 2;
+            promptArray = promptArray.slice(-keepCount);
+            // Trim listModel to match so deleteMessage indices stay aligned
+            while (listModel.count > keepCount) {
+                listModel.remove(0);
+            }
+            Utils.debugLog('debug', 'Trimmed conversation history to', keepCount, 'messages');
+        }
+
+        // Clear any error banner left over from a previous request
+        root.requestError = "";
+
+        // UI State Updates
+        // Set loading state to show progress indicators and disable input
+        root.isLoading = true;
+
+        // Auto-scroll to bottom to show the new message and prepare for response
+        // Only scroll if auto-scroll hasn't been disabled by user interaction
+        if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
+            scrollView.contentItem.positionViewAtEnd();
+        }
+
+        // HTTP Request Preparation
+        // Track initial conversation length for streaming response insertion
         const oldLength = listModel.count;
+        
+        // Build Ollama API endpoint URL
         const url = getServerUrl('chat');
+        
+        // Construct request payload with conversation context and model parameters
+        // Build messages array and prepend system prompt if enabled
+        let messagesForRequest = [];
+        try {
+            if (Plasmoid.configuration.systemPromptEnabled) {
+                let sp = (Plasmoid.configuration.systemPrompt || "").toString().trim();
+                if (sp.length > 0) {
+                    // Enforce a max length to avoid accidental huge payloads
+                    const maxLen = 2048;
+                    if (sp.length > maxLen) sp = sp.slice(0, maxLen);
+                    messagesForRequest.push({ role: "system", content: sp });
+                }
+            }
+        } catch (e) {
+            try { Utils.debugLog('warn', 'Failed to include system prompt:', e && e.message ? e.message : e); } catch (ee) {}
+        }
+
+        // Append the rest of the conversation (user + assistant messages)
+        messagesForRequest = messagesForRequest.concat(promptArray);
+
         const data = JSON.stringify({
             "model": modelsComboboxCurrentValue,
             "keep_alive": "5m",
             "options": {
-                "temperature": Number(Plasmoid.configuration.ollamaTemperature || 0.7)
+                "temperature": getValidTemperature(Plasmoid.configuration.ollamaTemperature)
             },
-            "messages": promptArray
+            "messages": messagesForRequest
         });
         
-        let xhr = new XMLHttpRequest();
+        // XMLHttpRequest Setup
+        // Create new request instance for this conversation turn
+        let xhr = new httpRequestConstructor();
+        // Store reference globally so "Stop generating" button can abort mid-stream
+        root.currentXhr = xhr;
 
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         
-        let lastProcessedLength = 0; // Track how much we've already processed
+        // Streaming Response Processing Setup
+        // Track processed content length to avoid reprocessing the same data
+        // Ollama streams responses as multiple JSON objects separated by newlines
+        let lastProcessedLength = 0;
+        let accumulatedText = ''; // Performance optimization: maintain single accumulated string
+        let lastUiUpdate = 0; // Performance optimization: throttle UI updates
         
+        /**
+         * Real-time streaming response handler
+         * Processes incoming data incrementally as it arrives from Ollama
+         * This enables live text generation display instead of waiting for complete responses
+         */
         xhr.onreadystatechange = function() {
-            // Only process during loading states to avoid unnecessary calls
-            if (xhr.readyState !== XMLHttpRequest.LOADING && xhr.readyState !== XMLHttpRequest.DONE) {
+            // State Filtering: Only process during active data transfer or completion
+            // LOADING = data is actively being received, DONE = transfer complete
+            if (xhr.readyState !== httpRequestConstructor.LOADING && xhr.readyState !== httpRequestConstructor.DONE) {
                 return;
             }
             
+            // Incremental Processing: Only handle new data since last processing cycle
             const responseText = xhr.responseText;
             if (responseText.length <= lastProcessedLength) {
-                return; // No new data to process
+                return; // No new data to process - avoid redundant work
             }
             
-            // Only process the new part of the response
+            // Extract only the new portion of the response stream
+            // This prevents reprocessing already-handled content on each event
             const newText = responseText.substring(lastProcessedLength);
-            const newObjects = newText.split('\n');
+            const newObjects = newText.split('\n'); // Ollama sends one JSON per line
             
-            // Update our tracking
+            // Update processing checkpoint for next iteration
             lastProcessedLength = responseText.length;
             
-            let text = '';
+            // Performance optimization: accumulate new content chunks
+            let newContent = '';
             
-            // Get existing text if we already have a response
-            if (listModel.count > oldLength) {
-                const lastValue = listModel.get(oldLength);
-                text = lastValue.number;
-            }
-
+            // JSON Stream Processing: Parse each line as a separate JSON object
+            // Ollama's streaming format sends one JSON object per line, containing message chunks
             newObjects.forEach((object, index) => {
-                if (object.trim() === '') return; // Skip empty lines
+                if (object.trim() === '') return; // Skip empty lines between JSON objects
                 
                 try {
+                    // Parse JSON chunk and extract content from nested message structure
                     const parsedObject = JSON.parse(object);
-                    text = text + parsedObject?.message?.content;
+                    // Ollama format: { "message": { "content": "text chunk" }, ... }
+                    const messageContent = parsedObject && parsedObject.message && parsedObject.message.content ? parsedObject.message.content : '';
+                    newContent += messageContent; // Accumulate new chunks only
                 } catch (e) {
-                    console.warn('Failed to parse JSON object:', object, 'Error:', e.message);
-                    return; // Skip malformed JSON
+                    // Log malformed JSON but continue processing - don't break the stream
+                    Utils.debugLog('warn', 'Failed to parse JSON object:', object, 'Error:', e.message);
+                    return; // Skip this malformed chunk and continue with others
                 }
             });
 
-            // Batch UI updates to reduce frequency
-            if (text.length > 0) {
-                // Play typing sound if enabled and we have new content
-                if (Plasmoid.configuration.completionSound && newObjects.some(obj => obj.trim() !== '')) {
-                    typingSound.play();
-                }
+            // UI Update Strategy: Batch updates to minimize rendering overhead
+            // Only update the UI when we have actual new content to display
+            if (newContent.length > 0) {
+                // Performance optimization: append to accumulated text
+                accumulatedText += newContent;
                 
-                if (!disableAutoScroll && scrollView.ScrollBar) {
-                    scrollView.ScrollBar.vertical.position = 1 - scrollView.ScrollBar.vertical.size;
-                }
+                // Performance optimization: throttle UI updates to reduce re-rendering
+                const now = Date.now();
+                if (now - lastUiUpdate > 100) { // Update UI at most every 100ms
+                    lastUiUpdate = now;
+                    
+                    // Auto-scroll Management: Keep the latest content visible during generation
+                    // Use ListView's built-in method for reliable scrolling to the end
+                    if (!root.disableAutoScroll && scrollView && scrollView.contentItem) {
+                        scrollView.contentItem.positionViewAtEnd();
+                    }
 
-                if (listModel.count === oldLength) {
-                    listModel.append({
-                        "name": "Assistant",
-                        "number": text
-                    });
-                } else {
-                    const lastValue = listModel.get(oldLength);
-                    lastValue.number = text;
+                    // Conversation Model Update: Create new entry or update existing one
+                    if (listModel.count === oldLength) {
+                        // First chunk: Create new assistant message entry
+                        listModel.append({
+                            "name": "Assistant",
+                            "number": accumulatedText // Use accumulated text
+                        });
+                    } else {
+                        // Subsequent chunks: Update the existing assistant message with accumulated text
+                        const lastValue = listModel.get(oldLength);
+                        lastValue.number = accumulatedText; // Use accumulated text
+                    }
                 }
             }
         };
 
+        /**
+         * Request Completion Handler
+         * Executed when the streaming response is fully complete
+         * Handles final cleanup and conversation context management
+         */
         xhr.onload = function() {
-            const lastValue = listModel.get(oldLength);
-
-            isLoading = false;
-
-            promptArray.push({ "role": "assistant", "content": lastValue.number, "images": [] });
+            // Ensure final UI update with complete accumulated text
+            if (listModel.count === oldLength) {
+                listModel.append({
+                    "name": "Assistant",
+                    "number": accumulatedText
+                });
+            } else {
+                const lastValue = listModel.get(oldLength);
+                lastValue.number = accumulatedText;
+            }
+            
+            // Use the accumulated text from streaming processing
+            const assistantText = accumulatedText;
+            
+            // Response Validation and Feedback
+            if (!assistantText || assistantText.length === 0) {
+                // Log missing response for debugging - this shouldn't happen in normal operation
+                Utils.debugLog('debug', 'xhr.onload: assistantText missing for request at oldLength=', oldLength, 'listModel.count=', listModel.count);
+                finishRequest('completed-empty-response');
+            } else {
+                // Audio Feedback: Play completion sound when configured by user
+                // Provides audible notification that the AI response is complete
+                if (Plasmoid.configuration.completionSound) {
+                    typingSound.play();
+                }
+                finishRequest('completed-successfully');
+            }
+            
+            // Conversation Context Preservation
+            // Add the assistant's response to the conversation array for future context
+            // This maintains conversation history for subsequent requests
+            promptArray.push({ "role": "assistant", "content": assistantText, "images": [] });
         };
 
+        /**
+         * Request Abort Handler
+         * Triggered when user clicks "Stop generating" during an active response
+         */
+        xhr.onabort = function() {
+            finishRequest('aborted-by-user');
+        };
+
+        /**
+         * Network Error Handler
+         * Handles connection failures, server errors, and other network issues
+         */
+        xhr.onerror = function() {
+            Utils.debugLog('error', 'Network error during chat request');
+            root.requestError = i18n("Network error — could not reach the Ollama server. Check that Ollama is running and the server URL is correct.");
+            finishRequest('network-error');
+        };
+
+        /**
+         * Request Timeout Handler
+         * Triggered if the server doesn't respond within the configured timeout period
+         */
+        xhr.ontimeout = function() {
+            Utils.debugLog('warn', 'Chat request timeout');
+            root.requestError = i18n("Request timed out. For slow models, increase the response timeout in Settings → Behavior, or set it to 0 to disable.");
+            finishRequest('timeout');
+        };
+
+        xhr.timeout = (Plasmoid.configuration.streamingTimeoutSecs || 0) * 1000; // 0 = no timeout
         xhr.send(data);
     }
 
     function deleteMessage(index) {
-        // Remove from visual list model
-        listModelController.remove(index);
-        
-        // Remove from prompt array (conversation history)
-        if (index < promptArray.length) {
-            promptArray.splice(index, 1);
+        // Compute promptArray index before removing from listModel.
+        // The two collections can drift if a trim hasn't run yet; drift
+        // is always non-negative (listModel >= promptArray after a trim).
+        var drift = root.listModelController.count - promptArray.length;
+        var promptIndex = index - drift;
+
+        root.listModelController.remove(index);
+
+        if (promptIndex >= 0 && promptIndex < promptArray.length) {
+            promptArray.splice(promptIndex, 1);
         }
     }
 
+    /**
+     * Model Discovery and State Management Function
+     * Fetches available AI models from the Ollama server and updates UI state
+     * This function is critical for establishing whether the plasmoid is functional
+     */
     function getModels() {
-        const url = getServerUrl('tags');
-        console.log("Fetching models from:", url);
+        // API Endpoint Construction
+        const url = getServerUrl('tags'); // Ollama's /api/tags endpoint lists available models
+        Utils.debugLog('debug', "Fetching models from:", url);
 
-        let xhr = new XMLHttpRequest();
-
+        // HTTP Request Setup
+        let xhr = new httpRequestConstructor();
         xhr.open('GET', url);
         xhr.setRequestHeader('Content-Type', 'application/json');
 
+        /**
+         * Model Fetch Response Handler
+         * Processes the server response and updates the entire UI state based on availability
+         */
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.readyState === httpRequestConstructor.DONE) {
                 if (xhr.status === 200) {
+                    // Response Processing: Extract model names from Ollama API format
+                    // Ollama returns: { "models": [{ "name": "model1", "model": "model1", ... }, ...] }
                     const objects = JSON.parse(xhr.responseText).models;
-                    
-                    const models = objects.map(object => object.model);
+                    const models = objects.map(object => object.model); // Extract just the model names
 
                     if (models.length) {
-                        hasLocalModel = true;
+                        // Success Path: Models available, enable UI functionality
+                        root.hasLocalModel = true;
+                        
+                        // Connection State Synchronization: Update connection manager status
+                        // This provides consistent status across UI components
+                        setConnectionStatus("connected");
 
-                        // Try to restore the previously selected model, otherwise use first model
+                        // Model Selection Logic: Restore previous selection or use default
+                        // Maintains user preference across application restarts
                         const savedModel = Plasmoid.configuration.selectedModel;
                         if (savedModel && models.includes(savedModel)) {
+                            // Restore previously selected model if it still exists on server
                             modelsComboboxCurrentValue = savedModel;
                         } else {
+                            // Fall back to first available model and persist this choice
                             modelsComboboxCurrentValue = models[0];
-                            // Save the default selection
                             Plasmoid.configuration.selectedModel = models[0];
                         }
 
-                        modelsArray = models.map(model => ({ text: parseTextToComboBox(model), value: model }));
-                        console.log("Successfully loaded", models.length, "models");
+                        // UI Model Array Construction: Create display-friendly model list
+                        // Maps internal model names to human-readable text for the ComboBox
+                        // Performance optimization: only update if models actually changed
+                        const newModelsArray = models.map(model => ({ 
+                            text: parseTextToComboBox(model), // Format for display
+                            value: model // Keep original name for API calls
+                        }));
+                        
+                        // Only update if the array actually changed
+                        const arraysEqual = root.modelsArray.length === newModelsArray.length && 
+                                          root.modelsArray.every((item, index) => 
+                                              item.value === newModelsArray[index].value);
+                        
+                        if (!arraysEqual) {
+                            root.modelsArray = newModelsArray;
+                            Utils.debugLog('debug', 'Updated models array with', models.length, 'models');
+                        }
+                        Utils.debugLog('info', "Successfully loaded", models.length, "models");
                     } else {
-                        hasLocalModel = false;
-                        console.log("No models found on server");
+                        // Empty Response: Server has no models installed
+                        root.hasLocalModel = false;
+                        setConnectionStatus("disconnected");
+                        Utils.debugLog('info', "No models found on server");
                     }
                 } else {
-                    hasLocalModel = false;
-                    console.error('Error fetching models:', xhr.status, xhr.statusText, 'from', url);
+                    // Error Response: Server unreachable or API error
+                    root.hasLocalModel = false;
+                    setConnectionStatus("disconnected");
+                    Utils.debugLog('error', 'Error fetching models:', xhr.status, xhr.statusText, 'from', url);
                 }
             }
         };
 
         xhr.onerror = function() {
-            hasLocalModel = false;
-            console.error('Network error when fetching models from:', url);
+            root.hasLocalModel = false;
+            setConnectionStatus("disconnected");
+            Utils.debugLog('error', 'Network error when fetching models from:', url);
         };
 
+        xhr.ontimeout = function() {
+            root.hasLocalModel = false;
+            setConnectionStatus("disconnected");
+            Utils.debugLog('warn', 'Timeout when fetching models from:', url);
+        };
+
+        xhr.timeout = 10000; // 10 seconds timeout for model fetching
         xhr.send();
+    }
+
+    /**
+     * Fetches current model info (/api/show) and running models (/api/ps)
+     * and appends a combined summary as a System message in the conversation
+     */
+    function getPs() {
+        if (root.infoShowXhr || root.infoPsXhr) return;
+        const results = { show: null, ps: null };
+
+        function tryAppend() {
+            if (results.show === null || results.ps === null) return;
+
+            const lines = [];
+
+            // Current model info section
+            lines.push(i18n("━━━ Selected Model") + ": " + modelsComboboxCurrentValue + " ━━━");
+            if (results.show.error) {
+                lines.push("  " + results.show.error);
+            } else {
+                const d = results.show.details || {};
+                lines.push("\n" + i18n("Details:"));
+                if (d.format)             lines.push(i18n("Format: %1", d.format));
+                if (d.family)             lines.push(i18n("Family: %1", d.family));
+                if (d.parameter_size)     lines.push(i18n("Parameters: %1", d.parameter_size));
+                if (d.quantization_level) lines.push(i18n("Quantization: %1", d.quantization_level));
+
+                const mi = results.show.model_info || {};
+                const miLines = [];
+                if (mi["llama.context_length"])          miLines.push(i18n("Context length: %1", mi["llama.context_length"]));
+                if (mi["llama.embedding_length"])        miLines.push(i18n("Embedding length: %1", mi["llama.embedding_length"]));
+                if (mi["llama.attention.head_count"])    miLines.push(i18n("Attention heads: %1", mi["llama.attention.head_count"]));
+                if (mi["llama.attention.head_count_kv"]) miLines.push(i18n("Attention heads (KV): %1", mi["llama.attention.head_count_kv"]));
+                if (mi["llama.block_count"])             miLines.push(i18n("Block count: %1", mi["llama.block_count"]));
+                if (mi["llama.feed_forward_length"])     miLines.push(i18n("Feed forward: %1", mi["llama.feed_forward_length"]));
+                if (mi["llama.rope.dimension_count"])    miLines.push(i18n("RoPE dimension: %1", mi["llama.rope.dimension_count"]));
+                if (mi["llama.vocab_size"])              miLines.push(i18n("Vocab size: %1", mi["llama.vocab_size"]));
+                lines.push("\n" + i18n("Architecture:"));
+                if (miLines.length > 0) {
+                    miLines.forEach(function(l) { lines.push(l); });
+                } else {
+                    lines.push("  " + i18n("(Not available for this model family)"));
+                }
+
+                const caps = results.show.capabilities || [];
+                if (caps.length > 0) lines.push(i18n("Capabilities: %1", caps.join(", ")));
+                if (results.show.modified_at) lines.push(i18n("Modified: %1", results.show.modified_at));
+            }
+
+            // Running models section
+            lines.push("\n" + i18n("━━━ Active in Memory ━━━"));
+            if (results.ps.error) {
+                lines.push("  " + results.ps.error);
+            } else if (results.ps.models.length === 0) {
+                lines.push("  " + i18n("No models currently running."));
+            } else {
+                results.ps.models.forEach(function(m) {
+                    const sizeGb = (m.size / 1073741824).toFixed(1) + " GiB";
+                    let processor;
+                    if (m.size_vram === m.size) processor = "100% GPU";
+                    else if (!m.size_vram) processor = "100% CPU";
+                    else processor = Math.round(m.size_vram / m.size * 100) + "% GPU";
+                    lines.push("  " + m.name);
+                    lines.push("    " + i18n("Size: %1 | Processor: %2 | Context: %3", sizeGb, processor, m.context_length));
+                    lines.push("    " + i18n("Unloads at: %1", new Date(m.expires_at).toLocaleString()));
+                });
+            }
+
+            root.listModelController.append({ "name": "System", "number": lines.join("\n") });
+            Utils.debugLog('debug', 'Model info appended to conversation');
+        }
+
+        // Fetch /api/show for current model
+        const showXhr = new httpRequestConstructor();
+        root.infoShowXhr = showXhr;
+        showXhr.open('POST', getServerUrl('show'));
+        showXhr.setRequestHeader('Content-Type', 'application/json');
+        showXhr.onreadystatechange = function() {
+            if (showXhr.readyState === httpRequestConstructor.DONE) {
+                root.infoShowXhr = null;
+                if (showXhr.status === 200) {
+                    try {
+                        results.show = JSON.parse(showXhr.responseText);
+                    } catch (e) {
+                        results.show = { error: i18n("Failed to parse model info response.") };
+                    }
+                } else {
+                    results.show = { error: i18n("Failed to fetch model info.") };
+                }
+                tryAppend();
+            }
+        };
+        showXhr.onerror = function() {
+            root.infoShowXhr = null;
+            results.show = { error: i18n("Network error fetching model info.") };
+            tryAppend();
+        };
+        showXhr.timeout = 5000;
+        showXhr.send(JSON.stringify({ model: modelsComboboxCurrentValue }));
+
+        // Fetch /api/ps for running models
+        const psXhr = new httpRequestConstructor();
+        root.infoPsXhr = psXhr;
+        psXhr.open('GET', getServerUrl('ps'));
+        psXhr.setRequestHeader('Content-Type', 'application/json');
+        psXhr.onreadystatechange = function() {
+            if (psXhr.readyState === httpRequestConstructor.DONE) {
+                root.infoPsXhr = null;
+                if (psXhr.status === 200) {
+                    try {
+                        const parsed = JSON.parse(psXhr.responseText);
+                        results.ps = { models: Array.isArray(parsed.models) ? parsed.models : [] };
+                    } catch (e) {
+                        results.ps = { error: i18n("Failed to parse running models response."), models: [] };
+                    }
+                } else {
+                    results.ps = { error: i18n("Failed to fetch running models."), models: [] };
+                }
+                tryAppend();
+            }
+        };
+        psXhr.onerror = function() {
+            root.infoPsXhr = null;
+            results.ps = { error: i18n("Network error fetching running models."), models: [] };
+            tryAppend();
+        };
+        psXhr.timeout = 5000;
+        psXhr.send();
     }
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: i18n("Keep Open")
+            text: root.translate("Keep Open")
             icon.name: "window-pin"
             checkable: true
             checked: Plasmoid.configuration.pin
             onTriggered: Plasmoid.configuration.pin = checked
         },
         PlasmaCore.Action {
-            text: i18n("Clear chat")
+            text: root.translate("Clear chat")
             icon.name: "edit-clear"
             onTriggered: {
                 listModelController.clear();
@@ -275,7 +706,7 @@ PlasmoidItem {
             }
         },
         PlasmaCore.Action {
-            text: i18n("Disable auto scroll")
+            text: root.translate("Disable auto scroll")
             icon.name: "transform-move-vertical"
             checkable: true
             checked: disableAutoScroll
@@ -285,15 +716,50 @@ PlasmoidItem {
 
     compactRepresentation: CompactRepresentation {}
 
+    // Connection status manager - placed at top level for accessibility
+    ConnectionManager {
+        id: connMgr
+        interval: 5000
+        timeoutMs: 2500
+        serverBase: Plasmoid.configuration.ollamaServerUrl || ''
+        running: root.expanded
+    }
+
     Component.onCompleted: {
-        // Ensure temperature is initialized from persisted settings if the plasmoid config doesn't provide it
+        // Initialize temperature with bidirectional sync using helper function
+        const configTemp = getValidTemperature(Plasmoid.configuration.ollamaTemperature, appSettings.ollamaTemperature);
         if (Plasmoid.configuration.ollamaTemperature === undefined || Plasmoid.configuration.ollamaTemperature === null) {
-            Plasmoid.configuration.ollamaTemperature = appSettings.ollamaTemperature;
-        } else {
-            appSettings.ollamaTemperature = Number(Plasmoid.configuration.ollamaTemperature);
+            Plasmoid.configuration.ollamaTemperature = configTemp;
         }
+        appSettings.ollamaTemperature = configTemp;
 
         getModels();
+    }
+
+    Component.onDestruction: {
+        // Abort any in-flight requests
+        if (currentXhr) {
+            try { 
+                currentXhr.abort(); 
+            } catch(e) {
+                Utils.debugLog('debug', 'Error aborting XHR during destruction:', e.message);
+            }
+            currentXhr = null;
+        }
+        if (infoShowXhr) {
+            try { infoShowXhr.abort(); } catch(e) {}
+            infoShowXhr = null;
+        }
+        if (infoPsXhr) {
+            try { infoPsXhr.abort(); } catch(e) {}
+            infoPsXhr = null;
+        }
+        
+        // Clear arrays to prevent memory leaks
+        promptArray = [];
+        modelsArray = [];
+        
+        Utils.debugLog('debug', 'Main plasmoid component destroyed and cleaned up');
     }
 
     fullRepresentation: ColumnLayout {
@@ -306,7 +772,6 @@ PlasmoidItem {
             width: parent.width
 
             contentItem: RowLayout {
-                visible: hasLocalModel
                 Layout.fillWidth: true
 
                 PlasmaComponents.Button {
@@ -315,37 +780,46 @@ PlasmoidItem {
                     checked: Plasmoid.configuration.pin
                     onToggled: Plasmoid.configuration.pin = checked
                     icon.name: "window-pin"
+                    
+                    // Only show pin button in panel mode where it's functional
+                    // Desktop widgets stay visible by default and don't need pinning
+                    visible: Plasmoid.location === PlasmaCore.Types.LeftEdge || 
+                             Plasmoid.location === PlasmaCore.Types.RightEdge || 
+                             Plasmoid.location === PlasmaCore.Types.TopEdge || 
+                             Plasmoid.location === PlasmaCore.Types.BottomEdge
 
                     display: PlasmaComponents.AbstractButton.IconOnly
-                    text: i18n("Keep Open")
+                    text: root.translate("Keep Open")
 
                     PlasmaComponents.ToolTip.text: text
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
                     PlasmaComponents.ToolTip.visible: hovered
                 }
 
+                // Model selector - only visible when models are loaded
                 PlasmaComponents.ComboBox {
                     id: modelsCombobox
-                    enabled: hasLocalModel && !isLoading
-                    hoverEnabled: hasLocalModel && !isLoading
+                    visible: root.hasLocalModel
+                    enabled: root.isReady
+                    hoverEnabled: root.isReady
 
                     Layout.fillWidth: true
 
-                    model: modelsArray.map(model => model.text)
+                    model: root.modelsArray.map(model => model.text)
 
                     onActivated: {
-                        modelsComboboxCurrentValue = modelsArray.find(model => model.text === modelsCombobox.currentText).value;
+                        modelsComboboxCurrentValue = root.modelsArray.find(model => model.text === modelsCombobox.currentText).value;
                         // Save selected model to configuration
                         Plasmoid.configuration.selectedModel = modelsComboboxCurrentValue;
-                        listModelController.clear();
+                        root.listModelController.clear();
                     }
 
                     // Update the current selection when models array changes
                     onModelChanged: {
-                        if (modelsArray.length > 0) {
+                        if (root.modelsArray.length > 0) {
                             if (modelsComboboxCurrentValue) {
                                 // Find and set the index of the saved/current model
-                                const modelIndex = modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
+                                const modelIndex = root.modelsArray.findIndex(model => model.value === modelsComboboxCurrentValue);
                                 if (modelIndex >= 0) {
                                     currentIndex = modelIndex;
                                 } else {
@@ -363,15 +837,25 @@ PlasmoidItem {
                         }
                     }
 
-                    Component.onCompleted: getModels()
+                    Component.onCompleted: root.getModels()
+                }
+
+                // Placeholder text when no models loaded
+                PlasmaComponents.Label {
+                    visible: !root.hasLocalModel
+                    Layout.fillWidth: true
+                    text: root.translate("Configure server connection...")
+                    horizontalAlignment: Text.AlignHCenter
+                    opacity: 0.7
                 }
 
                 PlasmaComponents.Button {
                     icon.name: "edit-clear-symbolic"
-                    text: i18n("Clear chat")
+                    text: root.translate("Clear chat")
                     display: PlasmaComponents.AbstractButton.IconOnly
-                    enabled: hasLocalModel && !isLoading
-                    hoverEnabled: hasLocalModel && !isLoading
+                    visible: root.hasLocalModel
+                    enabled: root.isReady
+                    hoverEnabled: root.isReady
 
                     onClicked: {
                         listModelController.clear();
@@ -383,12 +867,53 @@ PlasmoidItem {
                     PlasmaComponents.ToolTip.visible: hovered
                 }
 
-                // Connection status indicator
-                ConnectionManager {
-                    id: connMgr
-                    interval: 5000
-                    timeoutMs: 2500
-                    serverBase: Plasmoid.configuration.ollamaServerUrl || ''
+                PlasmaComponents.Button {
+                    icon.name: "transform-move-vertical"
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    checkable: true
+                    checked: root.disableAutoScroll
+                    enabled: true
+                    hoverEnabled: true
+
+                    onToggled: {
+                        root.disableAutoScroll = checked
+                    }
+
+                    PlasmaComponents.ToolTip.text: root.disableAutoScroll ? 
+                        root.translate("Enable auto scroll") : 
+                        root.translate("Disable auto scroll")
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
+                PlasmaComponents.Button {
+                    icon.name: "info"
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    visible: connMgr.connected
+                    enabled: connMgr.connected
+                    hoverEnabled: true
+
+                    onClicked: root.getPs()
+
+                    PlasmaComponents.ToolTip.text: root.translate("Model Info & Running Models")
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
+                }
+
+                PlasmaComponents.Button {
+                    icon.name: "configure"
+                    text: root.translate("Configure")
+                    display: PlasmaComponents.AbstractButton.IconOnly
+                    enabled: true
+                    hoverEnabled: true
+
+                    onClicked: {
+                        Plasmoid.internalAction("configure").trigger();
+                    }
+
+                    PlasmaComponents.ToolTip.text: text
+                    PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                    PlasmaComponents.ToolTip.visible: hovered
                 }
 
                 // Connection indicator: colored dot only
@@ -417,9 +942,10 @@ PlasmoidItem {
                         opacity: connMgr.connected ? 1.0 : (connMgr.status === "connecting" ? 0.95 : 0.8)
                     }
 
-                    PlasmaComponents.ToolTip.text: connMgr.connected ? i18n("Connected to Ollama") : (connMgr.status === "connecting" ? i18n("Connecting...") : i18n("Disconnected. Click to retry."))
+                    PlasmaComponents.ToolTip.text: connMgr.connected ? root.translate("Connected to Ollama") : (connMgr.status === "connecting" ? root.translate("Connecting...") : root.translate("Disconnected. Click to retry."))
                     PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
-                    PlasmaComponents.ToolTip.visible: (hoverArea && hoverArea.hovered) ? true : false
+                    // Use containsMouse for a more robust hover check
+                    PlasmaComponents.ToolTip.visible: hoverArea && hoverArea.containsMouse
                 }
             }
         }
@@ -443,7 +969,7 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     width: parent.width - (Kirigami.Units.largeSpacing * 4)
                     visible: listView.count === 0
-                    text: hasLocalModel ? i18n("I am ready...") : i18n("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
+                    text: root.hasLocalModel ? root.translate("I am ready...") : root.translate("No LLM models found.\n\nPlease check:\n1. Ollama server is running\n2. Server URL is correct in settings\n3. Models are installed on the server\n\nClick 'Refresh models list' to retry.")
                 }
 
                 model: ListModel {
@@ -456,23 +982,161 @@ PlasmoidItem {
 
                 delegate: Kirigami.AbstractCard {
                     Layout.fillWidth: true
+                    background: Rectangle {
+                        color: name === "System" ? Qt.darker(Kirigami.Theme.backgroundColor, 1.15) : Kirigami.Theme.backgroundColor
+                        radius: Kirigami.Units.smallSpacing
+                    }
 
                     contentItem: Item {
-                        implicitHeight: textMessage.implicitHeight + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
+                        implicitHeight: textMessageLoader.implicitHeight
+                            + (cardButtonsLayout ? cardButtonsLayout.implicitHeight : 0) + 16
                         
-                        TextEdit {
-                            id: textMessage
-                            
+                        /**
+                         * Dynamic Component Loading System for Message Rendering
+                         * Switches between plain text and markdown rendering based on user configuration
+                         * This architecture allows runtime switching without restart
+                         */
+                        Loader {
+                            id: textMessageLoader
+                            asynchronous: true
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
                             anchors.margins: 8
 
-                            readOnly: true
-                            wrapMode: Text.WordWrap
-                            text: number
-                            color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
-                            selectByMouse: true
+                            // Height calculation delegation to the loaded component
+                            // This ensures proper layout regardless of which component is active
+                            readonly property real implicitHeight: textMessageLoader.item ? textMessageLoader.item.implicitHeight : 0
+
+                            // Dynamic Component Selection: Load appropriate renderer based on markdown setting
+                            // Configuration changes trigger automatic component reloading
+                            sourceComponent: Plasmoid.configuration.enableMarkdown ? markdownComponent : plainTextComponent
+                            
+                            Component {
+                                id: plainTextComponent
+                                TextEdit {
+                                    id: textMessage
+                                    readOnly: true
+                                    wrapMode: Text.WordWrap
+                                    text: number
+                                    color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                    selectByMouse: true
+                                    
+                                    function selectAll() { textMessage.selectAll() }
+                                    function copy() { textMessage.copy() }
+                                    function deselect() { textMessage.deselect() }
+                                }
+                            }
+                            
+                            Component {
+                                id: markdownComponent
+                                Column {
+                                    id: segmentedColumn
+                                    spacing: 4
+
+                                    function selectAll() { clipboardHelper.copyText(number) }
+                                    function copy() {}
+                                    function deselect() {}
+
+                                    Repeater {
+                                        model: Utils.splitIntoSegments(number)
+
+                                        delegate: Item {
+                                            width: parent.width
+                                            implicitHeight: modelData.type === "code"
+                                                ? codeRect.implicitHeight
+                                                : mdText.implicitHeight
+
+                                            TextArea {
+                                                id: mdText
+                                                visible: modelData.type === "text"
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                readOnly: true
+                                                wrapMode: TextArea.Wrap
+                                                text: modelData.type === "text" ? modelData.content : ""
+                                                textFormat: TextArea.MarkdownText
+                                                color: name === "User" ? Kirigami.Theme.disabledTextColor : Kirigami.Theme.textColor
+                                                selectByMouse: true
+                                                background: null
+                                            }
+
+                                            Rectangle {
+                                                id: codeRect
+                                                visible: modelData.type === "code"
+                                                width: parent.width
+                                                implicitHeight: modelData.type === "code"
+                                                    ? codeEditCol.implicitHeight + 8
+                                                    : 0
+                                                color: Qt.darker(Kirigami.Theme.backgroundColor, 1.15)
+                                                radius: 4
+                                                border.width: 1
+                                                border.color: Qt.alpha(Kirigami.Theme.textColor, 0.15)
+
+                                                Column {
+                                                    id: codeEditCol
+                                                    anchors.left: parent.left
+                                                    anchors.right: parent.right
+                                                    anchors.top: parent.top
+                                                    anchors.topMargin: 4
+                                                    spacing: 0
+
+                                                    TextEdit {
+                                                        id: codeEdit
+                                                        width: parent.width
+                                                        leftPadding: 8
+                                                        rightPadding: 8
+                                                        readOnly: true
+                                                        wrapMode: Text.WrapAnywhere
+                                                        text: modelData.type === "code" ? modelData.content : ""
+                                                        font.family: "monospace"
+                                                        font.pointSize: Kirigami.Theme.defaultFont.pointSize - 1
+                                                        color: Kirigami.Theme.textColor
+                                                        selectByMouse: true
+                                                    }
+
+                                                    PlasmaComponents.ToolButton {
+                                                        id: codeCopyBtn
+                                                        property bool justCopied: false
+                                                        icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                                        display: PlasmaComponents.AbstractButton.IconOnly
+
+                                                        onClicked: {
+                                                            clipboardHelper.copyText(modelData.content)
+                                                            justCopied = true
+                                                            codeCopyTimer.restart()
+                                                        }
+
+                                                        Timer {
+                                                            id: codeCopyTimer
+                                                            interval: 1500
+                                                            repeat: false
+                                                            onTriggered: codeCopyBtn.justCopied = false
+                                                        }
+
+                                                        PlasmaComponents.ToolTip.text: root.translate("Copy code")
+                                                        PlasmaComponents.ToolTip.delay: Kirigami.Units.toolTipDelay
+                                                        PlasmaComponents.ToolTip.visible: hovered
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Clipboard intermediary for code-only copies (never visible)
+                        TextEdit {
+                            id: clipboardHelper
+                            visible: false
+                            function copyText(t) {
+                                text = t
+                                selectAll()
+                                copy()
+                                text = ""
+                            }
                         }
 
                         RowLayout {
@@ -484,14 +1148,28 @@ PlasmoidItem {
                             visible: cardHoverHandler.hovered
 
                             PlasmaComponents.Button {
-                                icon.name: "edit-copy-symbolic"
-                                text: i18n("Copy")
+                                id: msgCopyButton
+                                property bool justCopied: false
+
+                                icon.name: justCopied ? "dialog-ok" : "edit-copy-symbolic"
+                                text: root.translate(justCopied ? "Copied!" : "Copy")
                                 display: PlasmaComponents.AbstractButton.IconOnly
-                                
+
                                 onClicked: {
-                                    textMessage.selectAll();
-                                    textMessage.copy();
-                                    textMessage.deselect();
+                                    if (textMessageLoader.item) {
+                                        textMessageLoader.item.selectAll()
+                                        textMessageLoader.item.copy()
+                                        textMessageLoader.item.deselect()
+                                        justCopied = true
+                                        msgCopyFeedbackTimer.restart()
+                                    }
+                                }
+
+                                Timer {
+                                    id: msgCopyFeedbackTimer
+                                    interval: 1500
+                                    repeat: false
+                                    onTriggered: msgCopyButton.justCopied = false
                                 }
 
                                 PlasmaComponents.ToolTip.text: text
@@ -501,7 +1179,7 @@ PlasmoidItem {
 
                             PlasmaComponents.Button {
                                 icon.name: "edit-delete-symbolic"
-                                text: i18n("Delete")
+                                text: root.translate("Delete")
                                 display: PlasmaComponents.AbstractButton.IconOnly
                                 
                                 onClicked: {
@@ -522,11 +1200,20 @@ PlasmoidItem {
             }
         }
 
+        Kirigami.InlineMessage {
+            Layout.fillWidth: true
+            visible: root.requestError.length > 0
+            text: root.requestError
+            type: Kirigami.MessageType.Error
+            showCloseButton: true
+            onVisibleChanged: if (!visible) root.requestError = ""
+        }
+
         ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
             clip: true
-            visible: hasLocalModel
+            visible: root.hasLocalModel
 
             TextArea {
                 id: messageField
@@ -534,9 +1221,10 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                enabled: hasLocalModel && !isLoading
-                hoverEnabled: hasLocalModel && !isLoading
-                placeholderText: i18n("Type here what you want to ask...")
+                enabled: root.isReady
+                hoverEnabled: root.isReady
+                selectByMouse: true
+                placeholderText: root.translate("Type here what you want to ask...")
                 wrapMode: TextArea.Wrap
 
                 Component.onCompleted: {
@@ -554,6 +1242,25 @@ PlasmoidItem {
                 }
 
                 Keys.onPressed: function(event) {
+                    // If Up arrow pressed, and caret is on the first line, recall lastUserMessage
+                    if (event.key === Qt.Key_Up) {
+                        // TextArea provides positionToRectangle to determine current cursor row via y coordinate,
+                        // but that's heavyweight; instead, inspect the text before the cursor for newlines.
+                        var caretPos = messageField.cursorPosition;
+                        var isAtFirstLine = Utils.caretIsOnFirstLine(messageField.text, caretPos);
+
+                        if (isAtFirstLine && root.lastUserMessage && root.lastUserMessage.length > 0) {
+                            // Repopulate the field and place caret at end
+                            messageField.text = root.lastUserMessage;
+                            messageField.cursorPosition = messageField.text.length;
+                            event.accepted = true;
+                            return;
+                        } else {
+                            // Let default behavior (move caret up) occur
+                            event.accepted = false;
+                            return;
+                        }
+                    }
                     // Handle both main Enter (Return) and numpad Enter
                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                         var ctrl = (event.modifiers & Qt.ControlModifier);
@@ -567,7 +1274,7 @@ PlasmoidItem {
                             } else {
                                 // Enter: send message
                                 if (messageField.text.trim().length > 0) {
-                                    request(messageField, listModel, scrollView, messageField.text);
+                                    root.request(messageField, listModel, scrollView, messageField.text);
                                     event.accepted = true;
                                 } else {
                                     event.accepted = false;
@@ -594,27 +1301,63 @@ PlasmoidItem {
                 BusyIndicator {
                     id: indicator
                     anchors.centerIn: parent
-                    running: isLoading
+                    running: root.isLoading
                 }
             }
 
         }
 
-        Button {
-            Layout.alignment: Qt.AlignHCenter
+        RowLayout {
             Layout.fillWidth: true
-            
-            text: i18n("Send")
-            hoverEnabled: hasLocalModel && !isLoading
-            enabled: hasLocalModel && !isLoading
-            visible: hasLocalModel
+            Layout.alignment: Qt.AlignHCenter
 
-            ToolTip.delay: 1000
-            ToolTip.visible: hovered
-            ToolTip.text: "CTRL+Enter"
-            
-            onClicked: {
-                request(messageField, listModel, scrollView, messageField.text);
+            // Wide Send button
+            Button {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+
+                text: root.translate("Send")
+                hoverEnabled: root.isReady
+                enabled: root.isReady
+                visible: root.hasLocalModel
+
+                ToolTip.delay: 1000
+                ToolTip.visible: hovered
+                ToolTip.text: "CTRL+Enter"
+
+                onClicked: {
+                    request(messageField, listModel, scrollView, messageField.text);
+                }
+            }
+
+            // Narrow stop icon button to the right of Send
+            ToolButton {
+                Layout.alignment: Qt.AlignVCenter
+                // Keep the stop button narrow — doesn't expand like the Send button
+                Layout.preferredWidth: implicitWidth
+
+                icon.name: "media-playback-stop"
+                visible: root.hasLocalModel
+                enabled: root.hasLocalModel && root.isLoading && root.currentXhr !== null
+
+                ToolTip.delay: 1000
+                ToolTip.visible: hovered
+                // Show the Esc key alongside the translated label so users discover the shortcut
+                ToolTip.text: root.translate("Stop") + " (Esc)"
+
+                onClicked: {
+                    if (root.currentXhr) {
+                        try { 
+                            root.currentXhr.abort(); // This will trigger xhr.onabort which calls finishRequest()
+                        } catch (e) {
+                            // If abort fails, still clean up manually
+                            finishRequest('stop-button-abort-failed');
+                        }
+                    } else {
+                        // No XHR but still in loading state - clean up anyway
+                        finishRequest('stop-button-no-xhr');
+                    }
+                }
             }
         }
 
@@ -622,10 +1365,10 @@ PlasmoidItem {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             
-            text: i18n("Refresh models list")
-            visible: !hasLocalModel
+            text: root.translate("Refresh models list")
+            visible: !root.hasLocalModel
             
-            onClicked: getModels()
+            onClicked: root.getModels()
         }
     }
 }

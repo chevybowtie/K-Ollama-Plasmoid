@@ -1,0 +1,256 @@
+# Russian translation for K-Ollama.
+# Copyright (C) 2025 Paul Sturm
+# This file is distributed under the same license as the K-Ollama package.
+# Paul Sturm <paul.sturm@cotton-software.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: K-Ollama 1.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
+"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"PO-Revision-Date: 2026-04-25 19:10-0500\n"
+"Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Server"
+msgstr "Сервер"
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Appearance"
+msgstr "Внешний вид"
+
+#: contents/config/config.qml:23
+msgctxt "@title"
+msgid "Behavior"
+msgstr "Поведение"
+
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "Значок:"
+
+#: contents/ui/ConfigAppearance.qml:53
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "Заполненный адаптивный значок"
+
+#: contents/ui/ConfigAppearance.qml:61
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "Контурный адаптивный значок"
+
+#: contents/ui/ConfigAppearance.qml:69
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "Заполненный тёмный значок"
+
+#: contents/ui/ConfigAppearance.qml:77
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "Заполненный светлый значок"
+
+#: contents/ui/ConfigAppearance.qml:85
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "Контурный тёмный значок"
+
+#: contents/ui/ConfigAppearance.qml:93
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "Контурный светлый значок"
+
+#: contents/ui/ConfigBehavior.qml:59
+msgctxt "@label:checkbox"
+msgid "Input:"
+msgstr "Ввод:"
+
+#: contents/ui/ConfigBehavior.qml:60
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "Использовать Enter для отправки сообщения"
+
+#: contents/ui/ConfigBehavior.qml:62
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use 'send' button to submit."
+msgstr ""
+"Включено: Enter отправляет сообщение, Ctrl+Enter добавляет новую строку.\n"
+"Отключено: Enter добавляет новую строку, для отправки использовать кнопку «Отправить»."
+
+#: contents/ui/ConfigBehavior.qml:70
+msgctxt "@label:checkbox"
+msgid "Sound:"
+msgstr "Звук:"
+
+#: contents/ui/ConfigBehavior.qml:71
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "Воспроизводить звук после получения ответа ИИ"
+
+#: contents/ui/ConfigBehavior.qml:73
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "Воспроизводит короткий звуковой сигнал после завершения ответа."
+
+#: contents/ui/ConfigBehavior.qml:81
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "Отображение текста:"
+
+#: contents/ui/ConfigBehavior.qml:82
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "Включить отображение Markdown в ответах ИИ"
+
+#: contents/ui/ConfigBehavior.qml:84
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"Отображать форматирование Markdown (жирный, курсив, блоки кода и т. д.) в "
+"ответах ИИ. При отключении ответы показываются как обычный текст."
+
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr "Тайм-аут ответа:"
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr "с  (без ограничений)"
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr "с"
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+"Максимальное время ожидания потокового ответа. Установите 0 для отключения "
+"тайм-аута. Увеличьте для медленных моделей с длинными ответами."
+
+#: contents/ui/ConfigBehavior.qml:139
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "Журнал отладки:"
+
+#: contents/ui/ConfigBehavior.qml:140
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "Включить журналы отладки в консоли"
+
+#: contents/ui/ConfigBehavior.qml:142
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"Показывать отладочные сообщения console.log для диагностики. "
+"Этот параметр сохраняется."
+
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "URL сервера Ollama:"
+
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
+
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"URL сервера Ollama. Используйте localhost (127.0.0.1) для локального сервера "
+"или IP-адрес в локальной сети для удалённого сервера"
+
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"Примеры:\n"
+"• Локальный сервер: http://127.0.0.1:11434\n"
+"• Удалённый сервер: http://192.168.1.100:11434"
+
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "Температура"
+
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "Ниже = более предсказуемо, выше = более творчески (0,0–2,0)"
+
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "Системный запрос"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "Включить системный запрос"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr "Добавляет системное сообщение к каждому запросу API. Не включайте секретные данные."
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr "Ты полезный ассистент, отвечающий на вопросы простым и понятным языком."
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "Длинные запросы могут увеличить размер запроса к API."
+
+#: contents/ui/main.qml:430
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
+msgstr ""
+"Ошибка сети — не удаётся подключиться к серверу Ollama. Убедитесь, что "
+"Ollama запущен и URL сервера указан верно."
+
+#: contents/ui/main.qml:440
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
+msgstr ""
+"Время ожидания запроса истекло. Для медленных моделей увеличьте тайм-аут "
+"в Настройках → Поведение или установите 0 для отключения."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Копировать %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Копировать блок %1"

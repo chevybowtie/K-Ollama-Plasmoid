@@ -1,0 +1,92 @@
+#!/bin/bash
+# K-Ollama Plasmoid Packaging Script
+# Creates a clean .plasmoid package for KDE Store distribution
+
+set -e  # Exit on any error
+
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_NAME="$(basename "$PROJECT_DIR")"
+PLUGIN_ID=$(grep '"Id"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Id": *"\([^"]*\)".*/\1/')
+#APP_NAME=$(sed -n '/"KPlugin"/,/"Authors"/p' "$PROJECT_DIR/metadata.json" | grep '"Name"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+APP_NAME=$(jq -r '.KPlugin.Name' "$PROJECT_DIR/metadata.json" 2>/dev/null || grep -A 10 '"KPlugin"' "$PROJECT_DIR/metadata.json" | grep '"Name":' | grep -v '"Authors"' | head -1 | sed 's/.*"Name": *"\([^"]*\)".*/\1/')
+VERSION=$(grep '"Version"' "$PROJECT_DIR/metadata.json" | sed 's/.*"Version": *"\([^"]*\)".*/\1/')
+PACKAGE_NAME="${APP_NAME}-${VERSION}.plasmoid"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}📦 K-Ollama Plasmoid Packaging Script${NC}"
+echo -e "Project Dir: ${PROJECT_NAME}"
+echo -e "Plugin ID: ${PLUGIN_ID}"
+echo -e "App Name: ${APP_NAME}"
+echo -e "Version: ${YELLOW}${VERSION}${NC}"
+echo -e "Package: ${YELLOW}${PACKAGE_NAME}${NC}"
+echo ""
+
+# Change to project directory for packaging
+cd "$PROJECT_DIR"
+echo -e "${BLUE}Working directory:${NC} $(pwd)"
+
+echo -e "${BLUE}Compiling translations...${NC}"
+"$SCRIPT_DIR/translate.sh" all
+
+# Remove existing package if it exists
+if [ -f "../$PACKAGE_NAME" ]; then
+    echo -e "${YELLOW}Removing existing package:${NC} $PACKAGE_NAME"
+    rm -f "../$PACKAGE_NAME"
+fi
+
+echo -e "${BLUE}Creating package with essential files only...${NC}"
+
+# Create the package by explicitly including only what end users need
+# Working from project directory so files are at root level in zip
+zip -r "../$PACKAGE_NAME" \
+    "metadata.json" \
+    "LICENSE" \
+    "README.md" \
+    "contents/" \
+    "po/" 
+    
+
+# Check if package was created successfully
+if [ -f "../$PACKAGE_NAME" ]; then
+    PACKAGE_SIZE=$(du -h "../$PACKAGE_NAME" | cut -f1)
+    echo ""
+    echo -e "${GREEN}✅ Package created successfully!${NC}"
+    echo -e "File: ${YELLOW}$PACKAGE_NAME${NC}"
+    echo -e "Size: ${YELLOW}$PACKAGE_SIZE${NC}"
+    echo ""
+    
+    # Show what's included (first few items)
+    echo -e "${BLUE}Package contents (sample):${NC}"
+    unzip -l "../$PACKAGE_NAME" | head -15
+    
+    echo ""
+    echo -e "${BLUE}Included files (end-user essentials only):${NC}"
+    echo -e "• ${GREEN}metadata.json${NC} (widget metadata)"
+    echo -e "• ${GREEN}LICENSE${NC} (legal requirement)"
+    echo -e "• ${GREEN}README.md${NC} (user documentation)"
+    echo -e "• ${GREEN}contents/${NC} (widget UI, config, assets, images)"
+    echo -e "• ${GREEN}po/${NC} (translations)"
+    echo ""
+    echo -e "${BLUE}Auto-excluded (everything else):${NC}"
+    echo -e "• Development files, scripts, tests, build artifacts"
+    echo -e "• Version control, hidden files, contributor docs"
+    
+    echo ""
+    echo -e "${GREEN}🎯 Ready for KDE Store upload!${NC}"
+    echo -e "Location: ${YELLOW}$(dirname "$(pwd)")/$PACKAGE_NAME${NC}"
+    
+else
+    echo -e "${RED}❌ Package creation failed!${NC}"
+    echo -e "${PACKAGE_NAME} not found."
+    exit 1
+fi
+
+cd $PROJECT_DIR

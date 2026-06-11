@@ -4,6 +4,12 @@
 - **Denys Madureira** (denysmb@zoho.com) - Original ChatQT plasmoid implementation
 
 ## Contributors
+
+- **Giacomo Lozito** ([@giacomolozito](https://github.com/giacomolozito)) - 2026 contributions:
+  - Fixed Plasma 6 icon rendering by replacing PlasmaCore with Kirigami
+  - Optimized connection polling to pause when the widget is collapsed
+  - Added model info button showing architecture details and active-in-memory models
+
 - **Paul** (paul.sturm@cotton-software.com) - 2025 enhancements:
   - Fixed Qt QML deprecation warnings and binding loops
   - Added persistent model selection across sessions

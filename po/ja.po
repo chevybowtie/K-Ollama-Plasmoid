@@ -1,0 +1,255 @@
+# Japanese translation for K-Ollama.
+# Copyright (C) 2025 Paul Sturm
+# This file is distributed under the same license as the K-Ollama package.
+# Paul Sturm <paul.sturm@cotton-software.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: K-Ollama 1.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
+"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"PO-Revision-Date: 2026-04-25 19:10-0500\n"
+"Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Server"
+msgstr "サーバー"
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Appearance"
+msgstr "外観"
+
+#: contents/config/config.qml:23
+msgctxt "@title"
+msgid "Behavior"
+msgstr "動作"
+
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "アイコン："
+
+#: contents/ui/ConfigAppearance.qml:53
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "塗りつぶしアダプティブアイコン"
+
+#: contents/ui/ConfigAppearance.qml:61
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "アウトラインアダプティブアイコン"
+
+#: contents/ui/ConfigAppearance.qml:69
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "塗りつぶしダークアイコン"
+
+#: contents/ui/ConfigAppearance.qml:77
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "塗りつぶしライトアイコン"
+
+#: contents/ui/ConfigAppearance.qml:85
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "アウトラインダークアイコン"
+
+#: contents/ui/ConfigAppearance.qml:93
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "アウトラインライトアイコン"
+
+#: contents/ui/ConfigBehavior.qml:59
+msgctxt "@label:checkbox"
+msgid "Input:"
+msgstr "入力："
+
+#: contents/ui/ConfigBehavior.qml:60
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "Enter キーでメッセージを送信"
+
+#: contents/ui/ConfigBehavior.qml:62
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use 'send' button to submit."
+msgstr ""
+"有効時：Enter でメッセージ送信、Ctrl+Enter で改行。\n"
+"無効時：Enter で改行、「送信」ボタンで送信。"
+
+#: contents/ui/ConfigBehavior.qml:70
+msgctxt "@label:checkbox"
+msgid "Sound:"
+msgstr "サウンド："
+
+#: contents/ui/ConfigBehavior.qml:71
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "AI の返答が完了したときにサウンドを再生"
+
+#: contents/ui/ConfigBehavior.qml:73
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "返答完了後に短いビープ音を再生します。"
+
+#: contents/ui/ConfigBehavior.qml:81
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "テキスト表示："
+
+#: contents/ui/ConfigBehavior.qml:82
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "AI の返答で Markdown レンダリングを有効にする"
+
+#: contents/ui/ConfigBehavior.qml:84
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"AI の返答で Markdown 書式（太字、斜体、コードブロックなど）を表示します。"
+"無効時はプレーンテキストで表示されます。"
+
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr "レスポンスタイムアウト："
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr "秒  （制限なし）"
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr "秒"
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+"ストリーミング応答を待つ最大時間。0 に設定するとタイムアウトを無効にします。"
+"長い返答を生成する低速モデルでは値を大きくしてください。"
+
+#: contents/ui/ConfigBehavior.qml:139
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "デバッグログ："
+
+#: contents/ui/ConfigBehavior.qml:140
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "デバッグコンソールログを有効にする"
+
+#: contents/ui/ConfigBehavior.qml:142
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"トラブルシューティング用のデバッグ console.log メッセージを表示します。"
+"この設定は保存されます。"
+
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "Ollama サーバー URL："
+
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
+
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"Ollama サーバーの URL。ローカルサーバーには localhost (127.0.0.1)、"
+"リモートサーバーには LAN の IP アドレスを使用してください"
+
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"例：\n"
+"• ローカルサーバー：http://127.0.0.1:11434\n"
+"• リモートサーバー：http://192.168.1.100:11434"
+
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "温度"
+
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "低いほど確定的、高いほど創造的（0.0〜2.0）"
+
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "システムプロンプト"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "システムプロンプトを有効にする"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr "すべての API リクエストにシステムメッセージを付加します。機密情報は含めないでください。"
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr "あなたはわかりやすい日本語で質問に答える役立つアシスタントです。"
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "長いプロンプトはリクエストサイズを増加させる可能性があります。"
+
+#: contents/ui/main.qml:430
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
+msgstr ""
+"ネットワークエラー — Ollama サーバーに接続できません。Ollama が起動していること、"
+"サーバー URL が正しいことを確認してください。"
+
+#: contents/ui/main.qml:440
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
+msgstr ""
+"リクエストがタイムアウトしました。低速モデルの場合は設定 → 動作でタイムアウトを"
+"増やすか、0 に設定して無効にしてください。"
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "%1 をコピー"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "ブロック %1 をコピー"

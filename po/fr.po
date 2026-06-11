@@ -1,0 +1,255 @@
+# French translation for K-Ollama.
+# Copyright (C) 2025 Paul Sturm
+# This file is distributed under the same license as the K-Ollama package.
+# Paul Sturm <paul.sturm@cotton-software.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: K-Ollama 1.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
+"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"PO-Revision-Date: 2026-04-25 19:10-0500\n"
+"Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Server"
+msgstr "Serveur"
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Appearance"
+msgstr "Apparence"
+
+#: contents/config/config.qml:23
+msgctxt "@title"
+msgid "Behavior"
+msgstr "Comportement"
+
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "Icône :"
+
+#: contents/ui/ConfigAppearance.qml:53
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "Icône adaptative pleine"
+
+#: contents/ui/ConfigAppearance.qml:61
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "Icône adaptative en contour"
+
+#: contents/ui/ConfigAppearance.qml:69
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "Icône sombre pleine"
+
+#: contents/ui/ConfigAppearance.qml:77
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "Icône claire pleine"
+
+#: contents/ui/ConfigAppearance.qml:85
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "Icône sombre en contour"
+
+#: contents/ui/ConfigAppearance.qml:93
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "Icône claire en contour"
+
+#: contents/ui/ConfigBehavior.qml:59
+msgctxt "@label:checkbox"
+msgid "Input:"
+msgstr "Saisie :"
+
+#: contents/ui/ConfigBehavior.qml:60
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "Utiliser Entrée pour envoyer le message"
+
+#: contents/ui/ConfigBehavior.qml:62
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use 'send' button to submit."
+msgstr ""
+"Activé : Entrée envoie le message, Ctrl+Entrée ajoute une nouvelle ligne.\n"
+"Désactivé : Entrée ajoute une nouvelle ligne, utiliser le bouton « envoyer »."
+
+#: contents/ui/ConfigBehavior.qml:70
+msgctxt "@label:checkbox"
+msgid "Sound:"
+msgstr "Son :"
+
+#: contents/ui/ConfigBehavior.qml:71
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "Jouer un son quand la réponse de l'IA est complète"
+
+#: contents/ui/ConfigBehavior.qml:73
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "Jouer un léger bip sonore une fois la réponse terminée."
+
+#: contents/ui/ConfigBehavior.qml:81
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "Rendu du texte :"
+
+#: contents/ui/ConfigBehavior.qml:82
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "Activer le rendu Markdown dans les réponses IA"
+
+#: contents/ui/ConfigBehavior.qml:84
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"Afficher la mise en forme Markdown (gras, italique, blocs de code, etc.) "
+"dans les réponses IA. Désactivé, les réponses s'affichent en texte brut."
+
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr "Délai d'attente :"
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr "s  (sans limite)"
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr "s"
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+"Temps d'attente maximal pour une réponse en streaming. Mettre 0 pour "
+"désactiver. Augmenter pour les modèles lents générant de longues réponses."
+
+#: contents/ui/ConfigBehavior.qml:139
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "Journal de débogage :"
+
+#: contents/ui/ConfigBehavior.qml:140
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "Activer les journaux de console de débogage"
+
+#: contents/ui/ConfigBehavior.qml:142
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"Afficher les messages console.log de débogage pour le dépannage. "
+"Ce paramètre est persistant."
+
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "URL du serveur Ollama :"
+
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
+
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"URL du serveur Ollama. Utiliser localhost (127.0.0.1) pour un serveur local "
+"ou l'IP du réseau local pour un serveur distant"
+
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"Exemples :\n"
+"• Serveur local : http://127.0.0.1:11434\n"
+"• Serveur distant : http://192.168.1.100:11434"
+
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "Température"
+
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "Bas = plus déterministe, haut = plus créatif (0,0–2,0)"
+
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "Invite système"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "Activer l'invite système"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr "Ajouter un message système à chaque requête API. Ne pas inclure de secrets."
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr "Vous êtes un assistant utile qui répond aux questions en français courant."
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "Les invites longues peuvent augmenter la taille des requêtes."
+
+#: contents/ui/main.qml:430
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
+msgstr ""
+"Erreur réseau — impossible d'atteindre le serveur Ollama. Vérifiez qu'Ollama "
+"est en cours d'exécution et que l'URL du serveur est correcte."
+
+#: contents/ui/main.qml:440
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
+msgstr ""
+"La requête a expiré. Pour les modèles lents, augmentez le délai d'attente "
+"dans Paramètres → Comportement, ou mettez 0 pour désactiver."
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "Copier %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "Copier le bloc %1"

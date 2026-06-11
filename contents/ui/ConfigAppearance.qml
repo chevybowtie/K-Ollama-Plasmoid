@@ -3,48 +3,43 @@
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
 
+// Qt modules
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
+// KDE modules
 import org.kde.iconthemes as KIconThemes
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
-import org.kde.kcmutils as KCM
+import org.kde.plasma.plasmoid
 
-import org.kde.plasma.core as PlasmaCore
+// Local imports
+import "../js/utils.js" as Utils
 
-KCM.SimpleKCM {
-    property string cfg_icon: plasmoid.configuration.icon || ""
+ConfigDefaults {
+    id: root
+
+    property string cfg_icon: Plasmoid.configuration.icon || ""
     property alias cfg_useFilledIcon: useFilledIcon.checked
     property alias cfg_useOutlinedIcon: useOutlinedIcon.checked
     property alias cfg_useFilledLightIcon: useFilledLightIcon.checked
     property alias cfg_useFilledDarkIcon: useFilledDarkIcon.checked
     property alias cfg_useOutlinedLightIcon: useOutlinedLightIcon.checked
     property alias cfg_useOutlinedDarkIcon: useOutlinedDarkIcon.checked
-    property alias cfg_enterToSend: enterToSendCheckbox.checked
-    property alias cfg_completionSound: completionSoundCheckbox.checked
-    
-    // Ignore server-related properties that get assigned to all config pages
-    property string cfg_ollamaServerUrl: ""
-    property bool cfg_pin: false
-    property string cfg_selectedModel: ""
-    
-    // Ignore "Default" variants that the configuration system tries to assign
-    property bool cfg_useFilledIconDefault: false
-    property bool cfg_useOutlinedIconDefault: false
-    property bool cfg_useFilledLightIconDefault: false
-    property bool cfg_useFilledDarkIconDefault: false
-    property bool cfg_useOutlinedLightIconDefault: false
-    property bool cfg_useOutlinedDarkIconDefault: false
-    property string cfg_ollamaServerUrlDefault: ""
-    property bool cfg_enterToSendDefault: false
-    property bool cfg_completionSoundDefault: false
-    property string cfg_iconDefault: ""
-    property bool cfg_pinDefault: false
-    property string cfg_selectedModelDefault: ""
 
     Kirigami.FormLayout {
+        Component.onCompleted: {
+            try {
+                if ((cfg_icon === undefined || cfg_icon === '') && Plasmoid.configuration.icon) cfg_icon = Plasmoid.configuration.icon;
+            } catch (e) {}
+            try { if (typeof cfg_useFilledIcon !== 'boolean') cfg_useFilledIcon = !!Plasmoid.configuration.useFilledIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedIcon !== 'boolean') cfg_useOutlinedIcon = !!Plasmoid.configuration.useOutlinedIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledLightIcon !== 'boolean') cfg_useFilledLightIcon = !!Plasmoid.configuration.useFilledLightIcon; } catch (e) {}
+            try { if (typeof cfg_useFilledDarkIcon !== 'boolean') cfg_useFilledDarkIcon = !!Plasmoid.configuration.useFilledDarkIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedLightIcon !== 'boolean') cfg_useOutlinedLightIcon = !!Plasmoid.configuration.useOutlinedLightIcon; } catch (e) {}
+            try { if (typeof cfg_useOutlinedDarkIcon !== 'boolean') cfg_useOutlinedDarkIcon = !!Plasmoid.configuration.useOutlinedDarkIcon; } catch (e) {}
+        }
 
         QQC2.ButtonGroup {
             id: iconGroup
@@ -97,28 +92,6 @@ KCM.SimpleKCM {
             text: i18nc("@option:radio", "Outlined light icon")
 
             QQC2.ButtonGroup.group: iconGroup
-        }
-        
-        QQC2.CheckBox {
-            id: enterToSendCheckbox
-            
-            Kirigami.FormData.label: i18nc("@label:checkbox", "Input behavior:")
-            text: i18nc("@option:check", "Use Enter to send message")
-            
-            QQC2.ToolTip.text: i18nc("@info:tooltip", "When enabled: Enter sends message, Ctrl+Enter adds new line.\nWhen disabled: Enter adds new line, use `send` button to submit.")
-            QQC2.ToolTip.visible: hovered
-            QQC2.ToolTip.delay: 1000
-        }
-        
-        QQC2.CheckBox {
-            id: completionSoundCheckbox
-            
-            Kirigami.FormData.label: i18nc("@label:checkbox", "Sound effects:")
-            text: i18nc("@option:check", "Play sound when AI response is complete")
-            
-            QQC2.ToolTip.text: i18nc("@info:tooltip", "Play a slight beep sound effect after the response is completed.")
-            QQC2.ToolTip.visible: hovered
-            QQC2.ToolTip.delay: 1000
         }
     }
 }

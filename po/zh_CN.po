@@ -1,0 +1,253 @@
+# Simplified Chinese translation for K-Ollama.
+# Copyright (C) 2025 Paul Sturm
+# This file is distributed under the same license as the K-Ollama package.
+# Paul Sturm <paul.sturm@cotton-software.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: K-Ollama 1.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chevybowtie/K-Ollama-Plasmoid/issues\n"
+"POT-Creation-Date: 2026-04-25 19:03-0500\n"
+"PO-Revision-Date: 2026-04-25 19:10-0500\n"
+"Last-Translator: Paul Sturm <paul.sturm@cotton-software.com>\n"
+"Language-Team: Simplified Chinese\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: contents/config/config.qml:13
+msgctxt "@title"
+msgid "Server"
+msgstr "服务器"
+
+#: contents/config/config.qml:18
+msgctxt "@title"
+msgid "Appearance"
+msgstr "外观"
+
+#: contents/config/config.qml:23
+msgctxt "@title"
+msgid "Behavior"
+msgstr "行为"
+
+#: contents/ui/ConfigAppearance.qml:52
+msgctxt "@title:group"
+msgid "Icon:"
+msgstr "图标："
+
+#: contents/ui/ConfigAppearance.qml:53
+msgctxt "@option:radio"
+msgid "Filled adaptive icon"
+msgstr "填充自适应图标"
+
+#: contents/ui/ConfigAppearance.qml:61
+msgctxt "@option:radio"
+msgid "Outlined adaptive icon"
+msgstr "轮廓自适应图标"
+
+#: contents/ui/ConfigAppearance.qml:69
+msgctxt "@option:radio"
+msgid "Filled dark icon"
+msgstr "填充深色图标"
+
+#: contents/ui/ConfigAppearance.qml:77
+msgctxt "@option:radio"
+msgid "Filled light icon"
+msgstr "填充浅色图标"
+
+#: contents/ui/ConfigAppearance.qml:85
+msgctxt "@option:radio"
+msgid "Outlined dark icon"
+msgstr "轮廓深色图标"
+
+#: contents/ui/ConfigAppearance.qml:93
+msgctxt "@option:radio"
+msgid "Outlined light icon"
+msgstr "轮廓浅色图标"
+
+#: contents/ui/ConfigBehavior.qml:59
+msgctxt "@label:checkbox"
+msgid "Input:"
+msgstr "输入："
+
+#: contents/ui/ConfigBehavior.qml:60
+msgctxt "@option:check"
+msgid "Use Enter to send message"
+msgstr "使用 Enter 键发送消息"
+
+#: contents/ui/ConfigBehavior.qml:62
+msgctxt "@info:tooltip"
+msgid ""
+"When enabled: Enter sends message, Ctrl+Enter adds new line.\n"
+"When disabled: Enter adds new line, use 'send' button to submit."
+msgstr ""
+"启用时：Enter 发送消息，Ctrl+Enter 换行。\n"
+"禁用时：Enter 换行，使用"发送"按钮提交。"
+
+#: contents/ui/ConfigBehavior.qml:70
+msgctxt "@label:checkbox"
+msgid "Sound:"
+msgstr "声音："
+
+#: contents/ui/ConfigBehavior.qml:71
+msgctxt "@option:check"
+msgid "Play sound when AI response is complete"
+msgstr "AI 回复完成时播放声音"
+
+#: contents/ui/ConfigBehavior.qml:73
+msgctxt "@info:tooltip"
+msgid "Play a slight beep sound effect after the response is completed."
+msgstr "回复完成后播放一声轻微的提示音。"
+
+#: contents/ui/ConfigBehavior.qml:81
+msgctxt "@label:checkbox"
+msgid "Text rendering:"
+msgstr "文本渲染："
+
+#: contents/ui/ConfigBehavior.qml:82
+msgctxt "@option:check"
+msgid "Enable markdown rendering in AI responses"
+msgstr "在 AI 回复中启用 Markdown 渲染"
+
+#: contents/ui/ConfigBehavior.qml:84
+msgctxt "@info:tooltip"
+msgid ""
+"Render markdown formatting (bold, italics, code blocks, etc.) in AI "
+"responses. When disabled, responses are shown as plain text."
+msgstr ""
+"在 AI 回复中渲染 Markdown 格式（粗体、斜体、代码块等）。"
+"禁用时，回复显示为纯文本。"
+
+#: contents/ui/ConfigBehavior.qml:113
+msgctxt "@label:spinbox"
+msgid "Response timeout:"
+msgstr "响应超时："
+
+#: contents/ui/ConfigBehavior.qml:126
+msgctxt "@info"
+msgid "s  (no limit)"
+msgstr "秒  （无限制）"
+
+#: contents/ui/ConfigBehavior.qml:127
+msgctxt "@info"
+msgid "s"
+msgstr "秒"
+
+#: contents/ui/ConfigBehavior.qml:131
+msgctxt "@info:tooltip"
+msgid ""
+"Maximum time to wait for a streaming response. Set to 0 to disable the "
+"timeout. Increase this for slow models that generate long responses."
+msgstr ""
+"等待流式响应的最长时间。设为 0 可禁用超时。"
+"对于生成长回复的慢速模型，请增大此值。"
+
+#: contents/ui/ConfigBehavior.qml:139
+msgctxt "@label:checkbox"
+msgid "Debug logging:"
+msgstr "调试日志："
+
+#: contents/ui/ConfigBehavior.qml:140
+msgctxt "@option:check"
+msgid "Enable debug console logs"
+msgstr "启用调试控制台日志"
+
+#: contents/ui/ConfigBehavior.qml:142
+msgctxt "@info:tooltip"
+msgid ""
+"Show debug console.log messages for troubleshooting. This setting is "
+"persisted."
+msgstr ""
+"显示调试 console.log 消息以便排错。"
+"此设置会被保存。"
+
+#: contents/ui/ConfigServer.qml:41
+msgctxt "@label:textbox"
+msgid "Ollama Server URL:"
+msgstr "Ollama 服务器地址："
+
+#: contents/ui/ConfigServer.qml:42
+msgctxt "@info:placeholder"
+msgid "http://127.0.0.1:11434"
+msgstr "http://127.0.0.1:11434"
+
+#: contents/ui/ConfigServer.qml:48
+msgctxt "@info:tooltip"
+msgid ""
+"URL of the Ollama server. Use localhost (127.0.0.1) for local server or LAN "
+"IP for remote server"
+msgstr ""
+"Ollama 服务器的地址。本地服务器使用 localhost (127.0.0.1)，"
+"远程服务器使用局域网 IP 地址"
+
+#: contents/ui/ConfigServer.qml:54
+msgctxt "@info"
+msgid ""
+"Examples:\n"
+"• Local server: http://127.0.0.1:11434\n"
+"• Remote server: http://192.168.1.100:11434"
+msgstr ""
+"示例：\n"
+"• 本地服务器：http://127.0.0.1:11434\n"
+"• 远程服务器：http://192.168.1.100:11434"
+
+#: contents/ui/ConfigServer.qml:67
+msgctxt "@label"
+msgid "Temperature"
+msgstr "温度"
+
+#: contents/ui/ConfigServer.qml:89
+msgctxt "@info"
+msgid "Lower = more deterministic, higher = more creative (0.0–2.0)"
+msgstr "越低越确定，越高越有创意（0.0–2.0）"
+
+#: contents/ui/ConfigServer.qml:96
+msgctxt "@label:checkbox"
+msgid "System prompt"
+msgstr "系统提示词"
+
+#: contents/ui/ConfigServer.qml:97
+msgctxt "@option"
+msgid "Enable system prompt"
+msgstr "启用系统提示词"
+
+#: contents/ui/ConfigServer.qml:101
+msgctxt "@info"
+msgid "Prepend a system message to every API request. Do not include secrets."
+msgstr "在每次 API 请求前添加系统消息。请勿包含敏感信息。"
+
+#: contents/ui/ConfigServer.qml:110
+msgctxt "@info:placeholder"
+msgid "You are a helpful assistant that answers questions in plain English."
+msgstr "你是一个有帮助的助手，用简洁的中文回答问题。"
+
+#: contents/ui/ConfigServer.qml:138
+msgctxt "@info"
+msgid "Long prompts may increase request size."
+msgstr "较长的提示词可能会增加请求大小。"
+
+#: contents/ui/main.qml:430
+msgid ""
+"Network error — could not reach the Ollama server. Check that Ollama is "
+"running and the server URL is correct."
+msgstr ""
+"网络错误——无法连接到 Ollama 服务器。请确认 Ollama 正在运行且服务器地址正确。"
+
+#: contents/ui/main.qml:440
+msgid ""
+"Request timed out. For slow models, increase the response timeout in "
+"Settings → Behavior, or set it to 0 to disable."
+msgstr ""
+"请求超时。对于慢速模型，请在设置 → 行为中增大响应超时，或设为 0 以禁用超时。"
+
+
+#: contents/ui/main.qml:926
+msgctxt "@action:button"
+msgid "Copy %1"
+msgstr "复制 %1"
+
+#: contents/ui/main.qml:928
+msgctxt "@action:button"
+msgid "Copy block %1"
+msgstr "复制第 %1 块"
